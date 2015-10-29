@@ -41,6 +41,11 @@ class essentials(minqlx.Plugin):
         self.add_hook("command", self.handle_command, priority=minqlx.PRI_LOW)
         self.add_command("id", self.cmd_id, 1, usage="[part_of_name] ...")
         self.add_command(("commands", "cmds"), self.cmd_commands, 2)
+        self.add_command("shuffle", self.cmd_shuffle, 1)
+        self.add_command("slap", self.cmd_slap, 2, usage="<id> [damage]")
+        self.add_command("slay", self.cmd_slay, 2, usage="<id>")
+        self.add_command("sound", self.cmd_sound, 1, usage="<path>")
+        self.add_command("music", self.cmd_music, 1, usage="<path>")
         self.add_command("kick", self.cmd_kick, 2, usage="<id>")
         self.add_command(("kickban", "tempban"), self.cmd_kickban, 2, usage="<id>")
         self.add_command("yes", self.cmd_yes, 2)
@@ -153,6 +158,71 @@ class essentials(minqlx.Plugin):
                 player.tell("  {} executed: {}".format(cmd[0].name, cmd[2]))
 
         return minqlx.RET_STOP_EVENT
+
+    def cmd_shuffle(self, player, msg, channel):
+        """Forces a shuffle instantly."""
+        self.shuffle()
+
+    def cmd_slap(self, player, msg, channel):
+        """Slaps a player with optional damage."""
+        if len(msg) < 2:
+            return minqlx.RET_USAGE
+
+        try:
+            i = int(msg[1])
+            target_player = self.player(i)
+            if not (i >= 0 and i < 64) or not target_player:
+                raise ValueError
+        except ValueError:
+            player.tell("Invalid ID.")
+            return minqlx.RET_STOP_EVENT
+
+        if len(msg) > 2:
+            try:
+                dmg = int(msg[2])
+            except ValueError:
+                player.tell("Invalid damage value.")
+                return minqlx.RET_STOP_EVENT
+        else:
+            dmg = 0
+        
+        self.slap(target_player, dmg)
+        return minqlx.RET_STOP_EVENT
+
+    def cmd_slay(self, player, msg, channel):
+        """Kills a player instantly."""
+        if len(msg) < 2:
+            return minqlx.RET_USAGE
+
+        try:
+            i = int(msg[1])
+            target_player = self.player(i)
+            if not (i >= 0 and i < 64) or not target_player:
+                raise ValueError
+        except ValueError:
+            player.tell("Invalid ID.")
+            return minqlx.RET_STOP_EVENT
+        
+        self.slay(target_player)
+        return minqlx.RET_STOP_EVENT
+
+    def cmd_sound(self, player, msg, channel):
+        """Plays a sound for the whole server."""
+        if len(msg) < 2:
+            return minqlx.RET_USAGE
+
+        if not self.play_sound(msg[1]):
+            player.tell("Invalid sound.")
+            return minqlx.RET_STOP_EVENT
+
+    def cmd_music(self, player, msg, channel):
+        """Plays music for the whole server, but only for those with music volume on."""
+        if len(msg) < 2:
+            return minqlx.RET_USAGE
+
+        if not self.play_sound(msg[1]):
+            player.tell("Invalid music.")
+            return minqlx.RET_STOP_EVENT
 
     def cmd_kick(self, player, msg, channel):
         """Kicks a player. A reason can also be provided."""
