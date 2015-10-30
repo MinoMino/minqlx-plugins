@@ -57,7 +57,7 @@ class essentials(minqlx.Plugin):
         self.add_command("allready", self.cmd_allready, 2)
         self.add_command("abort", self.cmd_abort, 2)
         self.add_command(("map", "changemap"), self.cmd_map, 2, usage="<mapname> [factory]")
-        self.add_command(("help", "about", "commands", "version"), self.cmd_help)
+        self.add_command(("help", "about", "version"), self.cmd_help)
         self.add_command("db", self.cmd_db, 5, usage="<key> [value]")
         self.add_command("seen", self.cmd_seen, usage="<steam_id>")
         self.add_command("time", self.cmd_time, usage="[timezone_offset]")
