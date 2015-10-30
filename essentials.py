@@ -22,6 +22,7 @@ import minqlx
 import minqlx.database
 import plugins
 import datetime
+import itertools
 import time
 import re
 
@@ -69,6 +70,10 @@ class essentials(minqlx.Plugin):
         self.add_command(("teamsize", "ts"), self.cmd_teamsize, 2, usage="<size>")
         self.add_command("rcon", self.cmd_rcon, 5)
 
+        # Vote counter. We use this to avoid automatically passing votes we shouldn't.
+        self.vote_count = itertools.count()
+        self.last_vote = 0
+
         # A short history of recently executed commands.
         self.recent_cmds = deque(maxlen=11)
 
@@ -81,18 +86,17 @@ class essentials(minqlx.Plugin):
     def handle_vote_called(self, caller, vote, args):
         config = minqlx.get_config()
         # Enforce teamsizes.
-        if vote == "teamsize":
+        if vote.lower() == "teamsize":
             try:
                 args = int(args)
             except ValueError:
                 return
             
-            disallow = self.disallow_teamsize(args)
-            if disallow and disallow < args:
+            limits = self.teamsize_limits()
+            if "max" in limits and args > limits["max"]:
                 caller.tell("The team size is larger than what the server allows.")
                 return minqlx.RET_STOP_ALL
-
-            if disallow and disallow > args:
+            elif "min" in limits and args < limits["min"]:
                 caller.tell("The team size is smaller than what the server allows.")
                 return minqlx.RET_STOP_ALL
 
@@ -102,7 +106,8 @@ class essentials(minqlx.Plugin):
                 require = None
                 if "AutoPassRequireParticipation" in config["Essentials"]:
                     require = float(config["Essentials"]["AutoPassRequireParticipation"])
-                self.force(require)
+                self.last_vote = next(self.vote_count)
+                self.force(require, self.last_vote)
 
     def handle_command(self, caller, command, args):
         self.recent_cmds.appendleft((caller, command, args))
@@ -588,23 +593,27 @@ class essentials(minqlx.Plugin):
         db.execute()
         
     @minqlx.delay(29)
-    def force(self, require):
+    def force(self, require, vote_id):
+        if self.last_vote != vote_id:
+            # This is not the vote we should be resolving.
+            return
+
         votes = self.current_vote_count()
         if self.is_vote_active() and votes and votes[0] > votes[1]:
-            if require and sum(votes)/len(self.players()) < require:
-                return
+            if require:
+                teams = self.teams()
+                players = teams["red"] + teams["blue"] + teams["free"]
+                if sum(votes)/len(players) < require:
+                    return
             minqlx.force_vote(True)
 
-    def disallow_teamsize(self, size):
+    def teamsize_limits(self):
+        res = {}
         conf = self.config
         if "Essentials" in conf and "MaximumTeamsize" in conf["Essentials"]:
-            max_teamsize = int(conf["Essentials"]["MaximumTeamsize"])
-            if size > max_teamsize:
-                return max_teamsize
+            res["max"] = int(conf["Essentials"]["MaximumTeamsize"])
 
         if "Essentials" in conf and "MinimumTeamsize" in conf["Essentials"]:
-            min_teamsize = int(conf["Essentials"]["MinimumTeamsize"])
-            if size < min_teamsize:
-                return min_teamsize
+            res["min"] = int(conf["Essentials"]["MinimumTeamsize"])
 
-        return False
+        return res
