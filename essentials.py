@@ -74,7 +74,7 @@ class essentials(minqlx.Plugin):
         self.update_player(player)
 
     def handle_vote_called(self, caller, vote, args):
-        config = minqlx.get_config()
+        config = self.config
         # Enforce teamsizes.
         if vote == "teamsize":
             try:
