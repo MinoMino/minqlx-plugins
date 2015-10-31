@@ -58,6 +58,7 @@ class essentials(minqlx.Plugin):
         self.add_command("free", self.cmd_free, 1, usage="<id>")
         self.add_command("addmod", self.cmd_addmod, 5, usage="<id>")
         self.add_command("addadmin", self.cmd_addadmin, 5, usage="<id>")
+        self.add_command("demote", self.cmd_demote, 5, usage="<id>")
         self.add_command("mute", self.cmd_mute, 1, usage="<id>")
         self.add_command("unmute", self.cmd_unmute, 1, usage="<id>")
         self.add_command("allready", self.cmd_allready, 2)
@@ -399,6 +400,22 @@ class essentials(minqlx.Plugin):
             return
 
         target_player.addadmin()
+
+    def cmd_demote(self, player, msg, channel):
+        """Remove admin status from someone."""
+        if len(msg) < 2:
+            return minqlx.RET_USAGE
+
+        try:
+            i = int(msg[1])
+            target_player = self.player(i)
+            if not (i >= 0 and i < 64) or not target_player:
+                raise ValueError
+        except ValueError:
+            channel.reply("Invalid ID.")
+            return
+
+        target_player.demote()
 
     def cmd_mute(self, player, msg, channel):
         """Mute a player."""
