@@ -437,14 +437,14 @@ class essentials(minqlx.Plugin):
     
     def cmd_allready(self, player, msg, channel):
         """Forces all players to ready up."""
-        if self.game().state == "warmup":
+        if self.game.state == "warmup":
             self.allready()
         else:
             channel.reply("But the game's already in progress, you silly goose!")
         
     def cmd_abort(self, player, msg, channel):
         """Forces a game in progress to go back to warmup."""
-        if self.game().state != "warmup":
+        if self.game.state != "warmup":
             self.abort()
         else:
             channel.reply("But the game isn't even on, you doofus!")
