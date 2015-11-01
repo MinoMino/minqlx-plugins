@@ -60,7 +60,7 @@ class permission(minqlx.Plugin):
         
         self.db.set_permission(ident, level)
 
-        channel.reply("Done!")
+        channel.reply("^6{}^7 was given permission level ^6{}^7.".format(target_player, level))
 
     def cmd_getperm(self, player, msg, channel):
         if len(msg) < 2:
