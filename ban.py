@@ -87,7 +87,7 @@ class ban(minqlx.Plugin):
         teams = self.teams()
         self.players_start = teams["red"] + teams["blue"]
 
-    def handle_game_end(self, game, score, winner):
+    def handle_game_end(self, data):
         teams = self.teams()
         players_end = teams["red"] + teams["blue"]
         leavers = []
