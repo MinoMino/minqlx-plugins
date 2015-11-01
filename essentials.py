@@ -64,12 +64,18 @@ class essentials(minqlx.Plugin):
         self.add_command("allready", self.cmd_allready, 2)
         self.add_command("abort", self.cmd_abort, 2)
         self.add_command(("map", "changemap"), self.cmd_map, 2, usage="<mapname> [factory]")
-        self.add_command(("help", "about", "commands", "version"), self.cmd_help)
+        self.add_command(("help", "about", "version"), self.cmd_help)
         self.add_command("db", self.cmd_db, 5, usage="<key> [value]")
         self.add_command("seen", self.cmd_seen, usage="<steam_id>")
         self.add_command("time", self.cmd_time, usage="[timezone_offset]")
         self.add_command(("teamsize", "ts"), self.cmd_teamsize, 2, usage="<size>")
         self.add_command("rcon", self.cmd_rcon, 5)
+
+        # Cvars.
+        self.set_cvar_once("qlx_votepass", "1")
+        self.set_cvar_limit_once("qlx_votepassThreshold", "0.33", "0", "1")
+        self.set_cvar_once("qlx_teamsizeMinimum", "1")
+        self.set_cvar_once("qlx_teamsizeMaximum", "8")
 
         # Vote counter. We use this to avoid automatically passing votes we shouldn't.
         self.vote_count = itertools.count()
@@ -85,7 +91,6 @@ class essentials(minqlx.Plugin):
         self.update_player(player)
 
     def handle_vote_called(self, caller, vote, args):
-        config = minqlx.get_config()
         # Enforce teamsizes.
         if vote.lower() == "teamsize":
             try:
@@ -93,22 +98,16 @@ class essentials(minqlx.Plugin):
             except ValueError:
                 return
             
-            limits = self.teamsize_limits()
-            if "max" in limits and args > limits["max"]:
+            if args > self.get_cvar("qlx_teamsizeMaximum", int):
                 caller.tell("The team size is larger than what the server allows.")
                 return minqlx.RET_STOP_ALL
-            elif "min" in limits and args < limits["min"]:
+            elif args < self.get_cvar("qlx_teamsizeMinimum", int):
                 caller.tell("The team size is smaller than what the server allows.")
                 return minqlx.RET_STOP_ALL
 
-        if "Essentials" in config and "AutoPassMajorityVote" in config["Essentials"]:
-            auto_pass = config["Essentials"].getboolean("AutoPassMajorityVote")
-            if auto_pass:
-                require = None
-                if "AutoPassRequireParticipation" in config["Essentials"]:
-                    require = float(config["Essentials"]["AutoPassRequireParticipation"])
-                self.last_vote = next(self.vote_count)
-                self.force(require, self.last_vote)
+        if self.get_cvar("qlx_votepass", bool):
+            self.last_vote = next(self.vote_count)
+            self.force(self.get_cvar("qlx_votepassThreshold", float), self.last_vote)
 
     def handle_command(self, caller, command, args):
         self.recent_cmds.appendleft((caller, command, args))
@@ -612,6 +611,7 @@ class essentials(minqlx.Plugin):
     @minqlx.delay(29)
     def force(self, require, vote_id):
         if self.last_vote != vote_id:
+            print("GOT HERE1")
             # This is not the vote we should be resolving.
             return
 
@@ -620,17 +620,7 @@ class essentials(minqlx.Plugin):
             if require:
                 teams = self.teams()
                 players = teams["red"] + teams["blue"] + teams["free"]
+                print("GOT HERE2:", sum(votes)/len(players), require)
                 if sum(votes)/len(players) < require:
                     return
             minqlx.force_vote(True)
-
-    def teamsize_limits(self):
-        res = {}
-        conf = self.config
-        if "Essentials" in conf and "MaximumTeamsize" in conf["Essentials"]:
-            res["max"] = int(conf["Essentials"]["MaximumTeamsize"])
-
-        if "Essentials" in conf and "MinimumTeamsize" in conf["Essentials"]:
-            res["min"] = int(conf["Essentials"]["MinimumTeamsize"])
-
-        return res

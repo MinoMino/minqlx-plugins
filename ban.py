@@ -40,6 +40,12 @@ class ban(minqlx.Plugin):
         self.add_command("checkban", self.cmd_checkban, usage="<id>")
         self.add_command("forgive", self.cmd_forgive, 2, usage="<id> [leaves_to_forgive]")
 
+        # Cvars.
+        self.set_cvar_once("qlx_leaverBan", "0")
+        self.set_cvar_limit_once("qlx_leaverBanThreshold", "0", "0", "1")
+        self.set_cvar_limit_once("qlx_leaverBanWarnThreshold", "0", "0", "1")
+        self.set_cvar_once("qlx_leaverBanMinimumGames", "15")
+
         # List of players playing that could potentially be considered leavers.
         self.players_start = []
         self.pending_warnings = {}
@@ -80,14 +86,14 @@ class ban(minqlx.Plugin):
             self.players_start.remove(player)
 
     def handle_game_countdown(self):
-        if self.is_leaver_banning():
+        if self.get_cvar("qlx_automaticLeaveBan", type=bool):
             self.msg("Leavers are being kept track of. Repeat offenders ^6will^7 be banned.")
 
     def handle_game_start(self, game):
         teams = self.teams()
         self.players_start = teams["red"] + teams["blue"]
 
-    def handle_game_end(self, game, score, winner):
+    def handle_game_end(self, data):
         teams = self.teams()
         players_end = teams["red"] + teams["blue"]
         leavers = []
@@ -265,7 +271,7 @@ class ban(minqlx.Plugin):
             else:
                 channel.reply("^6{}^7 is banned until ^6{}^7.".format(name, expires))
             return
-        elif self.is_leaver_banning():
+        elif self.get_cvar("qlx_automaticLeaveBan", type=bool):
             status = self.leave_status(ident)
             if status and status[0] == "ban":
                 channel.reply("^6{} ^7is banned for having left too many games.".format(name))
@@ -342,24 +348,11 @@ class ban(minqlx.Plugin):
         
         return None
 
-    def is_leaver_banning(self):
-        conf = self.config
-
-        if ("Ban" in conf and
-            "AutomaticLeaveBan" in conf["Ban"] and
-            conf["Ban"].getboolean("AutomaticLeaveBan") and
-            "MinimumGamesPlayedBeforeBan" in conf["Ban"] and
-            "WarnThreshold" in conf["Ban"] and
-            "BanThreshold" in conf["Ban"]):
-            return True
-        else:
-            return False
-
     def leave_status(self, steam_id):
         """Get a player's status when it comes to leaving, given automatic leaver ban is on.
 
         """
-        if not self.is_leaver_banning():
+        if not self.get_cvar("qlx_automaticLeaveBan", type=bool):
             return None
 
         completed = self.db[PLAYER_KEY.format(steam_id) + ":games_completed"]
@@ -367,10 +360,9 @@ class ban(minqlx.Plugin):
         if completed == None or left == None:
             return None
 
-        conf = self.config
-        min_games_completed = int(conf["Ban"]["MinimumGamesPlayedBeforeBan"])
-        warn_threshold = float(conf["Ban"]["WarnThreshold"])
-        ban_threshold = float(conf["Ban"]["BanThreshold"])
+        min_games_completed = self.get_cvar("qlx_leaverBanMinimumGames", int)
+        warn_threshold = self.get_cvar("qlx_leaverBanWarnThreshold", float)
+        ban_threshold = self.get_cvar("qlx_leaverBanThreshold", float)
 
         # Check their games completed to total games ratio.
         total = completed + left
