@@ -19,7 +19,7 @@
 import minqlx
 import minqlx.database
 
-MOTD_KEY = "minqlx:server:motd"
+MOTD_SET_KEY = "minqlx:motd"
 
 class motd(minqlx.Plugin):
     database = minqlx.database.Redis
@@ -32,6 +32,13 @@ class motd(minqlx.Plugin):
         self.add_command(("clearmotd", "removemotd", "remmmotd"), self.cmd_clearmotd, 4)
         self.add_command("addmotd", self.cmd_addmotd, 4, usage="<more_motd>")
 
+        # homepath doesn't change runtime, so we can just save it for the sake of efficiency.
+        self.home = self.get_cvar("fs_homepath")
+        self.motd_key = MOTD_SET_KEY + ":{}".format(self.home)
+
+        # Add this server to the MOTD set.
+        self.db.sadd(MOTD_SET_KEY, self.home)
+
     @minqlx.delay(2)
     def handle_player_loaded(self, player):
         """Send the message of the day to the player in a tell.
@@ -39,7 +46,7 @@ class motd(minqlx.Plugin):
         This should be set to lowest priority so that we don't execute anything if "ban" or
         a similar plugin determines the player should be kicked.
         """
-        motd = self.db[MOTD_KEY]
+        motd = self.db[self.motd_key]
         if not motd:
             return
         
@@ -50,12 +57,13 @@ class motd(minqlx.Plugin):
         if len(msg) < 2:
             return minqlx.RET_USAGE
         
-        self.db[MOTD_KEY] = " ".join(msg[1:])
+        self.db.sadd(MOTD_SET_KEY, self.home)
+        self.db[self.motd_key] = " ".join(msg[1:])
         player.tell("The MOTD has been set.")
         return minqlx.RET_STOP_EVENT
     
     def cmd_getmotd(self, player, msg, channel):
-        motd = self.db[MOTD_KEY]
+        motd = self.db[self.motd_key]
         if not motd:
             player.tell("No MOTD has been set.")
         else:
@@ -63,18 +71,18 @@ class motd(minqlx.Plugin):
         return minqlx.RET_STOP_EVENT
 
     def cmd_clearmotd(self, player, msg, channel):
-        del self.db[MOTD_KEY]
+        del self.db[self.motd_key]
         player.tell("The MOTD has been cleared.")
         return minqlx.RET_STOP_EVENT
 
     def cmd_addmotd(self, player, msg, channel):
-        motd = self.db[MOTD_KEY]
+        motd = self.db[self.motd_key]
         if not motd:
-            self.db[MOTD_KEY] = " ".join(msg[1:])
+            self.db[self.motd_key] = " ".join(msg[1:])
             player.tell("No MOTD was set, so a new one was made.")
         else:
             leading_space = "" if len(motd) > 2 and motd[-2:] == "\\n" else " "
-            self.db[MOTD_KEY] = motd + leading_space + " ".join(msg[1:])
+            self.db[self.motd_key] = motd + leading_space + " ".join(msg[1:])
             player.tell("The MOTD has been updated.")
 
         return minqlx.RET_STOP_EVENT

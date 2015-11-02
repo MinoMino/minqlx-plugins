@@ -73,7 +73,7 @@ class clan(minqlx.Plugin):
         new_cs = "".join(["\\{}\\{}".format(key, cs[key]) for key in cs])
         minqlx.set_configstring(index, new_cs)
         self.db[tag_key] = tag
-        self.msg("{} changed clan tag to {}^7.".format(player, tag))
+        self.msg("{} changed clan tag to {}".format(player, tag))
         return minqlx.RET_STOP_EVENT
 
     def clean_tag(self, tag):
