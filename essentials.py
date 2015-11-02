@@ -20,7 +20,6 @@
 
 import minqlx
 import minqlx.database
-import plugins
 import datetime
 import itertools
 import time
@@ -475,7 +474,7 @@ class essentials(minqlx.Plugin):
         
     def cmd_help(self, player, msg, channel):
         # TODO: Perhaps print some essential commands in !help
-        player.tell("minqlx: ^6{}^7 - Plugins: ^6v{}".format(minqlx.__version__, plugins.__version__))
+        player.tell("minqlx: ^6{}^7 - Plugins: ^6{}".format(minqlx.__version__, minqlx.__plugins_version__))
         player.tell("See ^6github.com/MinoMino/minqlx^7 for more info about the mod and its commands.")
         return minqlx.RET_STOP_EVENT
     
