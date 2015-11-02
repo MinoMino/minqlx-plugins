@@ -86,7 +86,7 @@ class ban(minqlx.Plugin):
             self.players_start.remove(player)
 
     def handle_game_countdown(self):
-        if self.get_cvar("qlx_automaticLeaveBan", type=bool):
+        if self.get_cvar("qlx_automaticLeaveBan", bool):
             self.msg("Leavers are being kept track of. Repeat offenders ^6will^7 be banned.")
 
     def handle_game_start(self, game):
@@ -271,7 +271,7 @@ class ban(minqlx.Plugin):
             else:
                 channel.reply("^6{}^7 is banned until ^6{}^7.".format(name, expires))
             return
-        elif self.get_cvar("qlx_automaticLeaveBan", type=bool):
+        elif self.get_cvar("qlx_automaticLeaveBan", bool):
             status = self.leave_status(ident)
             if status and status[0] == "ban":
                 channel.reply("^6{} ^7is banned for having left too many games.".format(name))
@@ -352,7 +352,7 @@ class ban(minqlx.Plugin):
         """Get a player's status when it comes to leaving, given automatic leaver ban is on.
 
         """
-        if not self.get_cvar("qlx_automaticLeaveBan", type=bool):
+        if not self.get_cvar("qlx_automaticLeaveBan", bool):
             return None
 
         completed = self.db[PLAYER_KEY.format(steam_id) + ":games_completed"]
