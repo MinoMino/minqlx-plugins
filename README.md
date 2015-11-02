@@ -1,13 +1,17 @@
 # minqlx-plugins
 This is a collection of plugins for [minqlx](https://github.com/MinoMino/minqlx).
 The Python dependencies are included in requirements.txt. Make sure you do a
-`pip3.5 install -r requirements.txt` first. Replace `pip3.5` with whatever
-Python 3.5's pip is called on your system.
+`python3.5 -m pip install -r requirements.txt` first. `pyzmq` and `hiredis` might
+need `easy_install` instead of `pip`.
 
 The extras directory contains plugins I would not advice you use unless you further improve them or
 just use them for the purpose of learning.
 
-### Plugins
+If you have any questions, the IRC channel for the old bot,
+[#minqlbot on Quakenet](http://webchat.quakenet.org/?channels=minqlbot),
+is being used for this one as well. Feel free to drop by.
+
+## Plugins
 This is a list of plugins and their cvars. Set the cvars by passing them as a command line argument or using `server.cfg`
 like you would with any other QLDS cvar.
 
