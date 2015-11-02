@@ -352,7 +352,7 @@ class ban(minqlx.Plugin):
         """Get a player's status when it comes to leaving, given automatic leaver ban is on.
 
         """
-        if not self.get_cvar("qlx_automaticLeaveBan", bool):
+        if not self.get_cvar("qlx_leaverBan", bool):
             return None
 
         completed = self.db[PLAYER_KEY.format(steam_id) + ":games_completed"]
