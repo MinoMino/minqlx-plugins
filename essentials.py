@@ -24,6 +24,7 @@ import datetime
 import itertools
 import time
 import re
+import os
 
 from collections import deque
 
@@ -39,6 +40,7 @@ class essentials(minqlx.Plugin):
         self.add_hook("player_disconnect", self.handle_player_disconnect)
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("command", self.handle_command, priority=minqlx.PRI_LOW)
+        self.add_command("mappool", self.cmd_mappool, 2)
         self.add_command("id", self.cmd_id, 1, usage="[part_of_name] ...")
         self.add_command(("commands", "cmds"), self.cmd_commands, 2)
         self.add_command("shuffle", self.cmd_shuffle, 1)
@@ -73,6 +75,7 @@ class essentials(minqlx.Plugin):
         # Cvars.
         self.set_cvar_once("qlx_votepass", "1")
         self.set_cvar_limit_once("qlx_votepassThreshold", "0.33", "0", "1")
+        self.set_cvar_once("qlx_forceMappool", "1")
         self.set_cvar_once("qlx_teamsizeMinimum", "1")
         self.set_cvar_once("qlx_teamsizeMaximum", "8")
 
@@ -82,6 +85,20 @@ class essentials(minqlx.Plugin):
 
         # A short history of recently executed commands.
         self.recent_cmds = deque(maxlen=11)
+        
+        self.mappool = None
+        homepath = self.get_cvar("fs_homepath", str) + "/baseq3"
+        basepath = self.get_cvar("fs_basepath", str) + "/baseq3"
+        mpbase = os.path.join( basepath, self.get_cvar("sv_mappoolfile", str) )
+        mphome = os.path.join( homepath, self.get_cvar("sv_mappoolfile", str) )
+        try:
+            self.mappool = self.readMappool( mpbase )
+        except Exception:
+            minqlx.log_exception(self)
+        try:
+            self.mappool = self.readMappool( mphome )
+        except Exception:
+            minqlx.log_exception(self)
 
     def handle_player_connect(self, player):
         self.update_player(player)
@@ -103,7 +120,16 @@ class essentials(minqlx.Plugin):
             elif args < self.get_cvar("qlx_teamsizeMinimum", int):
                 caller.tell("The team size is smaller than what the server allows.")
                 return minqlx.RET_STOP_ALL
-
+        
+        if vote.lower() == "map" and self.get_cvar("qlx_forceMappool", bool):
+            mapflag = self.checkMapvoteAllowed( args )
+            if mapflag == 0:
+                caller.tell("This map is not in the mappool.")
+                return minqlx.RET_STOP_ALL
+            elif mapflag == 2:
+                caller.tell("This Factory is not allowed.")
+                return minqlx.RET_STOP_ALL
+        
         if self.get_cvar("qlx_votepass", bool):
             self.last_vote = next(self.vote_count)
             self.force(self.get_cvar("qlx_votepassThreshold", float), self.last_vote)
@@ -621,3 +647,61 @@ class essentials(minqlx.Plugin):
                 if sum(votes)/len(players) < require:
                     return
             minqlx.force_vote(True)
+    
+    def readMappool(self, name):
+        '''
+            Read the mappool file into a dictionary
+            to be able to indeed restrict mapvotings 
+            to maps that are in the configured mappool 
+            (which ql doesn't)
+        
+            Structure as follows:
+            { 'campgrounds' : ['ca', 'ffa'], 'overkill' : ['ca'] }
+        '''
+        mappool = {}
+        with open(name, "r") as f:         
+            for line in f.readlines():
+                li = line.lstrip()
+                # Ignore commented lines
+                if not li.startswith("#") and '|' in li:
+                    key, value = line.split('|', 1)
+                    # decapitalise everything to not run into any issue there
+                    key = key.lower()
+                    value = value.lower()
+                    # Create the Dictionary
+                    if key in mappool.keys():
+                        mappool[key] += [ value.strip() ]
+                    else:
+                        mappool[key] = [ value.strip() ]
+        return mappool
+    
+    def checkMapvoteAllowed(self, args):
+        '''
+            Checks if a desired mapvote should be executed.
+        
+            Function takes the name of the map and the
+            factory (the latter is optional)
+        '''
+        args = args.split()
+        themap = args[0]
+        try:
+            factory = args[1]
+        except:
+            factory = None
+        if not self.mappool:
+            return 0
+        
+        if themap.lower() in self.mappool.keys():
+            if factory:
+                if factory.lower() in self.mappool[themap]:
+                    return 1
+                else:
+                    return 2
+            return 1
+        return 0
+    
+    def cmd_mappool(self, player, msg, channel, indent=2):
+        if not self.mappool:
+            return "Either no mappool specified or cannot read mappool file!"
+        for m in self.mappool:
+            player.tell( "Map: {0:25} Factories: {1}".format(m, ", ".join(val.upper() for val in self.mappool[m])) )
