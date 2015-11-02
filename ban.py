@@ -42,8 +42,8 @@ class ban(minqlx.Plugin):
 
         # Cvars.
         self.set_cvar_once("qlx_leaverBan", "0")
-        self.set_cvar_limit_once("qlx_leaverBanThreshold", "0", "0", "1")
-        self.set_cvar_limit_once("qlx_leaverBanWarnThreshold", "0", "0", "1")
+        self.set_cvar_limit_once("qlx_leaverBanThreshold", "0.63", "0", "1")
+        self.set_cvar_limit_once("qlx_leaverBanWarnThreshold", "0.78", "0", "1")
         self.set_cvar_once("qlx_leaverBanMinimumGames", "15")
 
         # List of players playing that could potentially be considered leavers.
