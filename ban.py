@@ -355,8 +355,8 @@ class ban(minqlx.Plugin):
         if not self.get_cvar("qlx_leaverBan", bool):
             return None
 
-        completed = self.db[PLAYER_KEY.format(steam_id) + ":games_completed"]
-        left = self.db[PLAYER_KEY.format(steam_id) + ":games_left"]
+        completed = int(self.db[PLAYER_KEY.format(steam_id) + ":games_completed"])
+        left = int(self.db[PLAYER_KEY.format(steam_id) + ":games_left"])
         if completed == None or left == None:
             return None
 
