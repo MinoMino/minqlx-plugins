@@ -166,7 +166,7 @@ class essentials(minqlx.Plugin):
             for p in players:
                 out += " " * indent
                 out += "{}^6:^7 {}\n".format(p.id, p.name)
-            player.tell(out[:-1])
+            player.tell(out[:-1], delimiter="\n")
         
         player_list = self.players()
         if not player_list:
@@ -698,6 +698,8 @@ class essentials(minqlx.Plugin):
         return mappool
 
     def tell_mappool(self, player, indent=0):
+        out = ""
         for m in self.mappool:
-            player.tell("{0}Map: {1:25} Factories: {2}"
+            out += ("{0}Map: {1:25} Factories: {2}\n"
                 .format(" " * indent, m, ", ".join(val for val in self.mappool[m])))
+        player.tell(out.rstrip("\n"), delimiter="\n")
