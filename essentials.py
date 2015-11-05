@@ -40,7 +40,6 @@ class essentials(minqlx.Plugin):
         self.add_hook("player_disconnect", self.handle_player_disconnect)
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("command", self.handle_command, priority=minqlx.PRI_LOW)
-        self.add_command("mappool", self.cmd_mappool, 2)
         self.add_command("id", self.cmd_id, 1, usage="[part_of_name] ...")
         self.add_command(("commands", "cmds"), self.cmd_commands, 2)
         self.add_command("shuffle", self.cmd_shuffle, 1)
@@ -71,13 +70,14 @@ class essentials(minqlx.Plugin):
         self.add_command("time", self.cmd_time, usage="[timezone_offset]")
         self.add_command(("teamsize", "ts"), self.cmd_teamsize, 2, usage="<size>")
         self.add_command("rcon", self.cmd_rcon, 5)
+        self.add_command(("mappool", "maps", "maplist"), self.cmd_mappool, client_cmd_perm=0)
 
         # Cvars.
         self.set_cvar_once("qlx_votepass", "1")
         self.set_cvar_limit_once("qlx_votepassThreshold", "0.33", "0", "1")
-        self.set_cvar_once("qlx_forceMappool", "1")
         self.set_cvar_once("qlx_teamsizeMinimum", "1")
         self.set_cvar_once("qlx_teamsizeMaximum", "8")
+        self.set_cvar_once("qlx_enforceMappool", "0")
 
         # Vote counter. We use this to avoid automatically passing votes we shouldn't.
         self.vote_count = itertools.count()
@@ -86,19 +86,17 @@ class essentials(minqlx.Plugin):
         # A short history of recently executed commands.
         self.recent_cmds = deque(maxlen=11)
         
+        # Map voting stuff. fs_homepath takes precedence.
         self.mappool = None
-        homepath = self.get_cvar("fs_homepath", str) + "/baseq3"
-        basepath = self.get_cvar("fs_basepath", str) + "/baseq3"
-        mpbase = os.path.join( basepath, self.get_cvar("sv_mappoolfile", str) )
-        mphome = os.path.join( homepath, self.get_cvar("sv_mappoolfile", str) )
-        try:
-            self.mappool = self.readMappool( mpbase )
-        except Exception:
-            minqlx.log_exception(self)
-        try:
-            self.mappool = self.readMappool( mphome )
-        except Exception:
-            minqlx.log_exception(self)
+        mphome = os.path.join(self.get_cvar("fs_homepath", str),
+            "baseq3", self.get_cvar("sv_mappoolfile"))
+        if os.path.isfile(mphome):
+            self.mappool = self.parse_mappool(mphome)
+        else:
+            mpbase = os.path.join(self.get_cvar("fs_basepath", str),
+                "baseq3", self.get_cvar("sv_mappoolfile"))
+            if os.path.isfile(mpbase):
+                self.mappool = self.parse_mappool(mpbase)
 
     def handle_player_connect(self, player):
         self.update_player(player)
@@ -121,15 +119,27 @@ class essentials(minqlx.Plugin):
                 caller.tell("The team size is smaller than what the server allows.")
                 return minqlx.RET_STOP_ALL
         
-        if vote.lower() == "map" and self.get_cvar("qlx_forceMappool", bool):
-            mapflag = self.checkMapvoteAllowed( args )
-            if mapflag == 0:
-                caller.tell("This map is not in the mappool.")
+        # Enforce map pool.
+        if vote.lower() == "map" and self.mappool and self.get_cvar("qlx_enforceMappool", bool):
+            split_args = args.split()
+            if len(split_args) == 0:
+                caller.tell("Available maps and factories:")
+                self.tell_mappool(caller, indent=2)
                 return minqlx.RET_STOP_ALL
-            elif mapflag == 2:
-                caller.tell("This Factory is not allowed.")
+            
+            map_name = split_args[0].lower()
+            factory = split_args[1] if len(split_args) > 1 else None
+            if map_name in self.mappool:
+                if factory and factory not in self.mappool[map_name]:
+                    caller.tell("This factory is not allowed. Use {}mappool to see available options."
+                        .format(self.get_cvar("qlx_commandPrefix")))
+                    return minqlx.RET_STOP_ALL
+            else:
+                caller.tell("This map is not allowed. Use {}mappool to see available options."
+                    .format(self.get_cvar("qlx_commandPrefix")))
                 return minqlx.RET_STOP_ALL
         
+        # Automatic vote passing.
         if self.get_cvar("qlx_votepass", bool):
             self.last_vote = next(self.vote_count)
             self.force(self.get_cvar("qlx_votepassThreshold", float), self.last_vote)
@@ -609,6 +619,15 @@ class essentials(minqlx.Plugin):
         # TODO: Maybe hack up something to redirect the output of !rcon?
         minqlx.console_command(" ".join(msg[1:]))
 
+    def cmd_mappool(self, player, msg, channel):
+        if not self.mappool or not self.get_cvar("qlx_enforceMappool", bool):
+            player.tell("No map pool is being enforced. You are free to vote any map.")
+        else:
+            self.tell_mappool(player)
+
+        return minqlx.RET_STOP_EVENT
+
+
     # ====================================================================
     #                               HELPERS
     # ====================================================================
@@ -648,60 +667,37 @@ class essentials(minqlx.Plugin):
                     return
             minqlx.force_vote(True)
     
-    def readMappool(self, name):
-        '''
-            Read the mappool file into a dictionary
-            to be able to indeed restrict mapvotings 
-            to maps that are in the configured mappool 
-            (which ql doesn't)
+    def parse_mappool(self, path):
+        """Read and parse the map pool file into a dictionary.
+    
+        Structure as follows:
+        {'campgrounds': ['ca', 'ffa'], 'overkill': ['ca']}
         
-            Structure as follows:
-            { 'campgrounds' : ['ca', 'ffa'], 'overkill' : ['ca'] }
-        '''
+        """
         mappool = {}
-        with open(name, "r") as f:         
-            for line in f.readlines():
-                li = line.lstrip()
-                # Ignore commented lines
-                if not li.startswith("#") and '|' in li:
-                    key, value = line.split('|', 1)
-                    # decapitalise everything to not run into any issue there
-                    key = key.lower()
-                    value = value.lower()
-                    # Create the Dictionary
-                    if key in mappool.keys():
-                        mappool[key] += [ value.strip() ]
-                    else:
-                        mappool[key] = [ value.strip() ]
-        return mappool
-    
-    def checkMapvoteAllowed(self, args):
-        '''
-            Checks if a desired mapvote should be executed.
-        
-            Function takes the name of the map and the
-            factory (the latter is optional)
-        '''
-        args = args.split()
-        themap = args[0]
         try:
-            factory = args[1]
+            with open(path, "r") as f:
+                lines = f.readlines()
         except:
-            factory = None
-        if not self.mappool:
-            return 0
+            minqlx.log_exception()
+            return None
         
-        if themap.lower() in self.mappool.keys():
-            if factory:
-                if factory.lower() in self.mappool[themap]:
-                    return 1
+        for line in lines:
+            li = line.lstrip()
+            # Ignore commented lines.
+            if not li.startswith("#") and "|" in li:
+                key, value = line.split('|', 1)
+                # Maps are case-insensitive, but not factories.
+                key = key.lower()
+
+                if key in mappool:
+                    mappool[key].append(value.strip())
                 else:
-                    return 2
-            return 1
-        return 0
-    
-    def cmd_mappool(self, player, msg, channel, indent=2):
-        if not self.mappool:
-            return "Either no mappool specified or cannot read mappool file!"
+                    mappool[key] = [value.strip()]
+        
+        return mappool
+
+    def tell_mappool(self, player, indent=0):
         for m in self.mappool:
-            player.tell( "Map: {0:25} Factories: {1}".format(m, ", ".join(val.upper() for val in self.mappool[m])) )
+            player.tell("{0}Map: {1:25} Factories: {2}"
+                .format(" " * indent, m, ", ".join(val for val in self.mappool[m])))
