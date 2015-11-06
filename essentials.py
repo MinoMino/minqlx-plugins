@@ -101,7 +101,7 @@ class essentials(minqlx.Plugin):
     def handle_player_connect(self, player):
         self.update_player(player)
 
-    def handle_player_disconnect(self, player):
+    def handle_player_disconnect(self, player, reason):
         self.update_player(player)
 
     def handle_vote_called(self, caller, vote, args):
