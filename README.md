@@ -28,6 +28,8 @@ and to pass votes before it fails if the majority votes yes.
     - Default: `1`
   - `qlx_teamsizeMaximum`: The maximum teamsize allowed to vote for. `!teamsize` can override this.
     - Default: `8` (if teams are full and teamsize is above 8, players will not be visible on the scoreboard)
+  - `qlx_enforceMappool`: A boolean deciding whether or not it should only allow votes in the mappool or not.
+    - Default: `0`
 - **ban**: Adds command to ban people for a set amount of time. Also adds functionality to ban for automatically
 for leaving too many games.
   - `qlx_leaverBan`: A boolean deciding whether or not it should automatically ban players for leaving.
