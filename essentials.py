@@ -47,6 +47,8 @@ class essentials(minqlx.Plugin):
         self.add_command("slay", self.cmd_slay, 2, usage="<id>")
         self.add_command("sound", self.cmd_sound, 1, usage="<path>")
         self.add_command("music", self.cmd_music, 1, usage="<path>")
+        self.add_command("stopsound", self.cmd_stopsound, 1)
+        self.add_command("stopmusic", self.cmd_stopmusic, 1)
         self.add_command("kick", self.cmd_kick, 2, usage="<id>")
         self.add_command(("kickban", "tempban"), self.cmd_kickban, 2, usage="<id>")
         self.add_command("yes", self.cmd_yes, 2)
@@ -263,6 +265,14 @@ class essentials(minqlx.Plugin):
         if not self.play_sound(msg[1]):
             player.tell("Invalid music.")
             return minqlx.RET_STOP_EVENT
+
+    def cmd_stopsound(self, player, msg, channel):
+        """Stops all sounds playing. Useful if someone players one of those really long ones."""
+        self.stop_sound()
+
+    def cmd_stopmusic(self, player, msg, channel):
+        """Stops any music playing."""
+        self.stop_music()
 
     def cmd_kick(self, player, msg, channel):
         """Kicks a player. A reason can also be provided."""
