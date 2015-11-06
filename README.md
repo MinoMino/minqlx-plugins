@@ -45,4 +45,8 @@ for leaving too many games.
 - **clan**: Adds commands to let players have persistent clan tags without having to change the name on Steam.
 - **motd**: Adds commands to set a message of the day.
 - **permission**: Adds commands to set player permissions.
+- **names**: Adds a command to change names without relying on Steam.
+  - `qlx_enforceSteamName`: A boolean deciding whether or not it should force players to use Steam names,
+    but allowing colors, or to allow the player to set any name.
+    - Default: `1`
 - **raw**: Adds commands to interact with the Python interpreter directly. Useful for debugging.
