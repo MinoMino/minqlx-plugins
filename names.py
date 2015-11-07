@@ -33,7 +33,7 @@ class names(minqlx.Plugin):
         name_key = _name_key.format(player.steam_id)
         if name_key in self.db:
             db_name = self.db[name_key]
-            if self.clean_text(db_name) == player.clean_name:
+            if not self.get_cvar("qlx_enforceSteamName", bool) or self.clean_text(db_name) == player.clean_name:
                 info = minqlx.parse_variables(minqlx.player_info(player.id)["userinfo"], ordered=True)
                 info["name"] = db_name
                 new_info = "".join(["\\{}\\{}".format(key, info[key]) for key in info])
