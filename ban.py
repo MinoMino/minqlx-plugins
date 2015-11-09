@@ -267,7 +267,7 @@ class ban(minqlx.Plugin):
         if res:
             expires, reason = res
             if reason:
-                channel.reply("^6{}^7 is banned until ^6{}^7 for the follow reason:^6 {}".format(name, *res))
+                channel.reply("^6{}^7 is banned until ^6{}^7 for the following reason:^6 {}".format(name, *res))
             else:
                 channel.reply("^6{}^7 is banned until ^6{}^7.".format(name, expires))
             return
