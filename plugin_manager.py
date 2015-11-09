@@ -27,7 +27,6 @@ class plugin_manager(minqlx.Plugin):
         self.add_command("load", self.cmd_load, 5, usage="<plugin>")
         self.add_command("unload", self.cmd_unload, 5, usage="<plugin>")
         self.add_command("reload", self.cmd_reload, 5, usage="<plugin>")
-        self.add_command(("reload_config", "reloadconfig"), self.cmd_reload_config, 5)
     
     def cmd_load(self, player, msg, channel):
         if len(msg) < 2:
@@ -67,13 +66,3 @@ class plugin_manager(minqlx.Plugin):
                 channel.reply("^7Plugin ^6{} ^7has failed to reload: {} - {}"
                     .format(msg[1], e.__class__.__name__, e))
                 minqlx.log_exception(self)
-    
-    def cmd_reload_config(self, player, msg, channel):
-        try:
-            minqlx.reload_config()
-            channel.reply("^7The config file was reloaded successfully.")
-        except Exception as e:
-            channel.reply("^7The config file has failed to reload: {} - {}"
-                    .format(e.__class__.__name__, e))
-            minqlx.log_exception(self)
-    
