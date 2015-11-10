@@ -198,12 +198,9 @@ class ban(minqlx.Plugin):
             db.execute()
             
             try:
-                self.kick(ident, "You have been banned until {}: {}".format(expires, reason))
+                self.kick(ident, "has been banned until ^6{}^7: {}".format(expires, reason))
             except ValueError:
-                pass
-            
-            channel.reply("^6{} ^7has been banned. Ban expires on ^6{}^7.".format(name, expires))
-            return
+                channel.reply("^6{} ^7has been banned. Ban expires on ^6{}^7.".format(name, expires))
 
     def cmd_unban(self, player, msg, channel):
         """Unbans a player if banned."""
