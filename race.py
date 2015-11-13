@@ -192,8 +192,14 @@ class race(minqlx.Plugin):
             channel.reply("^7{} ^2has no {}records :(".format(player, strafe))
 
     def output_times(self, map_name, times, channel):
-        """Outputs times to the channel. Will split lines so that each
-        record is not on 2 different lines."""
+        """
+        Outputs times to the channel. Will split lines so that each
+        record is not on 2 different lines.
+        :param map_name: The map name
+        :param times: List of map times
+        :param channel: The channel to reply to
+        :return:
+        """
         output = ["^2{}:".format(map_name)]
         for time in times:
             if len(output[len(output) - 1]) + len(time) < 100:
@@ -222,6 +228,13 @@ class race(minqlx.Plugin):
         return next((x for x in self.maps if x.startswith(map_prefix)), None)
 
     def get_map_name_weapons(self, map_prefix, command, channel):
+        """
+        Get the map name and weapons boolean.
+        :param map_prefix: The prefix of a map
+        :param command: The command the player entered
+        :param channel: The channel to reply to. Usually chat.
+        :return: The map name and weapons boolean.
+        """
         map_name = self.map_prefix(map_prefix)
         if not map_name:
             channel.reply("^2No map found for ^3{}. ^2If this is wrong, ^6!updatemaps".format(map_prefix))
@@ -230,6 +243,12 @@ class race(minqlx.Plugin):
         return map_name, weapons
 
     def get_records(self, map_name, weapons):
+        """
+        Gets records
+        :param map_name: The map name
+        :param weapons: Weapons boolean
+        :return: race records
+        """
         if weapons:
             return RaceRecords(map_name, self.race_mode)
         else:
@@ -238,6 +257,7 @@ class race(minqlx.Plugin):
 
 class RaceRecords:
     """Gets times from QLRace.com for a map and mode."""
+
     def __init__(self, map_name, mode):
         self.map_name = map_name.lower()
         self.mode = mode
@@ -248,7 +268,7 @@ class RaceRecords:
             self.first_time = self.records[0]["time"]
 
     def rank(self, rank):
-        """Returns name and time of the rank
+        """Returns name and time of the rank.
         :param rank: The rank of the time which will be returned
         """
         try:
@@ -263,7 +283,7 @@ class RaceRecords:
         return name, time
 
     def rank_from_time(self, time):
-        """Returns the rank the time would be
+        """Returns the rank the time would be.
         :param time: The time in milliseconds which will be ranked
         """
         for i, record in enumerate(self.records):
@@ -271,7 +291,7 @@ class RaceRecords:
                 return i + 1
 
     def pb(self, player_id):
-        """Returns a players rank and time
+        """Returns a players rank and time.
         :param player_id: The player id
         """
         for record in self.records:
@@ -282,7 +302,7 @@ class RaceRecords:
         return None, None
 
     def output(self, name, rank, time):
-        """Returns the output which will be sent to the channel
+        """Returns the output which will be sent to the channel.
         :param name: Name of the player
         :param rank: Rank of the record
         :param time: Time of the record
@@ -299,7 +319,7 @@ class RaceRecords:
             .format(name, rank, self.last_rank, time, time_diff, self.map_name, strafe)
 
     def get_data(self):
-        """Gets the records for the map and mode from qlrace.com"""
+        """Gets the records for the map and mode from qlrace.com."""
         data = requests.get("https://qlrace.com/api/map/{}".format(self.map_name), params=params[self.mode]).json()
         return data['records']
 

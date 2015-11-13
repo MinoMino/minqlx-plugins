@@ -3,32 +3,35 @@ import requests
 import threading
 import sqlite3
 from datetime import datetime
-import sys
-sys.path.append("minqlx-plugins")
-import race
+import importlib
+
+race = importlib.import_module("minqlx-plugins.race")
 
 
 class track_race(minqlx.Plugin):
+    """Tracks race records and posts them to QLRace.com."""
+
     def __init__(self):
         super().__init__()
         self.add_hook("stats", self.handle_stats)
-        self.add_command("mapname", self.cmd_mapname)
         self.server_mode = self.get_cvar("qlx_race_mode", int)
         self.key = self.get_cvar("qlx_race_key")
 
         if self.game:
-            self.mapname = self.game.map.lower()
-
-    def cmd_mapname(self, player, msg, channel):
-        channel.reply(self.mapname)
+            self.map_name = self.game.map.lower()
 
     def handle_stats(self, stats):
         if stats["TYPE"] == "PLAYER_RACECOMPLETE":
-            self.mapname = self.game.map.lower()
+            self.map_name = self.game.map.lower()
         elif stats["TYPE"] == "PLAYER_STATS":
             threading.Thread(target=self.update_pb, args=(stats,)).start()
 
     def update_pb(self, stats):
+        """
+        Updates a players pb. Checks if any knockback weapons was fired.
+        :param stats:
+        """
+
         time = stats["DATA"]["SCORE"]
         if time == -1 or time == 2147483647:
             return
@@ -37,27 +40,37 @@ class track_race(minqlx.Plugin):
         weapons = stats["DATA"]["WEAPONS"]
         # if no knockback weapons fired, set mode to strafe
         if weapons["PLASMA"]["S"] == 0 and weapons["ROCKET"]["S"] == 0 and weapons["PROXMINE"]["S"] == 0 and \
-                        weapons["GRENADE"]["S"] == 0 and weapons["BFG"]["S"] == 0:
+                weapons["GRENADE"]["S"] == 0 and weapons["BFG"]["S"] == 0:
             mode += 1
 
         if not stats['DATA']['ABORTED']:
-            self.mapname = self.game.map.lower()
+            self.map_name = self.game.map.lower()
         player_id = int(stats["DATA"]["STEAM_ID"])
         name = self.clean_text(stats["DATA"]["NAME"])
         match_guid = stats["DATA"]["MATCH_GUID"]
-        pb = self.post_data(self.mapname, mode, player_id, name, time, match_guid)
+        pb = self.post_data(self.map_name, mode, player_id, name, time, match_guid)
         if pb is None:
             self.msg("^2QLRace.com is down ^6:( ^2Your time has been saved locally and will be updated "
                      "when QLRace.com is back online")
         if pb:
-            records = race.RaceRecords(self.mapname, mode)
+            records = race.RaceRecords(self.map_name, mode)
             rank, time = records.pb(player_id)
             out = records.output(name, rank, time)
             out = out.replace(" ^2is rank ^3", " ^2is now rank ^3")
             self.msg(out)
 
-    def post_data(self, mapname, mode, player_id, name, time, match_guid):
-        payload = {"map": mapname, "mode": mode, "player_id": player_id, "name": name,
+    def post_data(self, map_name, mode, player_id, name, time, match_guid):
+        """
+        Posts record to QLRace.com.
+        :param map_name: The name of the map
+        :param mode: The mode(0-3)
+        :param player_id: Steam ID
+        :param name: The players name on steam
+        :param time: The time they set
+        :param match_guid: The guid of the match
+        :return: True if a new pb, false otherwise
+        """
+        payload = {"map": map_name, "mode": mode, "player_id": player_id, "name": name,
                    "time": time, "match_guid": match_guid}
         headers = {"X-Api-Key": self.key}
         try:
@@ -67,15 +80,24 @@ class track_race(minqlx.Plugin):
             else:
                 return False
         except:
-            self.insert_db(mapname, mode, player_id, name, time, match_guid)
+            self.insert_db(map_name, mode, player_id, name, time, match_guid)
 
-    def insert_data(self, mapname, mode, player_id, name, time, match_guid):
+    def insert_data(self, map_name, mode, player_id, name, time, match_guid):
+        """
+        Adds record to SQLite database if QLRace.com is down.
+        :param map_name: The name of the map
+        :param mode: The mode(0-3)
+        :param player_id: Steam ID
+        :param name: The players name on steam
+        :param time: The time they set
+        :param match_guid: The guid of the match
+        """
         connection = sqlite3.connect("lost_stats.db")
         cursor = connection.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS stats "
                        "(mapname TEXT, mode INTEGER, player_id TEXT, name TEXT, "
                        "time INTEGER, match_guid TEXT, date DATETIME)")
         cursor.execute("INSERT INTO stats VALUES (?,?,?,?,?,?,?)",
-                       (mapname, mode, player_id, name, time, match_guid, str(datetime.now())))
+                       (map_name, mode, player_id, name, time, match_guid, str(datetime.now())))
         connection.commit()
         connection.close()
