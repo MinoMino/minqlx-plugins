@@ -29,6 +29,7 @@ class race(minqlx.Plugin):
         threading.Thread(target=self.get_maps).start()
 
     def cmd_pb(self, player, msg, channel):
+        """Outputs the player's personal best time for a map."""
         if len(msg) == 1:
             map_prefix = self.game.map.lower()
         elif len(msg) == 2:
@@ -50,6 +51,7 @@ class race(minqlx.Plugin):
             channel.reply("^2No time found for ^7{} ^2on ^3{}".format(player, map_name))
 
     def cmd_rank(self, player, msg, channel):
+        """Outputs the x rank time for a map. Default rank if none is given is 1."""
         if len(msg) == 1:
             rank = 1
             map_prefix = self.game.map.lower()
@@ -80,6 +82,7 @@ class race(minqlx.Plugin):
             channel.reply("^2No rank ^3{} ^2time found on ^3{}".format(rank, map_name))
 
     def cmd_top(self, player, msg, channel):
+        """Outputs top x amount of times for a map. Default amount if none is given is 3."""
         if len(msg) == 1:
             amount = 3
             map_prefix = self.game.map
@@ -123,6 +126,7 @@ class race(minqlx.Plugin):
         self.output_times(map_name, times, channel)
 
     def cmd_all(self, player, msg, channel):
+        """Outputs the times of everyone on the server for a map."""
         if len(msg) == 1:
             map_prefix = self.game.map
         elif len(msg) == 2:
@@ -152,6 +156,7 @@ class race(minqlx.Plugin):
             channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
 
     def cmd_avg(self, player, msg, channel):
+        """Outputs a player average rank."""
         if len(msg) == 2:
             try:
                 i = int(msg[1])
@@ -187,6 +192,8 @@ class race(minqlx.Plugin):
             channel.reply("^7{} ^2has no {}records :(".format(player, strafe))
 
     def output_times(self, map_name, times, channel):
+        """Outputs times to the channel. Will split lines so that each
+        record is not on 2 different lines."""
         output = ["^2{}:".format(map_name)]
         for time in times:
             if len(output[len(output) - 1]) + len(time) < 100:
@@ -198,6 +205,8 @@ class race(minqlx.Plugin):
             channel.reply(out.lstrip())
 
     def get_maps(self):
+        """Gets the list of race maps from QLRace.com,
+        adds current map to the list if it isn't in the list"""
         self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
         current_map = self.game.map.lower()
         if current_map not in self.maps:
@@ -228,6 +237,7 @@ class race(minqlx.Plugin):
 
 
 class RaceRecords:
+    """Gets times from QLRace.com for a map and mode."""
     def __init__(self, map_name, mode):
         self.map_name = map_name.lower()
         self.mode = mode
