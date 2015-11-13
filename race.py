@@ -16,108 +16,99 @@ class race(minqlx.Plugin):
         self.add_command(("all", "sall"), self.cmd_all, usage="[map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
         self.race_mode = self.get_cvar("qlx_race_mode", int)
+
         self.maps = []
         threading.Thread(target=self.get_maps).start()
 
-    def handle_map(self, mapname, factory):
+    def handle_map(self, map_name, factory):
+        """Updates list of race maps on map change"""
         threading.Thread(target=self.get_maps).start()
 
     def cmd_updatemaps(self, player, msg, channel):
+        """Updates list of race maps"""
         threading.Thread(target=self.get_maps).start()
 
     def cmd_pb(self, player, msg, channel):
         if len(msg) == 1:
-            mapname = self.game.map.lower()
+            map_prefix = self.game.map.lower()
         elif len(msg) == 2:
-            mapname = msg[1]
+            map_prefix = msg[1]
         else:
             return minqlx.RET_USAGE
 
-        weapons = False if "s" in msg[0].lower() else True
-        threading.Thread(target=self.pb, args=(mapname, weapons, player, channel)).start()
+        map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
+        threading.Thread(target=self.pb, args=(map_name, weapons, player, channel)).start()
 
-    def pb(self, mapname, weapons, player, channel):
-        mapname = self.map_prefix(mapname, channel)
-        if not mapname:
-            return
-
-        records = self.get_records(mapname, weapons)
+    def pb(self, map_name, weapons, player, channel):
+        records = self.get_records(map_name, weapons)
         rank, time = records.pb(player.steam_id)
         if not weapons:
-            mapname += "^2(strafe)"
+            map_name += "^2(strafe)"
         if rank:
             channel.reply(records.output(player, rank, time))
         else:
-            channel.reply("^2No time found for ^7{} ^2on ^3{}".format(player, mapname))
+            channel.reply("^2No time found for ^7{} ^2on ^3{}".format(player, map_name))
 
     def cmd_rank(self, player, msg, channel):
         if len(msg) == 1:
             rank = 1
-            mapname = self.game.map.lower()
+            map_prefix = self.game.map.lower()
         elif len(msg) == 2:
             if msg[1].isdigit():
                 rank = int(msg[1])
-                mapname = self.game.map.lower()
+                map_prefix = self.game.map.lower()
             else:
                 rank = 1
-                mapname = msg[1]
+                map_prefix = msg[1]
         elif len(msg) == 3:
             rank = int(msg[1])
-            mapname = msg[2]
+            map_prefix = msg[2]
         else:
             return minqlx.RET_USAGE
 
-        weapons = False if "s" in msg[0].lower() else True
-        threading.Thread(target=self.rank, args=(mapname, weapons, rank, channel)).start()
+        map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
+        threading.Thread(target=self.rank, args=(map_name, weapons, rank, channel)).start()
 
-    def rank(self, mapname, weapons, rank, channel):
-        mapname = self.map_prefix(mapname, channel)
-        if not mapname:
-            return
-
-        records = self.get_records(mapname, weapons)
+    def rank(self, map_name, weapons, rank, channel):
+        records = self.get_records(map_name, weapons)
         name, time = records.rank(rank)
         if not weapons:
-            mapname += "^2(strafe)"
+            map_name += "^2(strafe)"
         if time:
             channel.reply(records.output(name, rank, time))
         else:
-            channel.reply("^2No rank ^3{} ^2time found on ^3{}".format(rank, mapname))
+            channel.reply("^2No rank ^3{} ^2time found on ^3{}".format(rank, map_name))
 
     def cmd_top(self, player, msg, channel):
         if len(msg) == 1:
             amount = 3
-            mapname = self.game.map
+            map_prefix = self.game.map
         elif len(msg) == 2:
             if msg[1].isdigit():
                 amount = int(msg[1])
-                mapname = self.game.map
+                map_prefix = self.game.map
             else:
                 amount = 3
-                mapname = msg[1]
+                map_prefix = msg[1]
         elif len(msg) == 3:
             amount = int(msg[1])
-            mapname = msg[2]
+            map_prefix = msg[2]
         else:
             return minqlx.RET_USAGE
         if amount > 20:
             channel.reply("^2Please use value <=20")
             return
 
-        weapons = False if "s" in msg[0].lower() else True
-        threading.Thread(target=self.top, args=(mapname, weapons, amount, channel)).start()
+        map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
+        threading.Thread(target=self.top, args=(map_name, weapons, amount, channel)).start()
 
-    def top(self, mapname, weapons, amount, channel):
-        mapname = self.map_prefix(mapname, channel)
-        if not mapname:
-            return
-
-        records = self.get_records(mapname, weapons)
-        if not weapons:
-            mapname += "^2(strafe)"
+    def top(self, map_name, weapons, amount, channel):
+        records = self.get_records(map_name, weapons)
         if not records.records:
-            channel.reply("^2No times were found on ^3{}".format(mapname))
+            channel.reply("^2No times were found on ^3{}".format(map_name))
             return
+        if not weapons:
+            map_name += "^2(strafe)"
 
         if amount > len(records.records):
             amount = len(records.records)
@@ -129,25 +120,21 @@ class race(minqlx.Plugin):
             except IndexError:
                 break
 
-        self.output_times(mapname, times, channel)
+        self.output_times(map_name, times, channel)
 
     def cmd_all(self, player, msg, channel):
         if len(msg) == 1:
-            mapname = self.game.map
+            map_prefix = self.game.map
         elif len(msg) == 2:
-            mapname = msg[1]
+            map_prefix = msg[1]
         else:
             return minqlx.RET_USAGE
 
-        weapons = False if "s" in msg[0].lower() else True
-        threading.Thread(target=self.all, args=(mapname, weapons, channel)).start()
+        map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
+        threading.Thread(target=self.all, args=(map_name, weapons, channel)).start()
 
-    def all(self, mapname, weapons, channel):
-        mapname = self.map_prefix(mapname, channel)
-        if not mapname:
-            return
-
-        records = self.get_records(mapname, weapons)
+    def all(self, map_name, weapons, channel):
+        records = self.get_records(map_name, weapons)
         times = {}
         for p in self.players():
             rank, time = records.pb(p.steam_id)
@@ -155,14 +142,14 @@ class race(minqlx.Plugin):
                 times[rank] = "^7{} ^2{}".format(p, time_string(time))
 
         if not weapons:
-            mapname += "^2(strafe)"
+            map_name += "^2(strafe)"
         if times:
             times_list = []
             for rank, time in sorted(times.items()):
                 times_list.append(" ^3{}. {}".format(rank, time))
-            self.output_times(mapname, times_list, channel)
+            self.output_times(map_name, times_list, channel)
         else:
-            channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(mapname))
+            channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
 
     def cmd_avg(self, player, msg, channel):
         if len(msg) == 2:
@@ -199,8 +186,8 @@ class race(minqlx.Plugin):
         else:
             channel.reply("^7{} ^2has no {}records :(".format(player, strafe))
 
-    def output_times(self, mapname, times, channel):
-        output = ["^2{}:".format(mapname)]
+    def output_times(self, map_name, times, channel):
+        output = ["^2{}:".format(map_name)]
         for time in times:
             if len(output[len(output) - 1]) + len(time) < 100:
                 output[len(output) - 1] += time
@@ -216,40 +203,42 @@ class race(minqlx.Plugin):
         if current_map not in self.maps:
             self.maps.append(current_map)
 
-    def map_prefix(self, prefix, channel):
-        """Returns the first map which matches the prefix."""
-        if prefix in self.maps:
-            return prefix
+    def map_prefix(self, map_prefix):
+        """Returns the first map which matches the prefix.
+        :param map_prefix: The prefix of a map
+        """
+        if map_prefix in self.maps:
+            return map_prefix
 
-        mapname = next((x for x in self.maps if x.startswith(prefix)), None)
-        if mapname:
-            return mapname
-        else:
-            channel.reply("^2No map found for ^3{}. ^2If this is wrong, ^6!updatemaps".format(prefix))
+        return next((x for x in self.maps if x.startswith(map_prefix)), None)
 
-    def get_records(self, mapname, weapons):
+    def get_map_name_weapons(self, map_prefix, command, channel):
+        map_name = self.map_prefix(map_prefix)
+        if not map_name:
+            channel.reply("^2No map found for ^3{}. ^2If this is wrong, ^6!updatemaps".format(map_prefix))
+            return minqlx.RET_STOP_EVENT
+        weapons = False if "s" in command.lower() else True
+        return map_name, weapons
+
+    def get_records(self, map_name, weapons):
         if weapons:
-            return RaceRecords(mapname, self.race_mode)
+            return RaceRecords(map_name, self.race_mode)
         else:
-            return RaceRecords(mapname, self.race_mode + 1)
+            return RaceRecords(map_name, self.race_mode + 1)
 
 
 class RaceRecords:
-    def __init__(self, mapname, mode):
-        self.mapname = mapname.lower()
+    def __init__(self, map_name, mode):
+        self.map_name = map_name.lower()
         self.mode = mode
-        if mode == 0 or mode == 2:
-            self.weapons = True
-        else:
-            self.weapons = False
+        self.weapons = True if mode % 2 == 0 else False
         self.records = self.get_data()
         if self.records:
             self.last_rank = len(self.records)
             self.first_time = self.records[0]["time"]
 
     def rank(self, rank):
-        """
-        Returns name and time of the rank
+        """Returns name and time of the rank
         :param rank: The rank of the time which will be returned
         """
         try:
@@ -264,8 +253,7 @@ class RaceRecords:
         return name, time
 
     def rank_from_time(self, time):
-        """
-        Returns the rank the time would be
+        """Returns the rank the time would be
         :param time: The time in milliseconds which will be ranked
         """
         for i, record in enumerate(self.records):
@@ -273,8 +261,7 @@ class RaceRecords:
                 return i + 1
 
     def pb(self, player_id):
-        """
-        Returns a players rank and time
+        """Returns a players rank and time
         :param player_id: The player id
         """
         for record in self.records:
@@ -285,8 +272,7 @@ class RaceRecords:
         return None, None
 
     def output(self, name, rank, time):
-        """
-        Returns the output which will be sent to the channel
+        """Returns the output which will be sent to the channel
         :param name: Name of the player
         :param rank: Rank of the record
         :param time: Time of the record
@@ -300,17 +286,16 @@ class RaceRecords:
         time = time_string(time)
         strafe = "^2(strafe)" if not self.weapons else ""
         return "^7{} ^2is rank ^3{} ^2of ^3{} ^2with ^3{}{} ^2on ^3{}{}" \
-            .format(name, rank, self.last_rank, time, time_diff, self.mapname, strafe)
+            .format(name, rank, self.last_rank, time, time_diff, self.map_name, strafe)
 
     def get_data(self):
         """Gets the records for the map and mode from qlrace.com"""
-        data = requests.get("https://qlrace.com/api/map/{}".format(self.mapname), params=params[self.mode]).json()
+        data = requests.get("https://qlrace.com/api/map/{}".format(self.map_name), params=params[self.mode]).json()
         return data['records']
 
 
 def time_ms(time_string):
-    """
-    Returns time in milliseconds.
+    """Returns time in milliseconds.
     :param time_string: Time as a string, examples 2.300, 1:12.383
     """
     minutes, seconds = (["0"] + time_string.split(":"))[-2:]
@@ -318,8 +303,7 @@ def time_ms(time_string):
 
 
 def time_string(time):
-    """
-    Returns a time string in the format s.ms or m:s.ms if time is more than
+    """Returns a time string in the format s.ms or m:s.ms if time is more than
     or equal to 1 minute.
     :param time: Time in milliseconds
     """
