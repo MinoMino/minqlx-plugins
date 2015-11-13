@@ -51,9 +51,9 @@ class clan(minqlx.Plugin):
             if tag_key in self.db:
                 del self.db[tag_key]
                 cs = minqlx.parse_variables(minqlx.get_configstring(index), ordered=True)
-                cs["cn"] = ""
-                cs["xcn"] = ""
-                new_cs = "".join(["\\{}\\{}".format(key, cs[key]) for key in cs])
+                del cs["cn"]
+                del cs["xcn"]
+                new_cs = "".join(["\\{}\\{}".format(key, cs[key]) for key in cs]).lstrip("\\")
                 minqlx.set_configstring(index, new_cs)
                 player.tell("The clan tag has been cleared.")
             else:
