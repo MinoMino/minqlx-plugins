@@ -140,7 +140,7 @@ class ban(minqlx.Plugin):
         try:
             ident = int(msg[1])
             target_player = None
-            if ident >= 0 and ident < 64:
+            if 0 <= ident < 64:
                 target_player = self.player(ident)
                 ident = target_player.steam_id
         except ValueError:
@@ -210,7 +210,7 @@ class ban(minqlx.Plugin):
         try:
             ident = int(msg[1])
             target_player = None
-            if ident >= 0 and ident < 64:
+            if 0 <= ident < 64:
                 target_player = self.player(ident)
                 ident = target_player.steam_id
         except ValueError:
@@ -244,7 +244,7 @@ class ban(minqlx.Plugin):
         try:
             ident = int(msg[1])
             target_player = None
-            if ident >= 0 and ident < 64:
+            if 0 <= ident < 64:
                 target_player = self.player(ident)
                 ident = target_player.steam_id
         except ValueError:
@@ -284,7 +284,7 @@ class ban(minqlx.Plugin):
         try:
             ident = int(msg[1])
             target_player = None
-            if ident >= 0 and ident < 64:
+            if 0 <= ident < 64:
                 target_player = self.player(ident)
                 ident = target_player.steam_id
         except ValueError:
@@ -354,7 +354,7 @@ class ban(minqlx.Plugin):
 
         completed = self.db[PLAYER_KEY.format(steam_id) + ":games_completed"]
         left = self.db[PLAYER_KEY.format(steam_id) + ":games_left"]
-        if completed == None or left == None:
+        if completed is None or left is None:
             return None
         else:
             completed = int(completed)
@@ -382,7 +382,7 @@ class ban(minqlx.Plugin):
         else:
             action = None
 
-        return (action, ratio)
+        return action, ratio
 
     def warn_player(self, player, ratio):
         player.tell("^7You have only completed ^6{}^7 percent of your games.".format(round(ratio * 100, 1)))
