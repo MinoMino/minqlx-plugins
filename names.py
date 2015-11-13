@@ -57,6 +57,12 @@ class names(minqlx.Plugin):
         elif self.clean_text(name) != player.clean_name and self.get_cvar("qlx_enforceSteamName", bool):
             player.tell("The colored name must match your current Steam name.")
             return minqlx.RET_STOP_EVENT
+        elif "\\" in name:
+            player.tell("The character '^6\\^7' cannot be used. Sorry for the inconvenience.")
+            return minqlx.RET_STOP_EVENT
+        elif not self.clean_text(name).strip():
+            player.tell("Blank names cannot be used. Sorry for the inconvenience.")
+            return minqlx.RET_STOP_EVENT
 
         info = minqlx.parse_variables(minqlx.player_info(player.id)["userinfo"], ordered=True)
         info["name"] = name

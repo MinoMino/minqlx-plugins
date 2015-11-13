@@ -32,7 +32,7 @@ class clan(minqlx.Plugin):
         # without having to worry about duplicate entries.
         if not value: # Player disconnected?
             return
-        elif index >= 529 and index < 529 + 64:
+        elif 529 <= index < 529 + 64:
             player = self.player(index - 529)
             if not player:
                 # This happens when someone connects, but the player
@@ -51,9 +51,9 @@ class clan(minqlx.Plugin):
             if tag_key in self.db:
                 del self.db[tag_key]
                 cs = minqlx.parse_variables(minqlx.get_configstring(index), ordered=True)
-                cs["cn"] = ""
-                cs["xcn"] = ""
-                new_cs = "".join(["\\{}\\{}".format(key, cs[key]) for key in cs])
+                del cs["cn"]
+                del cs["xcn"]
+                new_cs = "".join(["\\{}\\{}".format(key, cs[key]) for key in cs]).lstrip("\\")
                 minqlx.set_configstring(index, new_cs)
                 player.tell("The clan tag has been cleared.")
             else:

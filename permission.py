@@ -40,7 +40,7 @@ class permission(minqlx.Plugin):
         try:
             ident = int(msg[1])
             target_player = None
-            if ident >= 0 and ident < 64:
+            if 0 <= ident < 64:
                 target_player = self.player(ident)
                 ident = target_player.steam_id
         except ValueError:
@@ -69,7 +69,7 @@ class permission(minqlx.Plugin):
         try:
             ident = int(msg[1])
             target_player = None
-            if ident >= 0 and ident < 64:
+            if 0 <= ident < 64:
                 target_player = self.player(ident)
                 ident = target_player.steam_id
 
@@ -81,7 +81,7 @@ class permission(minqlx.Plugin):
             return
         
         perm = self.db.get_permission(ident)
-        if perm == None:
+        if perm is None:
             channel.reply("I do not know ^6{}^7.".format(msg[1]))
         else:
             if target_player:
@@ -95,7 +95,7 @@ class permission(minqlx.Plugin):
             return
         
         perm = self.db.get_permission(player)
-        if perm == None:
+        if perm is None:
             channel.reply("I do not know you.")
         else:
             channel.reply("You have permission level ^6{}^7.".format(perm))

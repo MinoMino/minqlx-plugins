@@ -213,7 +213,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             player.tell("Invalid ID.")
@@ -239,7 +239,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             player.tell("Invalid ID.")
@@ -282,7 +282,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
@@ -301,13 +301,13 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
             return
 
-            target_player.tempban()
+        target_player.tempban()
 
     def cmd_yes(self, player, msg, channel):
         """Passes the current vote."""
@@ -331,7 +331,7 @@ class essentials(minqlx.Plugin):
         try:
             i1 = int(msg[1])
             player1 = self.player(i1)
-            if not (i1 >= 0 and i1 < 64) or not player1:
+            if not (0 <= i1 < 64) or not player1:
                 raise ValueError
         except ValueError:
             channel.reply("The first ID is invalid.")
@@ -340,7 +340,7 @@ class essentials(minqlx.Plugin):
         try:
             i2 = int(msg[2])
             player2 = self.player(i2)
-            if not (i2 >= 0 and i2 < 64) or not player2:
+            if not (0 <= i2 < 64) or not player2:
                 raise ValueError
         except ValueError:
             channel.reply("The second ID is invalid.")
@@ -356,7 +356,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
@@ -372,7 +372,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
@@ -389,7 +389,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
@@ -405,7 +405,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
@@ -421,7 +421,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
@@ -437,7 +437,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
@@ -453,7 +453,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
@@ -469,7 +469,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
@@ -488,7 +488,7 @@ class essentials(minqlx.Plugin):
         try:
             i = int(msg[1])
             target_player = self.player(i)
-            if not (i >= 0 and i < 64) or not target_player:
+            if not (0 <= i < 64) or not target_player:
                 raise ValueError
         except ValueError:
             channel.reply("Invalid ID.")
