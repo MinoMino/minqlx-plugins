@@ -16,7 +16,7 @@ class race(minqlx.Plugin):
         self.add_command(("all", "sall"), self.cmd_all, usage="[map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
         self.race_mode = self.get_cvar("qlx_race_mode", int)
-        self.maps = None
+        self.maps = []
         threading.Thread(target=self.get_maps).start()
 
     def handle_map(self, mapname, factory):
