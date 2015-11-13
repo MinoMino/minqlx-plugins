@@ -32,7 +32,7 @@ class clan(minqlx.Plugin):
         # without having to worry about duplicate entries.
         if not value: # Player disconnected?
             return
-        elif index >= 529 and index < 529 + 64:
+        elif 529 <= index < 529 + 64:
             player = self.player(index - 529)
             if not player:
                 # This happens when someone connects, but the player
