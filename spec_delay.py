@@ -21,6 +21,7 @@ class spec_delay(minqlx.Plugin):
     def handle_team_switch(self, player, old_team, new_team):
         """Sets a delay on joining when the player joins spectator"""
         if new_team == "spectator" and old_team == "free":
+            # Set spec delay
             self.spec_delays[player.steam_id] = True
             self.allow_join(player)
         # This is only needed to stop \team s; team f
@@ -40,5 +41,6 @@ class spec_delay(minqlx.Plugin):
     def allow_join(self, player):
         """Allows the player to join after 8 seconds."""
         if self.spec_delays.get(player.steam_id):
-            player.tell("^6You can join now")
+            # Remove spec delay
             self.spec_delays[player.steam_id] = False
+            player.tell("^6You can join now")

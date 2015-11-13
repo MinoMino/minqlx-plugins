@@ -192,8 +192,7 @@ class race(minqlx.Plugin):
             channel.reply("^7{} ^2has no {}records :(".format(player, strafe))
 
     def output_times(self, map_name, times, channel):
-        """
-        Outputs times to the channel. Will split lines so that each
+        """Outputs times to the channel. Will split lines so that each
         record is not on 2 different lines.
         :param map_name: The map name
         :param times: List of map times
@@ -228,8 +227,7 @@ class race(minqlx.Plugin):
         return next((x for x in self.maps if x.startswith(map_prefix)), None)
 
     def get_map_name_weapons(self, map_prefix, command, channel):
-        """
-        Get the map name and weapons boolean.
+        """Get map name and weapons boolean.
         :param map_prefix: The prefix of a map
         :param command: The command the player entered
         :param channel: The channel to reply to. Usually chat.
@@ -243,8 +241,7 @@ class race(minqlx.Plugin):
         return map_name, weapons
 
     def get_records(self, map_name, weapons):
-        """
-        Gets records
+        """Gets race records
         :param map_name: The map name
         :param weapons: Weapons boolean
         :return: race records

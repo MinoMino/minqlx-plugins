@@ -27,24 +27,22 @@ class track_race(minqlx.Plugin):
             threading.Thread(target=self.update_pb, args=(stats,)).start()
 
     def update_pb(self, stats):
-        """
-        Updates a players pb. Checks if any knockback weapons was fired.
+        """Updates a players pb. Checks if any knockback weapons was fired.
         :param stats:
         """
-
         time = stats["DATA"]["SCORE"]
         if time == -1 or time == 2147483647:
             return
 
-        mode = self.server_mode
-        weapons = stats["DATA"]["WEAPONS"]
-        # if no knockback weapons fired, set mode to strafe
-        if weapons["PLASMA"]["S"] == 0 and weapons["ROCKET"]["S"] == 0 and weapons["PROXMINE"]["S"] == 0 and \
-                weapons["GRENADE"]["S"] == 0 and weapons["BFG"]["S"] == 0:
-            mode += 1
-
         if not stats['DATA']['ABORTED']:
             self.map_name = self.game.map.lower()
+        mode = self.server_mode
+        weapon_stats = stats["DATA"]["WEAPONS"]
+        # if no knockback weapons fired, set mode to strafe
+        if weapon_stats["PLASMA"]["S"] == 0 and weapon_stats["ROCKET"]["S"] == 0 and weapon_stats["PROXMINE"]["S"] == 0 and \
+                weapon_stats["GRENADE"]["S"] == 0 and weapon_stats["BFG"]["S"] == 0:
+            mode += 1
+
         player_id = int(stats["DATA"]["STEAM_ID"])
         name = self.clean_text(stats["DATA"]["NAME"])
         match_guid = stats["DATA"]["MATCH_GUID"]
@@ -60,8 +58,7 @@ class track_race(minqlx.Plugin):
             self.msg(out)
 
     def post_data(self, map_name, mode, player_id, name, time, match_guid):
-        """
-        Posts record to QLRace.com.
+        """Posts record to QLRace.com.
         :param map_name: The name of the map
         :param mode: The mode(0-3)
         :param player_id: Steam ID
@@ -83,8 +80,7 @@ class track_race(minqlx.Plugin):
             self.insert_db(map_name, mode, player_id, name, time, match_guid)
 
     def insert_data(self, map_name, mode, player_id, name, time, match_guid):
-        """
-        Adds record to SQLite database if QLRace.com is down.
+        """Adds record to SQLite database if QLRace.com is down.
         :param map_name: The name of the map
         :param mode: The mode(0-3)
         :param player_id: Steam ID
