@@ -112,11 +112,11 @@ class race(minqlx.Plugin):
 
     def top(self, map_name, weapons, amount, channel):
         records = self.get_records(map_name, weapons)
+        if not weapons:
+            map_name += "^2(strafe)"
         if not records.records:
             channel.reply("^2No times were found on ^3{}".format(map_name))
             return
-        if not weapons:
-            map_name += "^2(strafe)"
 
         if amount > len(records.records):
             amount = len(records.records)
