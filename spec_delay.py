@@ -1,12 +1,13 @@
+"""
+Stops people spectating then quickly joining the 'free' team.
+This is to stop people firing a rocket, then spectating and joining then
+using the knockback from the rocket which would count as a strafe time.
+"""
+
 import minqlx
 
 
 class spec_delay(minqlx.Plugin):
-    """Stops people spectating then quickly joining the 'free' team.
-    This is to stop people firing a rocket, then spectating and joining
-    then using the knockback from the rocket. This would count as a
-    strafe time."""
-
     def __init__(self):
         super().__init__()
         self.add_hook("player_disconnect", self.handle_player_disconnect)

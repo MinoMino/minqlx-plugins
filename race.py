@@ -1,3 +1,8 @@
+"""
+Race plugin for minqlx. Adds commands such as !pb, !top, !all etc
+"""
+
+
 import minqlx
 import requests
 import threading
@@ -253,7 +258,7 @@ class race(minqlx.Plugin):
 
 
 class RaceRecords:
-    """Gets times from QLRace.com for a map and mode."""
+    """Race records object. Gets records using QLRace.com API"""
 
     def __init__(self, map_name, mode):
         self.map_name = map_name.lower()

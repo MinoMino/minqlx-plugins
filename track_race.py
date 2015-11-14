@@ -1,16 +1,17 @@
+"""
+Tracks race records and posts them to QLRace.com.
+"""
+
 import minqlx
 import requests
 import threading
 import sqlite3
 from datetime import datetime
 import importlib
-
 race = importlib.import_module("minqlx-plugins.race")
 
 
 class track_race(minqlx.Plugin):
-    """Tracks race records and posts them to QLRace.com."""
-
     def __init__(self):
         super().__init__()
         self.add_hook("stats", self.handle_stats)
@@ -21,6 +22,7 @@ class track_race(minqlx.Plugin):
             self.map_name = self.game.map.lower()
 
     def handle_stats(self, stats):
+        """Gets zmq stats"""
         if stats["TYPE"] == "PLAYER_RACECOMPLETE":
             self.map_name = self.game.map.lower()
         elif stats["TYPE"] == "PLAYER_STATS":
@@ -31,16 +33,14 @@ class track_race(minqlx.Plugin):
         :param stats:
         """
         time = stats["DATA"]["SCORE"]
-        if time == -1 or time == 2147483647:
+        if time == -1 or time == 2147483647 or time == 0:
             return
 
-        if not stats['DATA']['ABORTED']:
-            self.map_name = self.game.map.lower()
         mode = self.server_mode
         weapon_stats = stats["DATA"]["WEAPONS"]
         # if no knockback weapons fired, set mode to strafe
-        if weapon_stats["PLASMA"]["S"] == 0 and weapon_stats["ROCKET"]["S"] == 0 and weapon_stats["PROXMINE"]["S"] == 0 and \
-                weapon_stats["GRENADE"]["S"] == 0 and weapon_stats["BFG"]["S"] == 0:
+        if weapon_stats["PLASMA"]["S"] == 0 and weapon_stats["ROCKET"]["S"] == 0 and weapon_stats["PROXMINE"]["S"] == 0\
+                and weapon_stats["GRENADE"]["S"] == 0 and weapon_stats["BFG"]["S"] == 0:
             mode += 1
 
         player_id = int(stats["DATA"]["STEAM_ID"])
