@@ -15,10 +15,10 @@ class race(minqlx.Plugin):
     def __init__(self):
         self.add_hook("map", self.handle_map)
         self.add_command("updatemaps", self.cmd_updatemaps)
-        self.add_command(("pb", "me", "spb", "sme"), self.cmd_pb, usage="[map]")
-        self.add_command(("rank", "srank"), self.cmd_rank, usage="[rank] [map]")
-        self.add_command(("top", "stop"), self.cmd_top, usage="[amount] [map]")
-        self.add_command(("all", "sall"), self.cmd_all, usage="[map]")
+        self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
+        self.add_command(("rank", "srank", "r", "sr"), self.cmd_rank, usage="[rank] [map]")
+        self.add_command(("top", "stop", "t", "st"), self.cmd_top, usage="[amount] [map]")
+        self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
         self.race_mode = self.get_cvar("qlx_race_mode", int)
 
