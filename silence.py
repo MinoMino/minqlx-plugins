@@ -106,7 +106,7 @@ class silence(minqlx.Plugin):
 
         if self.db.has_permission(ident, 2):
             channel.reply("^6{}^7 has permission level 5 and cannot be silenced.".format(name))
-        #    return
+            return
 
         if len(msg) > 4:
             reason = " ".join(msg[4:])
