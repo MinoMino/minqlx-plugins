@@ -42,6 +42,9 @@ class motd(minqlx.Plugin):
         # Add this server to the MOTD set.
         self.db.sadd(MOTD_SET_KEY, self.home)
 
+        # Cvar to disable/change the welcome sound.
+        self.set_cvar_once("qlx_motdSound", "sound/vo/crash_new/37b_07_alt.wav")
+
     @minqlx.delay(2)
     def handle_player_loaded(self, player):
         """Send the message of the day to the player in a tell.
@@ -53,7 +56,9 @@ class motd(minqlx.Plugin):
         if not motd:
             return
         
-        self.play_sound("sound/vo/crash_new/37b_07_alt.wav", player)
+        welcome_sound = self.get_cvar("qlx_motdSound")
+        if welcome_sound:
+            self.play_sound(welcome_sound, player)
         self.send_motd(player, motd)
 
     def cmd_setmotd(self, player, msg, channel):

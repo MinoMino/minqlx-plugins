@@ -44,6 +44,8 @@ for leaving too many games.
     - Default: `15`
 - **clan**: Adds commands to let players have persistent clan tags without having to change the name on Steam.
 - **motd**: Adds commands to set a message of the day.
+  - `qlx_motdSound`: The path to a sounds that is played when players connect and have the MOTD printed to them.
+    - Default: `sound/vo/crash_new/37b_07_alt.wav`
 - **permission**: Adds commands to set player permissions.
 - **names**: Adds a command to change names without relying on Steam.
   - `qlx_enforceSteamName`: A boolean deciding whether or not it should force players to use Steam names,
