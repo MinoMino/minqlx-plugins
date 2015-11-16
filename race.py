@@ -26,7 +26,7 @@ class race(minqlx.Plugin):
         threading.Thread(target=self.get_maps).start()
 
     def handle_map(self, map_name, factory):
-        """Brands server and updates list of race maps"""
+        """Brands server and updates list of race maps on map change"""
         brand_map = "QLRace.com - {}".format(map_name)
         minqlx.set_configstring(3, brand_map)
         threading.Thread(target=self.get_maps).start()
