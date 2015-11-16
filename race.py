@@ -2,7 +2,6 @@
 Race plugin for minqlx. Adds commands such as !pb, !top, !all etc
 """
 
-
 import minqlx
 import requests
 import threading
@@ -89,7 +88,8 @@ class race(minqlx.Plugin):
             channel.reply("^2No rank ^3{} ^2time found on ^3{}".format(rank, map_name))
 
     def cmd_top(self, player, msg, channel):
-        """Outputs top x amount of times for a map. Default amount if none is given is 3."""
+        """Outputs top x amount of times for a map. Default amount if none is given is 3.
+        Maximum amount is 20."""
         if len(msg) == 1:
             amount = 3
             map_prefix = self.game.map
@@ -133,7 +133,7 @@ class race(minqlx.Plugin):
         self.output_times(map_name, times, channel)
 
     def cmd_all(self, player, msg, channel):
-        """Outputs the times of everyone on the server for a map."""
+        """Outputs the ranks and times of everyone on the server for a map."""
         if len(msg) == 1:
             map_prefix = self.game.map
         elif len(msg) == 2:
