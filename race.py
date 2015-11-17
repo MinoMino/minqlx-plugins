@@ -13,7 +13,7 @@ params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
 class race(minqlx.Plugin):
     def __init__(self):
         self.add_hook("map", self.handle_map)
-        self.add_command("slap", self.cmd_slap, priority=minqlx.PRI_HIGH)
+        self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
         self.add_command(("rank", "srank", "r", "sr"), self.cmd_rank, usage="[rank] [map]")
@@ -25,9 +25,9 @@ class race(minqlx.Plugin):
         self.maps = []
         threading.Thread(target=self.get_maps).start()
 
-    def cmd_slap(self, player, msg, channel):
-        """This is to disable !slap"""
-        player.tell("slap is disabled")
+    def cmd_disabled(self, player, msg, channel):
+        """This is to disable !slap and !slay"""
+        player.tell("{} is disabled".format(msg[0]))
         return minqlx.RET_STOP
 
     def handle_map(self, map_name, factory):
