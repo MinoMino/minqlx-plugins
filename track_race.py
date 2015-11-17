@@ -3,15 +3,18 @@ Tracks race records and posts them to QLRace.com.
 """
 
 import minqlx
+import minqlx.database
 import requests
 import threading
-import sqlite3
+import json
 from datetime import datetime
 import importlib
 race = importlib.import_module("minqlx-plugins.race")
 
 
 class track_race(minqlx.Plugin):
+    database = minqlx.database.Redis
+
     def __init__(self):
         super().__init__()
         self.add_hook("stats", self.handle_stats)
@@ -47,9 +50,6 @@ class track_race(minqlx.Plugin):
         name = self.clean_text(stats["DATA"]["NAME"])
         match_guid = stats["DATA"]["MATCH_GUID"]
         pb = self.post_data(self.map_name, mode, player_id, name, time, match_guid)
-        if pb is None:
-            self.msg("^2QLRace.com is down ^6:( ^2Your time has been saved locally and will be updated "
-                     "when QLRace.com is back online")
         if pb:
             records = race.RaceRecords(self.map_name, mode)
             rank, time = records.pb(player_id)
@@ -74,26 +74,19 @@ class track_race(minqlx.Plugin):
             r = requests.post("https://qlrace.com/api/new", data=payload, headers=headers)
             if r.status_code == 200:
                 return True
-            else:
+            elif r.status_code == 304:
                 return False
+            else:
+                self.push_db(payload)
+                self.msg("Error!, ^2Your time has been saved locally")
         except:
-            self.insert_db(map_name, mode, player_id, name, time, match_guid)
+            self.push_db(payload)
+            self.msg("^2QLRace.com is down ^6:( ^2Your time has been saved locally")
 
-    def insert_data(self, map_name, mode, player_id, name, time, match_guid):
-        """Adds record to SQLite database if QLRace.com is down.
-        :param map_name: The name of the map
-        :param mode: The mode(0-3)
-        :param player_id: Steam ID
-        :param name: The players name on steam
-        :param time: The time they set
-        :param match_guid: The guid of the match
+    def push_db(self, payload):
+        """Add record to redis list
+        :param payload: record data
         """
-        connection = sqlite3.connect("lost_stats.db")
-        cursor = connection.cursor()
-        cursor.execute("CREATE TABLE IF NOT EXISTS stats "
-                       "(mapname TEXT, mode INTEGER, player_id TEXT, name TEXT, "
-                       "time INTEGER, match_guid TEXT, date DATETIME)")
-        cursor.execute("INSERT INTO stats VALUES (?,?,?,?,?,?,?)",
-                       (map_name, mode, player_id, name, time, match_guid, str(datetime.now())))
-        connection.commit()
-        connection.close()
+        payload["date"] = datetime.now
+        record = json.dumps(payload)
+        self.db.lpush("minqlx:race_records", record)
