@@ -87,6 +87,6 @@ class track_race(minqlx.Plugin):
         """Add record to redis list
         :param payload: record data
         """
-        payload["date"] = datetime.now
+        payload["date"] = str(datetime.now)
         record = json.dumps(payload)
         self.db.lpush("minqlx:race_records", record)
