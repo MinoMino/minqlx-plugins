@@ -93,7 +93,10 @@ class race(minqlx.Plugin):
             map_name += "^2(strafe)"
         if time:
             if actual_rank != rank:
-                channel.reply(records.output(name, rank, time, tied=True))
+                tied = True
+            else:
+                tied = False
+            channel.reply(records.output(name, rank, time, tied))
         else:
             channel.reply("^2No rank ^3{} ^2time found on ^3{}".format(rank, map_name))
 
