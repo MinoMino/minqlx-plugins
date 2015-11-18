@@ -88,11 +88,12 @@ class race(minqlx.Plugin):
 
     def rank(self, map_name, weapons, rank, channel):
         records = self.get_records(map_name, weapons)
-        name, time = records.rank(rank)
+        name, actual_rank, time = records.rank(rank)
         if not weapons:
             map_name += "^2(strafe)"
         if time:
-            channel.reply(records.output(name, rank, time))
+            if actual_rank != rank:
+                channel.reply(records.output(name, rank, time, tied=True))
         else:
             channel.reply("^2No rank ^3{} ^2time found on ^3{}".format(rank, map_name))
 
@@ -283,19 +284,18 @@ class RaceRecords:
             self.first_time = self.records[0]["time"]
 
     def rank(self, rank):
-        """Returns name and time of the rank.
+        """Returns name, actual rank and time of the rank.
         :param rank: The rank of the time which will be returned
         """
         try:
             record = self.records[rank - 1]
-            if record['rank'] != rank:
-                return None, None
         except IndexError:
             return None, None
 
         name = record["name"]
+        actual_rank = record["rank"]
         time = record["time"]
-        return name, time
+        return name, actual_rank, time
 
     def rank_from_time(self, time):
         """Returns the rank the time would be.
@@ -316,11 +316,12 @@ class RaceRecords:
                 return rank, time
         return None, None
 
-    def output(self, name, rank, time):
-        """Returns the output which will be sent to the channel.
+    def output(self, name, rank, time, tied=False):
+        """Returns record output with time difference to world record.
         :param name: Name of the player
         :param rank: Rank of the record
         :param time: Time of the record
+        :param tied: Whether the record is tied with anyone else
         """
         if rank != 1:
             time_diff = str(time - self.first_time)
@@ -330,8 +331,9 @@ class RaceRecords:
             time_diff = ""
         time = time_string(time)
         strafe = "^2(strafe)" if not self.weapons else ""
+        tied = "tied" if tied else ""
         return "^7{} ^2is rank ^3{} ^2of ^3{} ^2with ^3{}{} ^2on ^3{}{}" \
-            .format(name, rank, self.last_rank, time, time_diff, self.map_name, strafe)
+            .format(name, tied, rank, self.last_rank, time, time_diff, self.map_name, strafe)
 
     def get_data(self):
         """Gets the records for the map and mode from qlrace.com."""
