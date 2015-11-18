@@ -18,7 +18,6 @@ class track_race(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("stats", self.handle_stats)
-        self.server_mode = self.get_cvar("qlx_race_mode", int)
         self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
 
         if self.game:
@@ -40,7 +39,7 @@ class track_race(minqlx.Plugin):
         if time == -1 or time == 2147483647 or time == 0:
             return
 
-        mode = self.server_mode
+        mode = self.get_cvar("qlx_raceMode", int)
         weapon_stats = stats["DATA"]["WEAPONS"]
         # if no knockback weapons fired, set mode to strafe
         if weapon_stats["PLASMA"]["S"] == 0 and weapon_stats["ROCKET"]["S"] == 0 and weapon_stats["PROXMINE"]["S"] == 0\

@@ -12,6 +12,7 @@ params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
 
 class race(minqlx.Plugin):
     def __init__(self):
+        super().__init__()
         self.add_hook("map", self.handle_map)
         self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
         self.add_command("updatemaps", self.cmd_updatemaps)
@@ -20,9 +21,9 @@ class race(minqlx.Plugin):
         self.add_command(("top", "stop", "t", "st"), self.cmd_top, usage="[amount] [map]")
         self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
-        self.set_cvar_once("qlx_raceMode", "0")
-        # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
+        # 0 = Turbo/PQL, 2 = Classic/VQL
+        self.set_cvar_once("qlx_raceMode", "0")
 
         self.maps = []
         threading.Thread(target=self.get_maps).start()
@@ -262,9 +263,11 @@ class race(minqlx.Plugin):
         :return: race records
         """
         if weapons:
-            return RaceRecords(map_name, self.get_cvar("qlx_raceMode", int))
+            mode = self.get_cvar("qlx_raceMode", int)
+            return RaceRecords(map_name, mode)
         else:
-            return RaceRecords(map_name, self.get_cvar("qlx_raceMode", int) + 1)
+            mode = self.get_cvar("qlx_raceMode", int) + 1
+            return RaceRecords(map_name, mode)
 
 
 class RaceRecords:
