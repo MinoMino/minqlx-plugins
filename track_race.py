@@ -19,7 +19,7 @@ class track_race(minqlx.Plugin):
         super().__init__()
         self.add_hook("stats", self.handle_stats)
         self.server_mode = self.get_cvar("qlx_race_mode", int)
-        self.key = self.get_cvar("qlx_race_key")
+        self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
 
         if self.game:
             self.map_name = self.game.map.lower()
@@ -32,8 +32,9 @@ class track_race(minqlx.Plugin):
             threading.Thread(target=self.update_pb, args=(stats,)).start()
 
     def update_pb(self, stats):
-        """Updates a players pb. Checks if any knockback weapons was fired.
-        :param stats:
+        """Updates a players pb. If no knockback weapons were fired
+        it sets mode to strafe.
+        :param stats: ZMQ PLAYER_STATS
         """
         time = stats["DATA"]["SCORE"]
         if time == -1 or time == 2147483647 or time == 0:
@@ -49,7 +50,9 @@ class track_race(minqlx.Plugin):
         player_id = int(stats["DATA"]["STEAM_ID"])
         name = self.clean_text(stats["DATA"]["NAME"])
         match_guid = stats["DATA"]["MATCH_GUID"]
-        pb = self.post_data(self.map_name, mode, player_id, name, time, match_guid)
+        payload = {"map": self.map_name, "mode": mode, "player_id": player_id, "name": name,
+                   "time": time, "match_guid": match_guid}
+        pb = self.post_data(payload)
         if pb:
             records = race.RaceRecords(self.map_name, mode)
             rank, time = records.pb(player_id)
@@ -57,28 +60,27 @@ class track_race(minqlx.Plugin):
             out = out.replace(" ^2is rank ^3", " ^2is now rank ^3")
             self.msg(out)
 
-    def post_data(self, map_name, mode, player_id, name, time, match_guid):
-        """Posts record to QLRace.com.
-        :param map_name: The name of the map
-        :param mode: The mode(0-3)
-        :param player_id: Steam ID
-        :param name: The players name on steam
-        :param time: The time they set
-        :param match_guid: The guid of the match
-        :return: True if a new pb, false otherwise
+    def post_data(self, payload):
+        """Posts record to QLRace.com. If there's any records
+        in redis list and qlrace.com is online it will recursively
+        call itself until all the records have been posted.
+        :param payload: record data
         """
-        payload = {"map": map_name, "mode": mode, "player_id": player_id, "name": name,
-                   "time": time, "match_guid": match_guid}
-        headers = {"X-Api-Key": self.key}
+        headers = {"X-Api-Key": self.get_cvar("qlx_raceKey")}
         try:
             r = requests.post("https://qlrace.com/api/new", data=payload, headers=headers)
             if r.status_code == 200:
-                return True
+                pb = True
             elif r.status_code == 304:
-                return False
-            else:
+                pb = False
+            elif r.status_code == 401:
                 self.push_db(payload)
-                self.msg("Error!, ^2Your time has been saved locally")
+                self.msg("Invalid api key, ^2Your time has been saved locally")
+                return
+            if self.db.llen("minqlx:race_records") != 0:
+                payload = json.loads(self.db.rpop("minqlx:race_records"))
+                self.post_data(payload)
+            return pb
         except:
             self.push_db(payload)
             self.msg("^2QLRace.com is down ^6:( ^2Your time has been saved locally")
@@ -87,6 +89,6 @@ class track_race(minqlx.Plugin):
         """Add record to redis list
         :param payload: record data
         """
-        payload["date"] = str(datetime.now)
+        payload["date"] = str(datetime.utcnow())
         record = json.dumps(payload)
         self.db.lpush("minqlx:race_records", record)
