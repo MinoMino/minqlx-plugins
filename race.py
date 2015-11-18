@@ -334,8 +334,8 @@ class RaceRecords:
             time_diff = ""
         time = time_string(time)
         strafe = "^2(strafe)" if not self.weapons else ""
-        tied = "tied" if tied else ""
-        return "^7{} ^2is {} rank ^3{} ^2of ^3{} ^2with ^3{}{} ^2on ^3{}{}" \
+        tied = "tied " if tied else ""
+        return "^7{} ^2is {}rank ^3{} ^2of ^3{} ^2with ^3{}{} ^2on ^3{}{}" \
             .format(name, tied, rank, self.last_rank, time, time_diff, self.map_name, strafe)
 
     def get_data(self):
