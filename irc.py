@@ -60,7 +60,7 @@ class irc(minqlx.Plugin):
             self.logger.info("Connecting to {}...".format(self.server))
 
     def handle_chat(self, player, msg, channel):
-        if self.irc and self.relay:
+        if self.irc and self.relay and channel == "chat":
             text = "^7<{}> ^2{}".format(player.name, msg)
             self.irc.msg(self.relay, self.translate_colors(text))
 
