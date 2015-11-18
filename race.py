@@ -20,7 +20,9 @@ class race(minqlx.Plugin):
         self.add_command(("top", "stop", "t", "st"), self.cmd_top, usage="[amount] [map]")
         self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
-        self.race_mode = self.get_cvar("qlx_race_mode", int)
+        self.set_cvar_once("qlx_raceMode", "0")
+        # 0 = Turbo/PQL, 2 = Classic/VQL
+        self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
         self.maps = []
         threading.Thread(target=self.get_maps).start()
@@ -32,7 +34,7 @@ class race(minqlx.Plugin):
 
     def handle_map(self, map_name, factory):
         """Brands server and updates list of race maps on map change"""
-        brand_map = "QLRace.com - {}".format(map_name)
+        brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name)
         minqlx.set_configstring(3, brand_map)
         threading.Thread(target=self.get_maps).start()
 
@@ -184,10 +186,10 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         if "s" in msg[0].lower():
-            mode = self.race_mode + 1
+            mode = self.get_cvar("qlx_raceMode", int) + 1
             strafe = "strafe "
         else:
-            mode = self.race_mode
+            mode = self.get_cvar("qlx_raceMode", int)
             strafe = ""
 
         threading.Thread(target=self.avg, args=(player, mode, strafe, channel)).start()
@@ -260,9 +262,9 @@ class race(minqlx.Plugin):
         :return: race records
         """
         if weapons:
-            return RaceRecords(map_name, self.race_mode)
+            return RaceRecords(map_name, self.get_cvar("qlx_raceMode", int))
         else:
-            return RaceRecords(map_name, self.race_mode + 1)
+            return RaceRecords(map_name, self.get_cvar("qlx_raceMode", int) + 1)
 
 
 class RaceRecords:
