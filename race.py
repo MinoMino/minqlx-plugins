@@ -30,8 +30,8 @@ class race(minqlx.Plugin):
 
     def cmd_disabled(self, player, msg, channel):
         """This is to disable !slap and !slay"""
-        player.tell("{} is disabled".format(msg[0]))
-        return minqlx.RET_STOP
+        player.tell("^6{} ^7is disabled".format(msg[0]))
+        return minqlx.RET_STOP_ALL
 
     def handle_map(self, map_name, factory):
         """Brands server and updates list of race maps on map change"""
