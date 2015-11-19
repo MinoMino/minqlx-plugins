@@ -35,7 +35,7 @@ class track_race(minqlx.Plugin):
         it sets mode to strafe.
         :param stats: ZMQ PLAYER_STATS
         """
-        if self.game.type_short != race:
+        if self.game.type_short != "race":
             return
 
         time = stats["DATA"]["SCORE"]
