@@ -56,7 +56,7 @@ class log(minqlx.Plugin):
         if reason and reason[-1] not in ("?", "!", "."):
             reason = reason + "."
         
-        self.chatlog.info(self.clean_text("{}:{} {}.".format(player, player.steam_id, reason)))
+        self.chatlog.info(self.clean_text("{}:{} {}".format(player, player.steam_id, reason)))
 
     def handle_chat(self, player, msg, channel):
         channel_name = ""
