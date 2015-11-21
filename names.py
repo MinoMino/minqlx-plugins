@@ -64,7 +64,7 @@ class names(minqlx.Plugin):
             player.tell("Blank names cannot be used. Sorry for the inconvenience.")
             return minqlx.RET_STOP_EVENT
 
-        info = minqlx.parse_variables(minqlx.player_info(player.id)["userinfo"], ordered=True)
+        info = player.cvars
         info["name"] = name
         new_info = "".join(["\\{}\\{}".format(key, info[key]) for key in info])
         minqlx.client_command(player.id, "userinfo \"{}\"".format(new_info))
