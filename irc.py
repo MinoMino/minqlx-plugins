@@ -122,9 +122,10 @@ class irc(minqlx.Plugin):
         elif len(split_msg) > 1 and split_msg[1] == "433":
             irc.nick(irc.nickname + "_")
 
-    def translate_colors(self, text):
-        if not self.get_cvar("qlx_ircColors", bool):
-            return self.clean_text(text)
+    @classmethod
+    def translate_colors(cls, text):
+        if not cls.get_cvar("qlx_ircColors", bool):
+            return cls.clean_text(text)
 
         for i, color in enumerate(COLORS):
             text = text.replace("^{}".format(i), color)
@@ -145,7 +146,7 @@ class IrcChannel(minqlx.AbstractChannel):
         return "{} {}".format(str(self), self.recipient)
 
     def reply(self, msg):
-        self.irc.msg(self.recipient, msg)
+        self.irc.msg(self.recipient, irc.translate_colors(msg))
 
 class IrcDummyPlayer(minqlx.AbstractDummyPlayer):
     def __init__(self, irc, user):
@@ -158,7 +159,7 @@ class IrcDummyPlayer(minqlx.AbstractDummyPlayer):
         return minqlx.owner()
 
     def tell(self, msg):
-        self.irc.msg(self.user, msg)
+        self.irc.msg(self.user, irc.translate_colors(msg))
 
 # ====================================================================
 #                        SIMPLE ASYNC IRC
