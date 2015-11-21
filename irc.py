@@ -31,7 +31,7 @@ class irc(minqlx.Plugin):
     def __init__(self):
         self.add_hook("chat", self.handle_chat, priority=minqlx.PRI_LOWEST)
         self.add_hook("unload", self.handle_unload)
-        self.add_hook("player_loaded", self.handle_player_loaded, priority=minqlx.PRI_LOWEST)
+        self.add_hook("player_connect", self.handle_player_connect, priority=minqlx.PRI_LOWEST)
         self.add_hook("player_disconnect", self.handle_player_disconnect, priority=minqlx.PRI_LOWEST)
 
         self.set_cvar_once("qlx_ircServer", "irc.quakenet.org")
@@ -69,7 +69,7 @@ class irc(minqlx.Plugin):
             self.irc.quit("Plugin unloaded!")
             self.irc.stop()
 
-    def handle_player_loaded(self, player):
+    def handle_player_connect(self, player):
         if self.irc and self.relay:
             self.irc.msg(self.relay, self.translate_colors("{} connected.".format(player.name)))
 
