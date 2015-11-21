@@ -102,6 +102,7 @@ class irc(minqlx.Plugin):
                     minqlx.COMMANDS.handle_input(IrcDummyPlayer(self.irc, user[0]), " ".join(msg[1:]), IrcChannel(self.irc, user[0]))
                 except Exception as e:
                     irc.msg(channel, "{}: {}".format(e.__class__.__name__, e))
+                    minqlx.log_exception()
 
     def handle_perform(self, irc):
         self.logger.info("Connected to IRC!".format(self.server))
