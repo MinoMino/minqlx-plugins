@@ -33,7 +33,7 @@ class spec_delay(minqlx.Plugin):
 
     def handle_team_switch_attempt(self, player, old_team, new_team):
         """Stops the player joining if spec delay is true."""
-        if new_team == "any" and old_team == "spectator":
+        if (new_team == "any" or new_team == "free") and old_team == "spectator":
             if self.spec_delays.get(player.steam_id):
                 player.tell("^6You must wait 8 seconds before joining after spectating")
                 return minqlx.RET_STOP_EVENT
