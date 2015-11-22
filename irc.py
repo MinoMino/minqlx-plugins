@@ -152,7 +152,7 @@ class IrcDummyPlayer(minqlx.AbstractDummyPlayer):
     def __init__(self, irc, user):
         self.irc = irc
         self.user = user
-        super().__init__()
+        super().__init__(name="IRC-{}".format(irc.nickname))
     
     @property
     def steam_id(self):
