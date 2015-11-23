@@ -8,12 +8,15 @@ import threading
 
 params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
           {"factory": "classic", "weapons": "false"}]
+disabled_maps = ["q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17",
+                 "q3wcp18", "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs2"]
 
 
 class race(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("map", self.handle_map)
+        self.add_hook("vote_called", self.handle_vote_called)
         self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
@@ -32,6 +35,12 @@ class race(minqlx.Plugin):
         """This is to disable !slap and !slay"""
         player.tell("^6{} ^7is disabled".format(msg[0]))
         return minqlx.RET_STOP_ALL
+
+    def handle_vote_called(self, player, vote, args):
+        if vote.lower() == "map":
+            if args.lower() in disabled_maps:
+                player.tell("^3{} ^2is disabled(duplicate).".format(args))
+                return minqlx.RET_STOP_ALL
 
     def handle_map(self, map_name, factory):
         """Brands server and updates list of race maps on map change"""
