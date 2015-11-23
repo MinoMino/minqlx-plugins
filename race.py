@@ -37,6 +37,7 @@ class race(minqlx.Plugin):
         return minqlx.RET_STOP_ALL
 
     def handle_vote_called(self, player, vote, args):
+        """Cancels the vote when map is a duplicate."""
         if vote.lower() == "map":
             if args.lower() in disabled_maps:
                 player.tell("^3{} ^2is disabled(duplicate).".format(args))
