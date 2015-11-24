@@ -22,6 +22,7 @@ class track_race(minqlx.Plugin):
 
         if self.game:
             self.map_name = self.game.map.lower()
+            self.game_type = self.game.type_short
 
     def handle_stats(self, stats):
         """Gets zmq stats"""
@@ -35,7 +36,7 @@ class track_race(minqlx.Plugin):
         it sets mode to strafe.
         :param stats: ZMQ PLAYER_STATS
         """
-        if self.game.type_short != "race":
+        if self.game_type != "race":
             return
 
         time = stats["DATA"]["SCORE"]

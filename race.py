@@ -24,9 +24,10 @@ class race(minqlx.Plugin):
         self.add_command(("top", "stop", "t", "st"), self.cmd_top, usage="[amount] [map]")
         self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
-        self.set_cvar_once("qlx_raceBrand", "QLRace.com")
+
         # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceMode", "0")
+        self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
         self.maps = []
         threading.Thread(target=self.get_maps).start()
