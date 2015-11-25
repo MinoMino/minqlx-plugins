@@ -20,7 +20,7 @@ class track_race(minqlx.Plugin):
         self.add_hook("stats", self.handle_stats)
         self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
         self.race = False
-        self.map_name = self.game.map.lower()
+        self.map_name = ""
 
     def handle_stats(self, stats):
         """Gets zmq stats"""
