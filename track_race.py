@@ -19,14 +19,13 @@ class track_race(minqlx.Plugin):
         super().__init__()
         self.add_hook("stats", self.handle_stats)
         self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
-
-        if self.game:
-            self.map_name = self.game.map.lower()
-            self.game_type = self.game.type_short
+        self.race = False
+        self.map_name = self.game.map.lower()
 
     def handle_stats(self, stats):
         """Gets zmq stats"""
         if stats["TYPE"] == "PLAYER_RACECOMPLETE":
+            self.race = True
             self.map_name = self.game.map.lower()
         elif stats["TYPE"] == "PLAYER_STATS":
             threading.Thread(target=self.update_pb, args=(stats,)).start()
@@ -36,7 +35,7 @@ class track_race(minqlx.Plugin):
         it sets mode to strafe.
         :param stats: ZMQ PLAYER_STATS
         """
-        if self.game_type != "race":
+        if not self.race:
             return
 
         time = stats["DATA"]["SCORE"]
