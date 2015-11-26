@@ -39,7 +39,7 @@ class race(minqlx.Plugin):
     def handle_vote_called(self, player, vote, args):
         """Cancels the vote when map called is a duplicate."""
         # temp - to stop vit and mcpixel from voting every 39 seconds
-        banned_from_voting = ["76561198110340940", "76561198133180888", "76561198188732759"]
+        banned_from_voting = [76561198110340940, 76561198133180888, 76561198188732759]
         if player.steam_id in banned_from_voting:
             player.tell("You are banned from voting.")
             return minqlx.RET_STOP_ALL
