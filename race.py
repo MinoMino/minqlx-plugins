@@ -37,6 +37,10 @@ class race(minqlx.Plugin):
 
     def handle_vote_called(self, player, vote, args):
         """Cancels the vote when map called is a duplicate."""
+        # temp - to stop vit and mcpixel from voting every 39 seconds
+        if player.steam_id == "76561198110340940" or player.steam_id == "76561198133180888":
+            player.tell("You are banned from voting.")
+            return minqlx.RET_STOP_ALL
         if vote.lower() == "map":
             disabled_maps = ["q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
                              "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2"]
@@ -51,9 +55,8 @@ class race(minqlx.Plugin):
         brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name.lower())
         minqlx.set_configstring(3, brand_map)
 
-        strafe_maps = ["df_bardoklick", "df_bardoklickrevamped", "df_lickdirt", "df_lickevil",
-                       "df_lickgoogle", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
-                       "df_lickhuarstyle", "df_lickpads", "df_licktards"]
+        strafe_maps = ["df_bardoklick", "df_bardoklickrevamped", "df_lickdirt", "df_lickevil", "df_lickhossa",
+                       "df_lickhq", "df_lickhuar", "df_lickhuar2", "df_lickhuarstyle", "df_lickpads", "df_licktards"]
         if map_name.lower() in strafe_maps:
             minqlx.set_cvar("g_startingWeapons", "3")
         elif "strafe" not in factory:
