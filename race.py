@@ -55,11 +55,11 @@ class race(minqlx.Plugin):
         brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name.lower())
         minqlx.set_configstring(3, brand_map)
 
-        strafe_maps = ["df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickass",
-                       "df_lickcells", "df_lickcells2", "df_lickcorp", "df_lickdecease", "df_lickdirt", "df_lickevil",
-                       "df_lickfudge", "df_lickgirls", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
-                       "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
-                       "df_lickrevived2", "df_licksewage", "df_lickshit", "df_licksux", "df_licktards", "df_licktunnel"]
+        strafe_maps = ["df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
+                       "df_lickcells2", "df_lickcorp", "df_lickdecease", "df_lickdirt", "df_lickevil", "df_lickfudge",
+                       "df_lickgirls", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2", "df_lickhuarstyle",
+                       "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived", "df_lickrevived2",
+                       "df_licksewage", "df_lickshit", "df_licksux", "df_licktards", "df_licktunnel"]
         if map_name.lower() in strafe_maps:
             minqlx.set_cvar("g_startingWeapons", "3")
         elif "strafe" not in factory:
