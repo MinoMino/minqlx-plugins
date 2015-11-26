@@ -8,8 +8,6 @@ import threading
 
 params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
           {"factory": "classic", "weapons": "false"}]
-disabled_maps = ["q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
-                 "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2"]
 
 
 class race(minqlx.Plugin):
@@ -40,15 +38,26 @@ class race(minqlx.Plugin):
     def handle_vote_called(self, player, vote, args):
         """Cancels the vote when map called is a duplicate."""
         if vote.lower() == "map":
+            disabled_maps = ["q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
+                             "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2"]
             map_name = args.lower().split()[0]
             if map_name in disabled_maps:
                 player.tell("^3{} ^2is disabled(duplicate).".format(map_name))
                 return minqlx.RET_STOP_ALL
 
     def handle_map(self, map_name, factory):
-        """Brands server and updates list of race maps on map change"""
-        brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name)
+        """Brands server and updates list of race maps on map change.
+        Also sets starting weapons to only mg and gunatlet if strafe map."""
+        brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name.lower())
         minqlx.set_configstring(3, brand_map)
+
+        strafe_maps = ["df_bardoklick", "df_bardoklickrevamped", "df_lickdirt", "df_lickevil",
+                       "df_lickgoogle", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
+                       "df_lickhuarstyle", "df_lickpads", "df_licktards"]
+        if map_name.lower() in strafe_maps:
+            minqlx.set_cvar("g_startingWeapons", "3")
+        elif "strafe" not in factory:
+            minqlx.set_cvar("g_startingWeapons", "147")
         threading.Thread(target=self.get_maps).start()
 
     def cmd_updatemaps(self, player, msg, channel):
