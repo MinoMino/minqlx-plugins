@@ -33,8 +33,8 @@ class names(minqlx.Plugin):
         name_key = _name_key.format(player.steam_id)
         if name_key in self.db:
             db_name = self.db[name_key]
-            if not self.get_cvar("qlx_enforceSteamName", bool) or self.clean_text(db_name) == player.clean_name:
-                info = minqlx.parse_variables(minqlx.player_info(player.id)["userinfo"], ordered=True)
+            if not self.get_cvar("qlx_enforceSteamName", bool) or self.clean_text(db_name).lower() == player.clean_name.lower():
+                info = player.cvars
                 info["name"] = db_name
                 new_info = "".join(["\\{}\\{}".format(key, info[key]) for key in info])
                 minqlx.client_command(player.id, "userinfo \"{}\"".format(new_info))
@@ -54,8 +54,8 @@ class names(minqlx.Plugin):
         if len(name.encode()) > 36:
             player.tell("The name is too long. Consider using fewer colors or a shorter name.")
             return minqlx.RET_STOP_EVENT
-        elif self.clean_text(name) != player.clean_name and self.get_cvar("qlx_enforceSteamName", bool):
-            player.tell("The colored name must match your current Steam name.")
+        elif self.clean_text(name).lower() != player.clean_name.lower() and self.get_cvar("qlx_enforceSteamName", bool):
+            player.tell("The new name must match your current Steam name.")
             return minqlx.RET_STOP_EVENT
         elif "\\" in name:
             player.tell("The character '^6\\^7' cannot be used. Sorry for the inconvenience.")
@@ -64,7 +64,7 @@ class names(minqlx.Plugin):
             player.tell("Blank names cannot be used. Sorry for the inconvenience.")
             return minqlx.RET_STOP_EVENT
 
-        info = minqlx.parse_variables(minqlx.player_info(player.id)["userinfo"], ordered=True)
+        info = player.cvars
         info["name"] = name
         new_info = "".join(["\\{}\\{}".format(key, info[key]) for key in info])
         minqlx.client_command(player.id, "userinfo \"{}\"".format(new_info))
