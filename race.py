@@ -13,6 +13,7 @@ params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
 class race(minqlx.Plugin):
     def __init__(self):
         super().__init__()
+        self.add_hook("new_game", self.handle_new_game)
         self.add_hook("map", self.handle_map)
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
@@ -49,6 +50,12 @@ class race(minqlx.Plugin):
             if map_name in disabled_maps:
                 player.tell("^3{} ^2is disabled(duplicate).".format(map_name))
                 return minqlx.RET_STOP_ALL
+
+    def handle_new_game(self):
+        """Brands server"""
+        map_name = self.game.map.lower()
+        brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name)
+        minqlx.set_configstring(3, brand_map)
 
     def handle_map(self, map_name, factory):
         """Brands server and updates list of race maps on map change.
