@@ -32,7 +32,7 @@ class solorace(minqlx.Plugin):
 
     def handle_team_switch(self, player, old_team, new_team):
         if (minqlx.GAMETYPES_SHORT[self.get_cvar("g_gametype", int)] == "race" and old_team == "free" and
-            self.game.state == "in_progress" and not self.teams()["free"]):
+                self.game.state == "in_progress" and not self.teams()["free"]):
             minqlx.console_command("map_restart")
     
     def handle_player_disconnect(self, player, reason):
@@ -42,6 +42,8 @@ class solorace(minqlx.Plugin):
     def handle_new_game(self):
         if minqlx.GAMETYPES_SHORT[self.get_cvar("g_gametype", int)] == "race":
             self.set_cvar("g_doWarmup", "0")
+            self.set_cvar("timelimit", "0")
+            self.set_cvar("g_allowVoteMidGame", "1")
             minqlx.allow_single_player(True)
         else:
             self.set_cvar("g_doWarmup", "1")
