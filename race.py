@@ -212,6 +212,7 @@ class race(minqlx.Plugin):
             channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
 
     def cmd_ranktime(self, player, msg, channel):
+        """Outputs which rank a time would be."""
         if len(msg) == 1 and player.score != 2147483647:
             time = player.score
             map_prefix = self.game.map

@@ -4,7 +4,7 @@
 # (at your option) any later version.
 
 """
-Ban people from voting.
+Ban players from voting.
 """
 
 import minqlx
@@ -21,11 +21,13 @@ class vote_ban(minqlx.Plugin):
         self.add_command("voteunban", self.cmd_voteunban, 2, usage="<id>")
 
     def handle_vote_called(self, player, vote, args):
-        if self.db.sismember("minqlx:vote_ban", player.steam_id) == 1:
+        """Stops a banned player from voting."""
+        if self.is_banned(player.steam_id):
             player.tell("You are banned from voting.")
             return minqlx.RET_STOP_ALL
 
     def cmd_voteban(self, player, msg, channel):
+        """Bans a player from voting."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
@@ -56,6 +58,7 @@ class vote_ban(minqlx.Plugin):
         channel.reply("^6{} ^7has been banned from voting".format(name))
 
     def cmd_voteunban(self, player, msg, channel):
+        """Unbans a player from voting."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
@@ -77,9 +80,19 @@ class vote_ban(minqlx.Plugin):
         else:
             name = ident
 
-        banned_from_voting = self.db.sismember("minqlx:vote_ban", ident)
-        if banned_from_voting == 1:
+        if self.is_banned(ident):
             self.db.srem("minqlx:vote_ban", ident)
             channel.reply("{} is now unbanned from voting.".format(name))
         else:
             channel.reply("{} is not banned from voting.".format(name))
+
+    def is_banned(self, steam_id):
+        """Checks if a
+        :param steam_id: steamID64
+        :return: True if there are banned False otherwise
+        """
+        banned = self.db.sismember("minqlx:vote_ban", steam_id)
+        if banned == 1:
+            return True
+        else:
+            return False
