@@ -52,3 +52,15 @@ for leaving too many games.
     but allowing colors, or to allow the player to set any name.
     - Default: `1`
 - **raw**: Adds commands to interact with the Python interpreter directly. Useful for debugging.
+- **irc**: Has a small built-in IRC client that can relay chat to and from an IRC channel. It can also be used to remotely execute
+minqlx commands.
+  - `qlx_ircServer`: The address to the IRC server. The default port is 6667, but if you need to change it, just append `:<port>`.
+    - Default: `irc.quakenet.org`
+  - `qlx_ircRelayChannel`: The channel where chat is relayed to and from. Note that you must not omit the `#` from the channel name.
+  - `qlx_ircIdleChannels`: A list of channels you just want it to sit in and not do anything. Example: `#mychan1, #mychan2`.
+  - `qlx_ircNickname`: The nickname the client will use on IRC.
+    - Default: `minqlx-XXXX` where the last four characters is a random number between 1000 and 9999.
+  - `qlx_ircPassword`: A password that can be used to remotely execute commands. Leave it unconfigured if you don't want this feature.
+  - `qlx_ircColors`: A boolean determining whether or not it should take in-game colors and translate them to colors supported by
+  a lot of IRC clients. Note that if this is not on, it will simply remove colors from all in-game chat.
+    - Default: `0`
