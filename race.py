@@ -222,7 +222,7 @@ class race(minqlx.Plugin):
             time = time_ms(msg[1])
             map_prefix = msg[2]
         else:
-            channel.reply("^7Usage: ^6{0} <time> [map] ^7or just ^6{0} ^7 if you have set a time".format(msg[0]))
+            channel.reply("^7Usage: ^6{0} <time> [map] ^7or just ^6{0} ^7if you have set a time".format(msg[0]))
             return
 
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
