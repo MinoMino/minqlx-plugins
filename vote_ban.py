@@ -49,9 +49,9 @@ class vote_ban(minqlx.Plugin):
         else:
             name = ident
 
-        # Players with permissions level 2 or higher cannot be banned from voting.
-        if self.db.has_permission(ident, 2):
-            channel.reply("^6{}^7 has permission level 2 and cannot be banned from voting.".format(name))
+        # Players with permissions level 1 or higher cannot be banned from voting.
+        if self.db.has_permission(ident, 1):
+            channel.reply("^6{}^7 has permission level 1 or higher and cannot be banned from voting.".format(name))
             return
 
         self.db.sadd("minqlx:vote_ban", ident)
@@ -89,7 +89,7 @@ class vote_ban(minqlx.Plugin):
     def is_banned(self, steam_id):
         """Checks if a
         :param steam_id: steamID64
-        :return: True if there are banned False otherwise
+        :return: True if they are banned False otherwise
         """
         banned = self.db.sismember("minqlx:vote_ban", steam_id)
         if banned == 1:
