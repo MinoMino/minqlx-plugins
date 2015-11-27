@@ -83,7 +83,7 @@ class irc(minqlx.Plugin):
         if channel == self.relay:
             minqlx.CHAT_CHANNEL.reply("[IRC] ^6{}^7:^2 {}".format(user[0], " ".join(msg)))
         elif channel == user[0]: # Is PM?
-            if len(msg) > 1 and msg[0].lower() == ".auth":
+            if len(msg) > 1 and msg[0].lower() == ".auth" and self.password:
                 if user in self.authed:
                     irc.msg(channel, "You are already authenticated.")
                 elif msg[1] == self.password:
