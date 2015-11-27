@@ -22,6 +22,7 @@ class race(minqlx.Plugin):
         self.add_command(("rank", "srank", "r", "sr"), self.cmd_rank, usage="[rank] [map]")
         self.add_command(("top", "stop", "t", "st"), self.cmd_top, usage="[amount] [map]")
         self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
+        self.add_command(("ranktime", "sranktime", "rt", "srt"), self.cmd_ranktime, usage="<time> [map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
 
         # 0 = Turbo/PQL, 2 = Classic/VQL
@@ -210,6 +211,36 @@ class race(minqlx.Plugin):
         else:
             channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
 
+    def cmd_ranktime(self, player, msg, channel):
+        if len(msg) == 1 and player.score != 2147483647:
+            time = player.score
+            map_prefix = self.game.map
+        elif len(msg) == 2:
+            time = time_ms(msg[1])
+            map_prefix = self.game.map
+        elif len(msg) == 3:
+            time = time_ms(msg[1])
+            map_prefix = msg[2]
+        else:
+            channel.reply("^7Usage: ^6{0} <time> [map] ^7or just ^6{0} ^7 if you have set a time".format(msg[0]))
+            return
+
+        map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
+        self.ranktime(map_name, weapons, time, channel)
+
+    def ranktime(self, map_name, weapons, time, channel):
+        records = self.get_records(map_name, weapons)
+        rank = records.rank_from_time(time)
+        last_rank = records.last_rank + 1
+        if not rank:
+            rank = last_rank
+
+        if not weapons:
+            map_name += "^2(strafe)"
+
+        channel.reply("^3{} ^2would be rank ^3{} ^2of ^3{} ^2on ^3{}".format(time_string(time), rank,
+                                                                             last_rank, map_name))
+
     def cmd_avg(self, player, msg, channel):
         """Outputs a player average rank."""
         if len(msg) == 2:
@@ -317,8 +348,8 @@ class RaceRecords:
         self.mode = mode
         self.weapons = True if mode % 2 == 0 else False
         self.records = self.get_data()
+        self.last_rank = len(self.records)
         if self.records:
-            self.last_rank = len(self.records)
             self.first_time = self.records[0]["time"]
 
     def rank(self, rank):
