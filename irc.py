@@ -117,7 +117,7 @@ class irc(minqlx.Plugin):
             if user and user.groups() in self.authed:
                 # Update nick if an authed user changed it.
                 self.authed.remove(user.groups())
-                self.authed.add((split_msg[2][1:], *user.groups()[1:]))
+                self.authed.add((split_msg[2][1:], user.groups()[1], user.groups()[2]))
         elif len(split_msg) > 1 and split_msg[1] == "433":
             irc.nick(irc.nickname + "_")
 
