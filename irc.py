@@ -21,7 +21,6 @@ import threading
 import asyncio
 import random
 import time
-import sys
 import re
 
 # Colors using the mIRC color standard palette (which several other clients also comply with).
@@ -203,22 +202,24 @@ class SimpleAsyncIrc(threading.Thread):
             with self._lock:
                 self.writer.write(msg.encode(errors="ignore"))
 
-    async def connect(self):
-        self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
+    @asyncio.coroutine
+    def connect(self):
+        self.reader, self.writer = yield from asyncio.open_connection(self.host, self.port)
         self.write("NICK {0}\r\nUSER {0} 0 * :{0}\r\n".format(self.nickname))
         
         while not self.stop_event.is_set():
-            line = await self.reader.readline()
+            line = yield from self.reader.readline()
             if not line:
                 break
             line = line.decode("utf-8", errors="ignore").rstrip()
             if line:
-                await self.parse_data(line)
+                yield from self.parse_data(line)
 
         self.write("QUIT Quit by user.\r\n")
         self.writer.close()
 
-    async def parse_data(self, msg):
+    @asyncio.coroutine
+    def parse_data(self, msg):
         split_msg = msg.split()
         if len(split_msg) > 1 and split_msg[0] == "PING":
             self.pong(split_msg[1].lstrip(":"))
