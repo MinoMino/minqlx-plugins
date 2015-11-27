@@ -45,6 +45,7 @@ class essentials(minqlx.Plugin):
         self.add_command("shuffle", self.cmd_shuffle, 1)
         self.add_command("slap", self.cmd_slap, 2, usage="<id> [damage]")
         self.add_command("slay", self.cmd_slay, 2, usage="<id>")
+        self.add_command("sounds", self.cmd_enable_sounds, usage="<0/1>")
         self.add_command("sound", self.cmd_sound, 1, usage="<path>")
         self.add_command("music", self.cmd_music, 1, usage="<path>")
         self.add_command("stopsound", self.cmd_stopsound, 1)
@@ -244,34 +245,87 @@ class essentials(minqlx.Plugin):
         except ValueError:
             player.tell("Invalid ID.")
             return minqlx.RET_STOP_EVENT
-        
+
         self.slay(target_player)
         return minqlx.RET_STOP_EVENT
 
+    def cmd_enable_sounds(self, player, msg, channel):
+        flag = self.db.get_flag(player, "essentials:sounds_enabled", default=True)
+        self.db.set_flag(player, "essentials:sounds_enabled", not flag)
+        
+        if flag:
+            player.tell("Sounds have been disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+        else:
+            player.tell("Sounds have been enabled. Use ^6{}sounds^7 to disable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+
+        return minqlx.RET_STOP_EVENT
+
     def cmd_sound(self, player, msg, channel):
-        """Plays a sound for the whole server."""
+        """Plays a sound for the those who have it enabled."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
-        if not self.play_sound(msg[1]):
+        if not self.db.get_flag(player, "essentials:sounds_enabled", default=True):
+            player.tell("Sounds are disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+            return minqlx.RET_STOP_EVENT
+
+        # Play locally to validate.
+        if not self.play_sound(msg[1], player):
             player.tell("Invalid sound.")
             return minqlx.RET_STOP_EVENT
 
+        # Play to all other players who haven't disabled sound
+        players = self.players()
+        players.remove(player)
+        for p in players:
+            if self.db.get_flag(p, "essentials:sounds_enabled", default=True):
+                self.play_sound(msg[1], p)
+
+        return minqlx.RET_STOP_EVENT
+
     def cmd_music(self, player, msg, channel):
-        """Plays music for the whole server, but only for those with music volume on."""
+        """Plays music, but only for those with music volume on and the sounds flag on."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
-        if not self.play_sound(msg[1]):
-            player.tell("Invalid music.")
+        if not self.db.get_flag(player, "essentials:sounds_enabled", default=True):
+            player.tell("Sounds are disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
             return minqlx.RET_STOP_EVENT
 
+        # Play locally to validate.
+        if not self.play_music(msg[1], player):
+            player.tell("Invalid sound.")
+            return minqlx.RET_STOP_EVENT
+
+        # Play to all other players who haven't disabled sounds.
+        players = self.players()
+        players.remove(player)
+        for p in players:
+            if self.db.get_flag(p, "essentials:sounds_enabled", default=True):
+                self.play_music(msg[1], p)
+
+        return minqlx.RET_STOP_EVENT
+
     def cmd_stopsound(self, player, msg, channel):
-        """Stops all sounds playing. Useful if someone players one of those really long ones."""
+        """Stops all sounds playing. Useful if someone plays one of those really long ones."""
+        if not self.db.get_flag(player, "essentials:sounds_enabled", default=True):
+            player.tell("Sounds are disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+            return minqlx.RET_STOP_EVENT
+
         self.stop_sound()
 
     def cmd_stopmusic(self, player, msg, channel):
         """Stops any music playing."""
+        if not self.db.get_flag(player, "essentials:sounds_enabled", default=True):
+            player.tell("Sounds are disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+            return minqlx.RET_STOP_EVENT
+
         self.stop_music()
 
     def cmd_kick(self, player, msg, channel):
