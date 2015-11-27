@@ -64,3 +64,8 @@ minqlx commands.
   - `qlx_ircColors`: A boolean determining whether or not it should take in-game colors and translate them to colors supported by
   a lot of IRC clients. Note that if this is not on, it will simply remove colors from all in-game chat.
     - Default: `0`
+- **log**: A plugin that logs chat and commands. All logs go to `fs_homepath/chatlogs`.
+  - `qlx_chatlogs`: The maximum number of logs to keep around. If set to `0`, no maximum is enforced.
+    - Default: `0`
+  - `qlx_chatlogsSize`: The maximum size of a log in bytes before it starts with a new one.
+    - Default: `5000000` (5 MB)
