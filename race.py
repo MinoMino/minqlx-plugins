@@ -69,7 +69,8 @@ class race(minqlx.Plugin):
                        "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
                        "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
                        "df_lickrevived2", "df_licksewage", "df_licksux", "df_licktards", "df_licktunnel",
-                       "df_palmslane"]
+                       "df_palmslane", "df_enz12", "df_ghostcheerslick", "df_ghostslickthis", "df_liquidazot",
+                       "df_pornstarlambaslick", "df_ghostcheerextended"]
         if map_name.lower() in strafe_maps:
             minqlx.set_cvar("g_startingWeapons", "3")
         elif "strafe" not in factory:
