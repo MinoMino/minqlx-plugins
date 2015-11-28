@@ -18,11 +18,7 @@
 
 import minqlx
 
-from minqlx.database import Redis
-
 class plugin_manager(minqlx.Plugin):
-    database = Redis
-
     def __init__(self):
         self.add_command("load", self.cmd_load, 5, usage="<plugin>")
         self.add_command("unload", self.cmd_unload, 5, usage="<plugin>")
