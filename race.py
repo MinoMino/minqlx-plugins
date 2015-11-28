@@ -10,6 +10,7 @@ Race plugin for minqlx. Adds commands such as !pb, !top, !all etc
 import minqlx
 import requests
 import threading
+import random
 
 params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
           {"factory": "classic", "weapons": "false"}]
@@ -29,6 +30,8 @@ class race(minqlx.Plugin):
         self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
         self.add_command(("ranktime", "sranktime", "rt", "srt"), self.cmd_ranktime, usage="<time> [map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
+        self.add_command("random", self.cmd_random)
+        self.add_command(("help", "cmds", "commands"), self.cmd_commands, priority=minqlx.PRI_HIGH)
 
         # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceMode", "0")
@@ -53,14 +56,14 @@ class race(minqlx.Plugin):
                 return minqlx.RET_STOP_ALL
 
     def handle_new_game(self):
-        """Brands server"""
+        """Brands server."""
         map_name = self.game.map.lower()
         brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name)
         minqlx.set_configstring(3, brand_map)
 
     def handle_map(self, map_name, factory):
         """Brands server and updates list of race maps on map change.
-        Also sets starting weapons to only mg and gunatlet if strafe map."""
+        Also sets starting weapons to only mg and gauntlet if strafe map."""
         brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name.lower())
         minqlx.set_configstring(3, brand_map)
 
@@ -280,6 +283,17 @@ class race(minqlx.Plugin):
         else:
             channel.reply("^7{} ^2has no {}records :(".format(player, strafe))
 
+    def cmd_random(self, player, msg, channel):
+        """Callvotes a random map."""
+        map_name = random.choice(self.maps)
+        minqlx.client_command(player.id, "cv map {}".format(map_name))
+
+    def cmd_commands(self, player, msg, channel):
+        """Outputs list of race commands."""
+        channel.reply(
+            "Commands: ^3!(s)pb !(s)rank !(s)top !(s)all !(s)ranktime !(s)avg !random")
+        return minqlx.RET_STOP_EVENT
+
     def output_times(self, map_name, times, channel):
         """Outputs times to the channel. Will split lines so that each
         record is not on 2 different lines.
@@ -362,7 +376,7 @@ class RaceRecords:
         try:
             record = self.records[rank - 1]
         except IndexError:
-            return None, None
+            return None, None, None
 
         name = record["name"]
         actual_rank = record["rank"]
