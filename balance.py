@@ -46,6 +46,7 @@ class balance(minqlx.Plugin):
         self.add_command(("teams", "teens"), self.cmd_teams)
         self.add_command("do", self.cmd_do, 1)
         self.add_command(("agree", "a"), self.cmd_agree)
+        self.add_command(("ratings", "elos", "selo"), self.cmd_ratings)
 
         self.ratings_lock = threading.RLock()
         # Keys: steam_id - Items: {"ffa": {"elo": 123, "games": 321, "local": False}, ...}
@@ -437,6 +438,32 @@ class balance(minqlx.Plugin):
 
                 # Otherwise, switch right away.
                 self.execute_suggestion()
+
+    def cmd_ratings(self, player, msg, channel):
+        gt = self.game.type_short
+        if gt not in SUPPORTED_GAMETYPES:
+            player.tell("This game mode is not supported by the balance plugin.")
+            return minqlx.RET_STOP_ALL
+        
+        players = dict([(p.steam_id, gt) for p in self.players()])
+        self.add_request(players, self.callback_ratings, channel)
+
+    def callback_ratings(self, players, channel):
+        gt = self.game.type_short
+        teams = self.teams()
+
+        if teams["red"]:
+            red_sorted = sorted(teams["red"], key=lambda x: self.ratings[x.steam_id][gt]["elo"], reverse=True)
+            red = ", ".join(["{}: ^1{}^7".format(p.clean_name, self.ratings[p.steam_id][gt]["elo"]) for p in red_sorted])
+            channel.reply(red)
+        if teams["blue"]:
+            blue_sorted = sorted(teams["blue"], key=lambda x: self.ratings[x.steam_id][gt]["elo"], reverse=True)
+            blue = ", ".join(["{}: ^4{}^7".format(p.clean_name, self.ratings[p.steam_id][gt]["elo"]) for p in blue_sorted])
+            channel.reply(blue)
+        if teams["spectator"]:
+            spec_sorted = sorted(teams["spectator"], key=lambda x: self.ratings[x.steam_id][gt]["elo"], reverse=True)
+            spec = ", ".join(["{}: {}".format(p.clean_name, self.ratings[p.steam_id][gt]["elo"]) for p in spec_sorted])
+            channel.reply(spec)
 
     def suggest_switch(self, teams, gametype):
         """Suggest a switch based on average team ratings."""
