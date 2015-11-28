@@ -38,6 +38,7 @@ class balance(minqlx.Plugin):
     def __init__(self):
         self.add_hook("round_countdown", self.handle_round_countdown)
         self.add_hook("round_start", self.handle_round_start)
+        self.add_hook("vote_ended", self.handle_vote_ended)
         self.add_command(("setrating", "setelo"), self.cmd_setrating, 3, usage="<id> <rating>")
         self.add_command(("getrating", "getelo", "elo"), self.cmd_getrating, usage="<id>")
         self.add_command(("remrating", "remelo"), self.cmd_remrating, 3, usage="<id>")
@@ -77,10 +78,13 @@ class balance(minqlx.Plugin):
             gt = self.game.type_short
             if gt not in SUPPORTED_GAMETYPES:
                 return
-            
-            players = self.teams()
-            players = dict([(p.steam_id, gt) for p in players["red"] + players["blue"]])
-            self.add_request(players, self.callback_balance, minqlx.CHAT_CHANNEL)
+
+            @minqlx.delay(3.5)
+            def f():
+                players = self.teams()
+                players = dict([(p.steam_id, gt) for p in players["red"] + players["blue"]])
+                self.add_request(players, self.callback_balance, minqlx.CHAT_CHANNEL)
+            f()
 
     @minqlx.thread
     def fetch_ratings(self, players, request_id):
@@ -320,7 +324,6 @@ class balance(minqlx.Plugin):
         # Start out by evening out the number of players on each team.
         diff = len(teams["red"]) - len(teams["blue"])
         if abs(diff) > 1:
-            channel.reply("Evening teams...")
             if diff > 0:
                 for i in range(diff - 1):
                     p = teams["red"].pop()
@@ -336,7 +339,6 @@ class balance(minqlx.Plugin):
         # there are no more switches that can be done to improve teams.
         switch = self.suggest_switch(teams, gt)
         if switch:
-            self.msg("Balancing teams...")
             while switch:
                 p1 = switch[0][0]
                 p2 = switch[0][1]
@@ -350,13 +352,13 @@ class balance(minqlx.Plugin):
             avg_blue = self.team_average(teams["blue"], gt)
             diff_rounded = abs(round(avg_red) - round(avg_blue)) # Round individual averages.
             if round(avg_red) > round(avg_blue):
-                self.msg("Done! ^1{} ^7vs ^4{}^7 - DIFFERENCE: ^1{}"
+                self.msg("^1{} ^7vs ^4{}^7 - DIFFERENCE: ^1{}"
                     .format(round(avg_red), round(avg_blue), diff_rounded))
             elif round(avg_red) < round(avg_blue):
-                self.msg("Done! ^1{} ^7vs ^4{}^7 - DIFFERENCE: ^4{}"
+                self.msg("^1{} ^7vs ^4{}^7 - DIFFERENCE: ^4{}"
                     .format(round(avg_red), round(avg_blue), diff_rounded))
             else:
-                self.msg("Done! ^1{} ^7vs ^4{}^7 - Holy shit!"
+                self.msg("^1{} ^7vs ^4{}^7 - Holy shit!"
                     .format(round(avg_red), round(avg_blue)))
         else:
             channel.reply("Teams are good! Nothing to balance.")
