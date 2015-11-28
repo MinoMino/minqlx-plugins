@@ -260,7 +260,7 @@ class balance(minqlx.Plugin):
         channel.reply("{}'s {} rating has been set to ^6{}^7.".format(name, gt.upper(), rating))
 
     def cmd_remrating(self, player, msg, channel):
-        if len(msg) < 3:
+        if len(msg) < 2:
             return minqlx.RET_USAGE
         
         try:
