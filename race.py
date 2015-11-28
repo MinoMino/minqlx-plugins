@@ -292,7 +292,7 @@ class race(minqlx.Plugin):
         """Outputs list of race commands."""
         channel.reply(
             "Commands: ^3!(s)pb !(s)rank !(s)top !(s)all !(s)ranktime !(s)avg !random")
-        return minqlx.RET_STOP_EVENT
+        return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
         """Outputs times to the channel. Will split lines so that each
