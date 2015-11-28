@@ -87,10 +87,7 @@ class vote_ban(minqlx.Plugin):
             channel.reply("{} is not banned from voting.".format(name))
 
     def is_banned(self, steam_id):
-        """Checks if a
-        :param steam_id: steamID64
-        :return: True if they are banned False otherwise
-        """
+        """Returns whether a player is banned"""
         banned = self.db.sismember("minqlx:vote_ban", steam_id)
         if banned == 1:
             return True
