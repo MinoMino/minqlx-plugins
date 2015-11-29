@@ -31,6 +31,8 @@ MAX_ATTEMPTS = 3
 CACHE_EXPIRE = 60*30 # 30 minutes TTL.
 DEFAULT_RATING = 1000
 SUPPORTED_GAMETYPES = ("ca", "ctf", "dom", "ft", "tdm")
+# Externally supported game types. Used by !getrating for game types the API works with.
+EXT_SUPPORTED_GAMETYPES = ("ca", "ctf", "dom", "ft", "tdm", "duel", "ffa")
 
 class balance(minqlx.Plugin):
     database = Redis
@@ -212,15 +214,15 @@ class balance(minqlx.Plugin):
                 return minqlx.RET_STOP_ALL
 
         if len(msg) > 2:
-            if msg[2].lower() in SUPPORTED_GAMETYPES:
+            if msg[2].lower() in EXT_SUPPORTED_GAMETYPES:
                 gt = msg[2].lower()
             else:
                 player.tell("Invalid gametype. Supported gametypes: {}"
-                    .format(", ".join(SUPPORTED_GAMETYPES)))
+                    .format(", ".join(EXT_SUPPORTED_GAMETYPES)))
                 return minqlx.RET_STOP_ALL
         else:
             gt = self.game.type_short
-            if gt not in SUPPORTED_GAMETYPES:
+            if gt not in EXT_SUPPORTED_GAMETYPES:
                 player.tell("This game mode is not supported by the balance plugin.")
                 return minqlx.RET_STOP_ALL
 
