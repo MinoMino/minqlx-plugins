@@ -145,7 +145,8 @@ class IrcChannel(minqlx.AbstractChannel):
         return "{} {}".format(str(self), self.recipient)
 
     def reply(self, msg):
-        self.irc.msg(self.recipient, irc.translate_colors(msg))
+        for line in msg.split("\n"):
+            self.irc.msg(self.recipient, irc.translate_colors(line))
 
 class IrcDummyPlayer(minqlx.AbstractDummyPlayer):
     def __init__(self, irc, user):
@@ -158,7 +159,8 @@ class IrcDummyPlayer(minqlx.AbstractDummyPlayer):
         return minqlx.owner()
 
     def tell(self, msg):
-        self.irc.msg(self.user, irc.translate_colors(msg))
+        for line in msg.split("\n"):
+            self.irc.msg(self.user, irc.translate_colors(line))
 
 # ====================================================================
 #                        SIMPLE ASYNC IRC
