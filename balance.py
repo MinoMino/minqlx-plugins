@@ -40,7 +40,7 @@ class balance(minqlx.Plugin):
         self.add_hook("round_start", self.handle_round_start)
         self.add_hook("vote_ended", self.handle_vote_ended)
         self.add_command(("setrating", "setelo"), self.cmd_setrating, 3, usage="<id> <rating>")
-        self.add_command(("getrating", "getelo", "elo"), self.cmd_getrating, usage="<id>")
+        self.add_command(("getrating", "getelo", "elo"), self.cmd_getrating, usage="<id> [gametype]")
         self.add_command(("remrating", "remelo"), self.cmd_remrating, 3, usage="<id>")
         self.add_command("balance", self.cmd_balance, 1)
         self.add_command(("teams", "teens"), self.cmd_teams)
@@ -164,17 +164,17 @@ class balance(minqlx.Plugin):
 
     @minqlx.next_frame
     def handle_ratings_fetched(self, request_id, status_code):
-        players, callback, channel = self.requests[request_id]
+        players, callback, channel, args = self.requests[request_id]
         del self.requests[request_id]
         if status_code != requests.codes.ok:
             # TODO: Put a couple of known errors here for more detailed feedback.
             channel.reply("ERROR {}: Failed to fetch ratings.".format(status_code))
         else:
-            callback(players, channel)
+            callback(players, channel, *args)
 
-    def add_request(self, players, callback, channel):
+    def add_request(self, players, callback, channel, *args):
         req = next(self.request_counter)
-        self.requests[req] = players.copy(), callback, channel
+        self.requests[req] = players.copy(), callback, channel, args
 
         # Only start a new thread if we need to make an API request.
         if self.remove_cached(players):
@@ -211,9 +211,22 @@ class balance(minqlx.Plugin):
                 channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
                 return minqlx.RET_STOP_ALL
 
-        self.add_request({sid: self.game.type_short}, self.callback_getrating, channel)
+        if len(msg) > 2:
+            if msg[2].lower() in SUPPORTED_GAMETYPES:
+                gt = msg[2].lower()
+            else:
+                player.tell("Invalid gametype. Supported gametypes: {}"
+                    .format(", ".join(SUPPORTED_GAMETYPES)))
+                return minqlx.RET_STOP_ALL
+        else:
+            gt = self.game.type_short
+            if gt not in SUPPORTED_GAMETYPES:
+                player.tell("This game mode is not supported by the balance plugin.")
+                return minqlx.RET_STOP_ALL
 
-    def callback_getrating(self, players, channel):
+        self.add_request({sid: gt}, self.callback_getrating, channel, gt)
+
+    def callback_getrating(self, players, channel, gametype):
         sid = next(iter(players))
         player = self.player(sid)
         if player:
@@ -221,8 +234,7 @@ class balance(minqlx.Plugin):
         else:
             name = sid
         
-        gt = self.game.type_short
-        channel.reply("{} has a rating of ^6{}^7 in {}.".format(name, self.ratings[sid][gt]["elo"], gt.upper()))
+        channel.reply("{} has a rating of ^6{}^7 in {}.".format(name, self.ratings[sid][gametype]["elo"], gametype.upper()))
 
     def cmd_setrating(self, player, msg, channel):
         if len(msg) < 3:
@@ -382,7 +394,14 @@ class balance(minqlx.Plugin):
     def callback_teams(self, players, channel):
         # We check if people joined while we were requesting ratings and get them if someone did.
         teams = self.teams()
+        current = teams["red"] + teams["blue"]
         gt = self.game.type_short
+
+        for p in current:
+            if p.steam_id not in players:
+                d = dict([(p.steam_id, gt) for p in current])
+                self.add_request(d, self.callback_teams, channel)
+                return
 
         avg_red = self.team_average(teams["red"], gt)
         avg_blue = self.team_average(teams["blue"], gt)
@@ -449,8 +468,16 @@ class balance(minqlx.Plugin):
         self.add_request(players, self.callback_ratings, channel)
 
     def callback_ratings(self, players, channel):
-        gt = self.game.type_short
+        # We check if people joined while we were requesting ratings and get them if someone did.
         teams = self.teams()
+        current = self.players()
+        gt = self.game.type_short
+
+        for p in current:
+            if p.steam_id not in players:
+                d = dict([(p.steam_id, gt) for p in current])
+                self.add_request(d, self.callback_ratings, channel)
+                return
 
         if teams["red"]:
             red_sorted = sorted(teams["red"], key=lambda x: self.ratings[x.steam_id][gt]["elo"], reverse=True)
