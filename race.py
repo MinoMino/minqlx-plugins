@@ -22,6 +22,7 @@ class race(minqlx.Plugin):
         self.add_hook("new_game", self.handle_new_game)
         self.add_hook("map", self.handle_map)
         self.add_hook("vote_called", self.handle_vote_called)
+        self.add_hook("server_command", self.handle_server_command)
         self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
@@ -79,6 +80,11 @@ class race(minqlx.Plugin):
         elif "strafe" not in factory:
             minqlx.set_cvar("g_startingWeapons", "147")
         threading.Thread(target=self.get_maps).start()
+
+    def handle_server_command(self, player, cmd):
+        """Stops server printing haste message."""
+        if "^7^3 got the Haste!^7" in cmd:
+            return minqlx.RET_STOP_EVENT
 
     def cmd_updatemaps(self, player, msg, channel):
         """Updates list of race maps"""
