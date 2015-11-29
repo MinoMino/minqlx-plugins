@@ -46,6 +46,8 @@ for leaving too many games.
 - **motd**: Adds commands to set a message of the day.
   - `qlx_motdSound`: The path to a sounds that is played when players connect and have the MOTD printed to them.
     - Default: `sound/vo/crash_new/37b_07_alt.wav`
+  - `qlx_motdHeader`: The header printed right before the MOTD itself.
+    - Default: `^6======= ^7Message of the Day ^6=======`
 - **permission**: Adds commands to set player permissions.
 - **names**: Adds a command to change names without relying on Steam.
   - `qlx_enforceSteamName`: A boolean deciding whether or not it should force players to use Steam names,
