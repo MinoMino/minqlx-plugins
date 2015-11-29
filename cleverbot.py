@@ -29,6 +29,25 @@ class cleverbot(minqlx.Plugin):
     def create(self):
         """Creates the bot.
         Doc: https://docs.cleverbot.io/docs/getting-started"""
+        response, nick = self.post_data("https://cleverbot.io/1.0/create")
+        if response:
+            self.msg("Bot called {} was created.".format(nick))
+
+    def ask(self, text, channel):
+        """Doc: https://cleverbot.io/1.0/ask
+        :param text: Question or statement to ask the bot:
+        :param channel: Channel to reply to.
+        """
+        response, nick = self.post_data("https://cleverbot.io/1.0/ask", text)
+        if response:
+            channel.reply("^6{}: {}".format(nick, response["response"]))
+
+    def post_data(self, url, text=None):
+        """Posts data to cleverbot.io
+        :param url: The url to post to, either /ask or /create.
+        :param text: The text to send to the bot.
+        :return: JSON response and bot nick.
+        """
         user = self.get_cvar("qlx_cleverbotUser")
         key = self.get_cvar("qlx_cleverbotKey")
         nick = self.get_cvar("qlx_cleverbotNick")
@@ -36,15 +55,14 @@ class cleverbot(minqlx.Plugin):
             self.msg("Bot nick cannot be blank.")
             return
         if user and key:
-            payload = {"user": user, "key": key, "nick": nick}
-            r = requests.post("https://cleverbot.io/1.0/create", data=payload)
+            payload = {"user": user, "key": key, "nick": nick, "text": text}
+            r = requests.post(url, data=payload)
             if r.status_code == 200:
-                self.msg("Bot called {} was created".format(nick))
-                self.created = True
+                return r.json(), nick
             elif r.status_code == 400:
                 self.msg("Bad request.")
             else:
-                self.msg("Error: {}, Reason: {}".format(r.status_code, r.reason))
+                self.msg("Error: {}, {}".format(r.status_code, r.reason))
         else:
             self.msg("You need to set qlx_cleverbotUser and qlx_cleverbotKey")
 
@@ -69,22 +87,3 @@ class cleverbot(minqlx.Plugin):
             threading.Thread(target=self.ask(text, channel)).start()
         else:
             channel.reply("You need to create the bot or set API key first.")
-
-    def ask(self, text, channel):
-        """Doc: https://cleverbot.io/1.0/ask
-        :param text: Question or statement to ask the bot:
-        :param channel: Channel to reply to.
-        """
-        user = self.get_cvar("qlx_cleverbotUser")
-        key = self.get_cvar("qlx_cleverbotKey")
-        nick = self.get_cvar("qlx_cleverbotNick")
-
-        payload = {"user": user, "key": key, "nick": nick, "text": text}
-        r = requests.post("https://cleverbot.io/1.0/ask", data=payload)
-        if r.status_code == 200:
-            response = r.json()["response"]
-            channel.reply("^3{}: ^7{}".format(nick, response))
-        elif r.status_code == 400:
-            self.msg("Bad request.")
-        else:
-            self.msg("Error: {}, Reason: {}".format(r.status_code, r.reason))
