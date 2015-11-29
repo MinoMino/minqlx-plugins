@@ -57,7 +57,10 @@ class motd(minqlx.Plugin):
             return
         
         welcome_sound = self.get_cvar("qlx_motdSound")
-        if welcome_sound:
+        if welcome_sound == "0":
+            welcome_sound = ""
+        
+        if welcome_sound and self.db.get_flag(player, "essentials:sounds_enabled", default=True):
             self.play_sound(welcome_sound, player)
         self.send_motd(player, motd)
 
