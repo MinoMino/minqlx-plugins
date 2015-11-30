@@ -10,6 +10,7 @@ Race plugin for minqlx. Adds commands such as !pb, !top, !all etc
 import minqlx
 import requests
 import threading
+import re
 import random
 
 params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
@@ -85,7 +86,7 @@ class race(minqlx.Plugin):
 
     def handle_server_command(self, player, cmd):
         """Stops server printing haste message."""
-        if "^3 got the Haste!^7" in cmd:
+        if re.match(r'print ".+\^3 got the (Haste|Battle Suit|Quad)!\^7\n"', cmd):
             return minqlx.RET_STOP_EVENT
 
     def cmd_updatemaps(self, player, msg, channel):
