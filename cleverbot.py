@@ -32,6 +32,7 @@ class cleverbot(minqlx.Plugin):
         response, nick = self.post_data("https://cleverbot.io/1.0/create")
         if response:
             self.msg("Bot called {} was created.".format(nick))
+            self.created = True
 
     def ask(self, text, channel):
         """Doc: https://cleverbot.io/1.0/ask
