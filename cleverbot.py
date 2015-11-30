@@ -31,7 +31,7 @@ class cleverbot(minqlx.Plugin):
         Doc: https://docs.cleverbot.io/docs/getting-started"""
         response, nick = self.post_data("https://cleverbot.io/1.0/create")
         if response:
-            self.msg("Bot called {} was created.".format(nick))
+            self.msg("^7Bot called ^6{} ^7was created.".format(nick))
             self.created = True
 
     def ask(self, text, channel):
@@ -41,7 +41,7 @@ class cleverbot(minqlx.Plugin):
         """
         response, nick = self.post_data("https://cleverbot.io/1.0/ask", text)
         if response:
-            channel.reply("^6{}: {}".format(nick, response["response"]))
+            channel.reply("^6{}: ^7{}".format(nick, response["response"]))
 
     def post_data(self, url, text=''):
         """Posts data to cleverbot.io
@@ -53,7 +53,7 @@ class cleverbot(minqlx.Plugin):
         key = self.get_cvar("qlx_cleverbotKey")
         nick = self.get_cvar("qlx_cleverbotNick")
         if nick == "":
-            self.msg("Bot nick cannot be blank.")
+            self.msg("^3Bot nick cannot be blank.")
             return
         if user and key:
             payload = {"user": user, "key": key, "nick": nick, "text": text}
@@ -61,11 +61,11 @@ class cleverbot(minqlx.Plugin):
             if r.status_code == 200:
                 return r.json(), nick
             elif r.status_code == 400:
-                self.msg("Bad request.")
+                self.msg("^1Bad request.")
             else:
-                self.msg("Error: {}, {}".format(r.status_code, r.reason))
+                self.msg("^1Error: ^7{}, {}".format(r.status_code, r.reason))
         else:
-            self.msg("You need to set qlx_cleverbotUser and qlx_cleverbotKey")
+            self.msg("^3You need to set qlx_cleverbotUser and qlx_cleverbotKey")
 
     def cmd_create(self, player, msg, channel):
         """Creates the bot with the nick supplied."""
@@ -87,4 +87,4 @@ class cleverbot(minqlx.Plugin):
         if self.created:
             threading.Thread(target=self.ask(text, channel)).start()
         else:
-            channel.reply("You need to create the bot or set API key first.")
+            channel.reply("^3You need to create the bot or set API key first.")
