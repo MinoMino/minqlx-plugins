@@ -86,7 +86,7 @@ class race(minqlx.Plugin):
 
     def handle_server_command(self, player, cmd):
         """Stops server printing haste message."""
-        if re.match(r'print ".+\^3 got the (Haste|Battle Suit|Quad)!\^7\n"', cmd):
+        if re.match(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"', cmd):
             return minqlx.RET_STOP_EVENT
 
     def cmd_updatemaps(self, player, msg, channel):
