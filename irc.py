@@ -87,8 +87,12 @@ class irc(minqlx.Plugin):
             self.irc.msg(self.relay, self.translate_colors("{} {}".format(player.name, reason)))
 
     def handle_msg(self, irc, user, channel, msg):
-        if channel == self.relay and self.get_cvar("qlx_ircRelayIrcChat", bool):
-            minqlx.CHAT_CHANNEL.reply("[IRC] ^6{}^7:^2 {}".format(user[0], " ".join(msg)))
+        cmd = msg[0].lower()
+        if channel == self.relay:
+            if cmd in (".players", ".status", ".info", ".map", ".server"):
+                self.server_report(self.relay)
+            elif self.get_cvar("qlx_ircRelayIrcChat", bool):
+                minqlx.CHAT_CHANNEL.reply("[IRC] ^6{}^7:^2 {}".format(user[0], " ".join(msg)))
         elif channel == user[0]: # Is PM?
             if len(msg) > 1 and msg[0].lower() == ".auth" and self.password:
                 if user in self.authed:
@@ -145,6 +149,41 @@ class irc(minqlx.Plugin):
             text = text.replace("^{}".format(i), color)
 
         return text
+
+    @minqlx.next_frame
+    def server_report(self, channel):
+        teams = self.teams()
+        players = teams["free"] + teams["red"] + teams["blue"] + teams["spectator"]
+        game = self.game
+        # Make a list of players.
+        plist = []
+        for t in teams:
+            if not teams[t]:
+                continue
+            elif t == "free":
+                plist.append("Free: " + ", ".join([p.clean_name for p in teams["free"]]))
+            elif t == "red":
+                plist.append("\x0304Red\x03: " + ", ".join([p.clean_name for p in teams["red"]]))
+            elif t == "blue":
+                plist.append("\x0302Blue\x03: " + ", ".join([p.clean_name for p in teams["blue"]]))
+            elif t == "spectator":
+                plist.append("\x02Spec\x02: " + ", ".join([p.clean_name for p in teams["spectator"]]))
+                
+
+        # Info about the game state.
+        if game.state == "in_progress":
+            if game.type_short == "race" or game.type_short == "ffa":
+                ginfo = "The game is in progress"
+            else:
+                ginfo = "The score is \x02\x0304{}\x03 - \x0302{}\x03\x02".format(game.red_score, game.blue_score)
+        elif game.state == "countdown":
+            ginfo = "The game is about to start"
+        else:
+            ginfo = "The game is in warmup"
+
+        self.irc.msg(channel, "{} on \x02{}\x02 ({}) with \x02{}/{}\x02 players:" .format(ginfo, self.clean_text(game.map_title),
+            game.type_short.upper(), len(players), self.get_cvar("sv_maxClients")))
+        self.irc.msg(channel, "{}".format(" ".join(plist)))
 
 # ====================================================================
 #                     DUMMY PLAYER & IRC CHANNEL
