@@ -26,6 +26,7 @@ from minqlx.database import Redis
 _re_hahaha_yeah = re.compile(r"^haha(?:ha)?,? yeah?\W?$", flags=re.IGNORECASE)
 _re_haha_yeah_haha = re.compile(r"^haha(?:ha)?,? yeah?,? haha\W?$", flags=re.IGNORECASE)
 _re_yeah_hahaha = re.compile(r"^yeah?,? haha(?:ha)\W?$", flags=re.IGNORECASE)
+_re_duahahaha = re.compile(r"^duahaha(?:ha)?\W?$", flags=re.IGNORECASE)
 _re_hahaha = re.compile(r"hahaha", flags=re.IGNORECASE)
 _re_glhf = re.compile(r"^(?:gl ?hf\W?)|(?:hf\W?)|(?:gl hf\W?)", flags=re.IGNORECASE)
 _re_f3 = re.compile(r"^(?:(?:press )?f3)|ready(?: up)?\W?", flags=re.IGNORECASE)
@@ -49,9 +50,9 @@ _re_oink = re.compile(r"^oink\W?$", flags=re.IGNORECASE)
 _re_argh = re.compile(r"^a+rgh\W?$", flags=re.IGNORECASE)
 _re_hah_haha = re.compile(r"^hah haha\W?$", flags=re.IGNORECASE)
 _re_woohoo = re.compile(r"^woo+hoo+\W?$", flags=re.IGNORECASE)
-_re_duahahaha = re.compile(r"^duahaha(?:ha)?\W?$", flags=re.IGNORECASE)
 _re_quakelive = re.compile(r"^(?:ql|quake live)\W?$", flags=re.IGNORECASE)
-_re_chaching = re.compile(r"\$\d+", flags=re.IGNORECASE)
+_re_chaching = re.compile(r"(?:\$|€|£)\d+", flags=re.IGNORECASE)
+_re_uh_ah = re.compile(r"^uh ah$", flags=re.IGNORECASE)
 
 class fun(minqlx.Plugin):
     database = Redis
@@ -75,6 +76,8 @@ class fun(minqlx.Plugin):
             self.play_sound("sound/player/biker/taunt.wav")
         elif _re_yeah_hahaha.match(msg):
             self.play_sound("sound/player/razor/taunt.wav")
+        elif _re_duahahaha.match(msg):
+            self.play_sound("sound/player/keel/taunt.wav")
         elif _re_hahaha.search(msg):
             self.play_sound("sound/player/santa/taunt.wav")
         elif _re_glhf.match(msg):
@@ -127,12 +130,12 @@ class fun(minqlx.Plugin):
             self.play_sound("sound/player/hunter/taunt.wav")
         elif _re_woohoo.match(msg):
             self.play_sound("sound/player/janet/taunt.wav")
-        elif _re_duahahaha.match(msg):
-            self.play_sound("sound/player/keel/taunt.wav")
         elif _re_quakelive.match(msg):
             self.play_sound("sound/vo_female/quake_live")
         elif _re_chaching.search(msg):
             self.play_sound("sound/misc/chaching")
+        elif _re_uh_ah.match(msg):
+            self.play_sound("sound/player/mynx/taunt.wav")
 
     def play_sound(self, path):
         if not self.last_sound:
