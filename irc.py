@@ -35,6 +35,7 @@ class irc(minqlx.Plugin):
 
         self.set_cvar_once("qlx_ircServer", "irc.quakenet.org")
         self.set_cvar_once("qlx_ircRelayChannel", "")
+        self.set_cvar_once("qlx_ircRelayIrcChat", "1")
         self.set_cvar_once("qlx_ircIdleChannels", "")
         self.set_cvar_once("qlx_ircNickname", "minqlx-{}".format(random.randint(1000, 9999)))
         self.set_cvar_once("qlx_ircPassword", "")
@@ -80,7 +81,7 @@ class irc(minqlx.Plugin):
             self.irc.msg(self.relay, self.translate_colors("{} {}".format(player.name, reason)))
 
     def handle_msg(self, irc, user, channel, msg):
-        if channel == self.relay:
+        if channel == self.relay and self.get_cvar("qlx_ircRelayIrcChat", bool):
             minqlx.CHAT_CHANNEL.reply("[IRC] ^6{}^7:^2 {}".format(user[0], " ".join(msg)))
         elif channel == user[0]: # Is PM?
             if len(msg) > 1 and msg[0].lower() == ".auth" and self.password:
