@@ -40,12 +40,18 @@ class irc(minqlx.Plugin):
         self.set_cvar_once("qlx_ircNickname", "minqlx-{}".format(random.randint(1000, 9999)))
         self.set_cvar_once("qlx_ircPassword", "")
         self.set_cvar_once("qlx_ircColors", "0")
+        self.set_cvar_once("qlx_ircQuakenetUser", "")
+        self.set_cvar_once("qlx_ircQuakenetPass", "")
+        self.set_cvar_once("qlx_ircQuakenetHidden", "0")
 
         self.server = self.get_cvar("qlx_ircServer")
         self.relay = self.get_cvar("qlx_ircRelayChannel")
         self.idle = self.get_cvar("qlx_ircIdleChannels", list)
         self.nickname = self.get_cvar("qlx_ircNickname")
         self.password = self.get_cvar("qlx_ircPassword")
+        self.qnet = (self.get_cvar("qlx_ircQuakenetUser"),
+            self.get_cvar("qlx_ircQuakenetPass"),
+            self.get_cvar("qlx_ircQuakenetHidden", bool))
 
         self.authed = set()
         self.auth_attempts = {}
@@ -106,6 +112,14 @@ class irc(minqlx.Plugin):
 
     def handle_perform(self, irc):
         self.logger.info("Connected to IRC!".format(self.server))
+
+        quser, qpass, qhidden = self.qnet
+        if quser and qpass and "NETWORK" in self.irc.server_options and self.irc.server_options["NETWORK"] == "QuakeNet":
+            self.logger.info("Authenticating on Quakenet as \"{}\"...".format(quser))
+            self.irc.msg("Q@CServe.quakenet.org", "AUTH {} {}".format(quser, qpass))
+            if qhidden:
+                self.irc.mode(self.irc.nickname, "+x")
+
         for channel in self.idle:
             irc.join(channel)
         if self.relay:
