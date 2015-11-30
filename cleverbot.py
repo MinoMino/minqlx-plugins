@@ -29,8 +29,9 @@ class cleverbot(minqlx.Plugin):
     def create(self):
         """Creates the bot.
         Doc: https://docs.cleverbot.io/docs/getting-started"""
-        response, nick = self.post_data("https://cleverbot.io/1.0/create")
+        response = self.post_data("https://cleverbot.io/1.0/create")
         if response:
+            nick = self.get_cvar("qlx_cleverbotNick")
             self.msg("^7Bot called ^6{} ^7was created.".format(nick))
             self.created = True
 
@@ -39,9 +40,10 @@ class cleverbot(minqlx.Plugin):
         :param text: Question or statement to ask the bot:
         :param channel: Channel to reply to.
         """
-        response, nick = self.post_data("https://cleverbot.io/1.0/ask", text)
+        response = self.post_data("https://cleverbot.io/1.0/ask", text)
         if response:
-            channel.reply("^6{}: ^7{}".format(nick, response["response"]))
+            nick = self.get_cvar("qlx_cleverbotNick")
+            channel.reply("^6{}^7: {}".format(nick, response["response"]))
 
     def post_data(self, url, text=''):
         """Posts data to cleverbot.io
@@ -59,7 +61,7 @@ class cleverbot(minqlx.Plugin):
             payload = {"user": user, "key": key, "nick": nick, "text": text}
             r = requests.post(url, data=payload)
             if r.status_code == 200:
-                return r.json(), nick
+                return r.json()
             elif r.status_code == 400:
                 self.msg("^1Bad request.")
             else:
