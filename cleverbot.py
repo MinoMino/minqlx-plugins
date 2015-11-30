@@ -15,8 +15,8 @@ import requests
 class cleverbot(minqlx.Plugin):
     def __init__(self):
         super().__init__()
-        self.add_command("create", self.cmd_chat, usage="<nick>")
-        self.add_command("chat", self.cmd_chat, usage="<question>")
+        self.add_command("create", self.cmd_chat, 2, usage="<nick>")
+        self.add_command("chat", self.cmd_chat, usage="<text>")
 
         # Get an API key at cleverbot.io
         self.set_cvar_once("qlx_cleverbotUser", "")
@@ -43,7 +43,7 @@ class cleverbot(minqlx.Plugin):
         if response:
             channel.reply("^6{}: {}".format(nick, response["response"]))
 
-    def post_data(self, url, text=None):
+    def post_data(self, url, text=''):
         """Posts data to cleverbot.io
         :param url: The url to post to, either /ask or /create.
         :param text: The text to send to the bot.
