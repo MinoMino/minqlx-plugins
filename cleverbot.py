@@ -30,8 +30,7 @@ class cleverbot(minqlx.Plugin):
         self.create()
 
     def handle_chat(self, player, msg, channel):
-        """Responds to chat message
-        qlx_cleverbotChance * 100 percent of the time"""
+        """Responds to chat message qlx_cleverbotChance * 100 percent of the time"""
         if msg.startswith(self.get_cvar("qlx_commandPrefix")):
             return
         
@@ -80,7 +79,7 @@ class cleverbot(minqlx.Plugin):
     @minqlx.thread
     def ask(self, text, channel):
         """Doc: https://cleverbot.io/1.0/ask
-        :param text: Question or statement to ask the bot.
+        :param text: Text to send to the bot.
         :param channel: Channel to reply to.
         """
         response = self.post_data("https://cleverbot.io/1.0/ask", text)
@@ -89,8 +88,8 @@ class cleverbot(minqlx.Plugin):
             channel.reply("^6{}^7: {}".format(nick, response["response"]))
 
     def post_data(self, url, text=''):
-        """Posts data to cleverbot.io
-        :param url: The url to post to, either /ask or /create.
+        """POSTS data to cleverbot.io
+        :param url: The url to POST to, either /ask or /create.
         :param text: The text to send to the bot.
         :return: JSON response.
         """
