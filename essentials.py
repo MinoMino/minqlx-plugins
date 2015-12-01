@@ -41,6 +41,8 @@ class essentials(minqlx.Plugin):
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("command", self.handle_command, priority=minqlx.PRI_LOW)
         self.add_command("id", self.cmd_id, 1, usage="[part_of_name] ...")
+        self.add_command("players", self.cmd_players, 1)
+        self.add_command(("disconnects", "dcs"), self.cmd_disconnects, 1)
         self.add_command(("commands", "cmds"), self.cmd_commands, 2)
         self.add_command("shuffle", self.cmd_shuffle, 1)
         self.add_command("slap", self.cmd_slap, 2, usage="<id> [damage]")
@@ -88,6 +90,8 @@ class essentials(minqlx.Plugin):
 
         # A short history of recently executed commands.
         self.recent_cmds = deque(maxlen=11)
+        # A short history of recently disconnected players.
+        self.recent_dcs = deque(maxlen=10)
         
         # Map voting stuff. fs_homepath takes precedence.
         self.mappool = None
@@ -105,6 +109,7 @@ class essentials(minqlx.Plugin):
         self.update_player(player)
 
     def handle_player_disconnect(self, player, reason):
+        self.recent_dcs.appendleft((player, time.time()))
         self.update_player(player)
 
     def handle_vote_called(self, caller, vote, args):
@@ -191,6 +196,31 @@ class essentials(minqlx.Plugin):
 
         # We reply directly to the player, so no need to let the event pass.
         return minqlx.RET_STOP_EVENT
+
+    def cmd_players(self, player, msg, channel):
+        """A command that mimics the output of the "players" console command."""
+        players = self.players()
+        if not len(players):
+            player.tell("There are no players connected at the moment.")
+            return minqlx.RET_STOP_ALL
+        
+        res = "{:^} | {:^17} | {:^20} | {:^}\n".format("ID", "SteamID64", "IP Address", "Name")
+        for p in players:
+            res += "{:2} | {:17} | {:20} | {}\n".format(p.id, p.steam_id, p.ip, p)
+
+        player.tell(res)
+        return minqlx.RET_STOP_ALL
+
+    def cmd_disconnects(self, player, msg, channel):
+        if len(self.recent_dcs) == 0:
+            player.tell("No players have disconnected yet.")
+        else:
+            player.tell("The most recent ^6{}^7 player disconnects:".format(len(self.recent_dcs)))
+            for x in self.recent_dcs:
+                p, t = x
+                player.tell("  {} ({}): ^6{}^7 seconds ago".format(p.name, p.steam_id, round(time.time() - t)))
+
+        return minqlx.RET_STOP_ALL
 
     def cmd_commands(self, player, msg, channel):
         if len(self.recent_cmds) == 1:
