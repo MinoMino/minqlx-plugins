@@ -8,7 +8,6 @@ You can talk to cleverbot using !chat and it will respond.
 """
 
 import minqlx
-import threading
 import requests
 
 
@@ -24,8 +23,9 @@ class cleverbot(minqlx.Plugin):
         self.set_cvar_once("qlx_cleverbotNick", "cleverbot")
 
         self.created = False
-        threading.Thread(target=self.create).start()
+        self.create()
 
+    @minqlx.thread
     def create(self):
         """Creates the bot.
         Doc: https://docs.cleverbot.io/docs/getting-started"""
@@ -35,6 +35,7 @@ class cleverbot(minqlx.Plugin):
             self.msg("^7Bot called ^6{} ^7was created.".format(nick))
             self.created = True
 
+    @minqlx.thread
     def ask(self, text, channel):
         """Doc: https://cleverbot.io/1.0/ask
         :param text: Question or statement to ask the bot:
@@ -75,7 +76,6 @@ class cleverbot(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         self.set_cvar("qlx_cleverbotNick", msg[1])
-        threading.Thread(target=self.create).start()
 
     def cmd_chat(self, player, msg, channel):
         """Responds to !chat some text
@@ -87,6 +87,6 @@ class cleverbot(minqlx.Plugin):
             text = ' '.join(msg[1:])
 
         if self.created:
-            threading.Thread(target=self.ask(text, channel)).start()
+            self.ask(text, channel)
         else:
             channel.reply("^3You need to create the bot or set API key first.")
