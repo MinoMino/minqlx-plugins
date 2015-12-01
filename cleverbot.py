@@ -76,6 +76,7 @@ class cleverbot(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         self.set_cvar("qlx_cleverbotNick", msg[1])
+        self.create()
 
     def cmd_chat(self, player, msg, channel):
         """Responds to !chat some text
