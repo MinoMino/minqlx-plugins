@@ -110,7 +110,7 @@ class essentials(minqlx.Plugin):
 
     def handle_player_disconnect(self, player, reason):
         self.recent_dcs.appendleft((player, time.time()))
-        self.update_player(player)
+        self.update_seen_player(player)
 
     def handle_vote_called(self, caller, vote, args):
         # Enforce teamsizes.
@@ -727,12 +727,20 @@ class essentials(minqlx.Plugin):
     # ====================================================================
 
     def update_player(self, player):
-        """Updates the 'last_seen' entry in the database.
+        """Updates the list of recent names and IPs used by the player,
+        and adds entries to the player list and IP entries.
 
         """
         base_key = "minqlx:players:" + str(player.steam_id)
         db = self.db.pipeline()
-        # The simplicity here is the reason why Redis is perfect for this.
+        
+        # Add to IP set and make IP entry.
+        if player.ip:
+            db.sadd("minqlx:ips", player.ip)
+            db.sadd("minqlx:ips:" + player.ip, player.steam_id)
+            db.sadd(base_key + ":ips", player.ip)
+        
+        # Make or update player entry.
         if base_key not in self.db:
             db.lpush(base_key, player.name)
             db.sadd("minqlx:players", player.steam_id)
@@ -742,9 +750,11 @@ class essentials(minqlx.Plugin):
                 db.lpush(base_key, player.name)
                 db.ltrim(base_key, 0, 19)
         
-        now = datetime.datetime.now().strftime(DATETIME_FORMAT)
-        db.set(base_key + ":last_seen", now)
         db.execute()
+
+    def update_seen_player(self, player):
+        key = "minqlx:players:" + str(player.steam_id) + ":last_seen"
+        self.db[key] = datetime.datetime.now().strftime(DATETIME_FORMAT)
         
     @minqlx.delay(29)
     def force(self, require, vote_id):
