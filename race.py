@@ -9,7 +9,6 @@ Race plugin for minqlx. Adds commands such as !pb, !top, !all etc
 
 import minqlx
 import requests
-import threading
 import re
 import random
 
@@ -39,8 +38,7 @@ class race(minqlx.Plugin):
         self.set_cvar_once("qlx_raceMode", "0")
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
-        self.maps = []
-        threading.Thread(target=self.get_maps).start()
+        self.maps = self.get_maps()
 
     def cmd_disabled(self, player, msg, channel):
         """This is to disable !slap and !slay"""
@@ -83,7 +81,7 @@ class race(minqlx.Plugin):
             minqlx.set_cvar("g_startingWeapons", "3")
         elif "strafe" not in factory:
             minqlx.set_cvar("g_startingWeapons", "147")
-        threading.Thread(target=self.get_maps).start()
+        self.maps = self.get_maps()
 
     def handle_server_command(self, player, cmd):
         """Stops server printing haste message."""
@@ -92,7 +90,7 @@ class race(minqlx.Plugin):
 
     def cmd_updatemaps(self, player, msg, channel):
         """Updates list of race maps"""
-        threading.Thread(target=self.get_maps).start()
+        self.maps = self.get_maps()
 
     def cmd_pb(self, player, msg, channel):
         """Outputs the player's personal best time for a map."""
@@ -104,8 +102,9 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
-        threading.Thread(target=self.pb, args=(map_name, weapons, player, channel)).start()
+        self.pb(map_name, weapons, player, channel)
 
+    @minqlx.thread
     def pb(self, map_name, weapons, player, channel):
         records = self.get_records(map_name, weapons)
         rank, time = records.pb(player.steam_id)
@@ -135,8 +134,9 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
-        threading.Thread(target=self.rank, args=(map_name, weapons, rank, channel)).start()
+        self.rank(map_name, weapons, rank, channel)
 
+    @minqlx.thread
     def rank(self, map_name, weapons, rank, channel):
         records = self.get_records(map_name, weapons)
         name, actual_rank, time = records.rank(rank)
@@ -174,8 +174,9 @@ class race(minqlx.Plugin):
             return
 
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
-        threading.Thread(target=self.top, args=(map_name, weapons, amount, channel)).start()
+        self.top(map_name, weapons, amount, channel)
 
+    @minqlx.thread
     def top(self, map_name, weapons, amount, channel):
         records = self.get_records(map_name, weapons)
         if not weapons:
@@ -206,8 +207,9 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
-        threading.Thread(target=self.all, args=(map_name, weapons, channel)).start()
+        self.all(map_name, weapons, channel)
 
+    @minqlx.thread
     def all(self, map_name, weapons, channel):
         records = self.get_records(map_name, weapons)
         times = {}
@@ -244,6 +246,7 @@ class race(minqlx.Plugin):
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
         self.ranktime(map_name, weapons, time, channel)
 
+    @minqlx.thread
     def ranktime(self, map_name, weapons, time, channel):
         records = self.get_records(map_name, weapons)
         rank = records.rank_from_time(time)
@@ -279,8 +282,9 @@ class race(minqlx.Plugin):
             mode = self.get_cvar("qlx_raceMode", int)
             strafe = ""
 
-        threading.Thread(target=self.avg, args=(player, mode, strafe, channel)).start()
+        self.avg(player, mode, strafe, channel)
 
+    @minqlx.thread
     def avg(self, player, mode, strafe, channel):
         data = requests.get("https://qlrace.com/api/player/{}".format(player.steam_id), params=params[mode]).json()
         name = data["name"]
@@ -322,13 +326,15 @@ class race(minqlx.Plugin):
         for out in output:
             channel.reply(out.lstrip())
 
+    @minqlx.thread
     def get_maps(self):
         """Gets the list of race maps from QLRace.com,
         adds current map to the list if it isn't in the list"""
-        self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
+        maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
         current_map = self.game.map.lower()
-        if current_map not in self.maps:
-            self.maps.append(current_map)
+        if current_map not in maps:
+            maps.append(current_map)
+        return maps
 
     def map_prefix(self, map_prefix):
         """Returns the first map which matches the prefix.

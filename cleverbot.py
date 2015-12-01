@@ -71,7 +71,7 @@ class cleverbot(minqlx.Plugin):
             self.msg("^3You need to set qlx_cleverbotUser and qlx_cleverbotKey")
 
     def cmd_create(self, player, msg, channel):
-        """Creates the bot with the nick supplied."""
+        """Creates the bot with the nick given."""
         if len(msg) != 2:
             return minqlx.RET_USAGE
 
