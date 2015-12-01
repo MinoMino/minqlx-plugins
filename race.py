@@ -231,7 +231,7 @@ class race(minqlx.Plugin):
 
     def cmd_ranktime(self, player, msg, channel):
         """Outputs which rank a time would be."""
-        if len(msg) == 1 and player.score != 2147483647:
+        if len(msg) == 1 and player.score != 2147483647 and player.score != 0:
             time = player.score
             map_prefix = self.game.map
         elif len(msg) == 2:
