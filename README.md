@@ -42,6 +42,8 @@ for leaving too many games.
   before automatic banning takes place. If it determines a player cannot possibly recover even if they were to not leave
   any future games before the minimum, the player will still be banned.
     - Default: `15`
+- **silence**: Adds commands to mute a player for an extended period of time. This persists reconnects, as opposed to the
+default mute behavior of QLDS.
 - **clan**: Adds commands to let players have persistent clan tags without having to change the name on Steam.
 - **motd**: Adds commands to set a message of the day.
   - `qlx_motdSound`: The path to a sounds that is played when players connect and have the MOTD printed to them.
@@ -77,3 +79,6 @@ minqlx commands.
     - Default: `0`
   - `qlx_chatlogsSize`: The maximum size of a log in bytes before it starts with a new one.
     - Default: `5000000` (5 MB)
+- **solorace**: A plugin that starts the game and keeps it running on a race server without requiring a minimum of two players,
+like you usually do with race.
+- **docs**: A plugin that generates a command list of all the plugins currently loaded, in the form of a Markdown file.
