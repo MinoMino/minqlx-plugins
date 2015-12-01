@@ -24,20 +24,47 @@ _name_key = "minqlx:players:{}:colored_name"
 
 class names(minqlx.Plugin):
     def __init__(self):
+        self.add_hook("player_connect", self.handle_player_connect)
         self.add_hook("player_loaded", self.handle_player_loaded)
+        self.add_hook("player_disconnect", self.handle_player_disconnect)
+        self.add_hook("userinfo", self.handle_userinfo)
         self.add_command(("name", "setname"), self.cmd_name, usage="<name>", client_cmd_perm=0)
 
         self.set_cvar_once("qlx_enforceSteamName", "1")
 
+        self.steam_names = {}
+        self.name_set = False
+
+    def handle_player_connect(self, player):
+        self.steam_names[player.steam_id] = player.clean_name
+    
     def handle_player_loaded(self, player):
         name_key = _name_key.format(player.steam_id)
         if name_key in self.db:
             db_name = self.db[name_key]
             if not self.get_cvar("qlx_enforceSteamName", bool) or self.clean_text(db_name).lower() == player.clean_name.lower():
-                info = player.cvars
-                info["name"] = db_name
-                new_info = "".join(["\\{}\\{}".format(key, info[key]) for key in info])
-                minqlx.client_command(player.id, "userinfo \"{}\"".format(new_info))
+                self.name_set = True
+                player.name = db_name
+
+    def handle_player_disconnect(self, player, reason):
+        del self.steam_names[player.steam_id]
+
+    def handle_userinfo(self, player, changed):
+        # Make sure we're not doing anything if our script set the name.
+        if self.name_set:
+            self.name_set = False
+            return
+
+        if "name" in changed:
+            name_key = _name_key.format(player.steam_id)
+            if name_key not in self.db:
+                self.steam_names[player.steam_id] = self.clean_text(changed["name"])
+            elif self.steam_names[player.steam_id] == self.clean_text(changed["name"]):
+                changed["name"] = self.db[name_key]
+                return changed
+            else:
+                del self.db[name_key]
+                player.tell("Your registered name has been reset.")
 
     def cmd_name(self, player, msg, channel):
         name_key = _name_key.format(player.steam_id)
@@ -48,30 +75,28 @@ class names(minqlx.Plugin):
             else:
                 del self.db[name_key]
                 player.tell("Your registered name has been removed.")
-                return minqlx.RET_STOP_EVENT
+                return minqlx.RET_STOP_ALL
         
         name = self.clean_excessive_colors(" ".join(msg[1:]))
         if len(name.encode()) > 36:
             player.tell("The name is too long. Consider using fewer colors or a shorter name.")
-            return minqlx.RET_STOP_EVENT
+            return minqlx.RET_STOP_ALL
         elif self.clean_text(name).lower() != player.clean_name.lower() and self.get_cvar("qlx_enforceSteamName", bool):
             player.tell("The new name must match your current Steam name.")
-            return minqlx.RET_STOP_EVENT
+            return minqlx.RET_STOP_ALL
         elif "\\" in name:
             player.tell("The character '^6\\^7' cannot be used. Sorry for the inconvenience.")
-            return minqlx.RET_STOP_EVENT
+            return minqlx.RET_STOP_ALL
         elif not self.clean_text(name).strip():
             player.tell("Blank names cannot be used. Sorry for the inconvenience.")
-            return minqlx.RET_STOP_EVENT
+            return minqlx.RET_STOP_ALL
 
-        info = player.cvars
-        info["name"] = name
-        new_info = "".join(["\\{}\\{}".format(key, info[key]) for key in info])
-        minqlx.client_command(player.id, "userinfo \"{}\"".format(new_info))
+        self.name_set = True
+        player.name = name
         self.db[name_key] = name
         player.tell("The name has been registered. To make me forget about it, a simple ^6{}name^7 will do it."
             .format(self.get_cvar("qlx_commandPrefix")))
-        return minqlx.RET_STOP_EVENT
+        return minqlx.RET_STOP_ALL
 
     def clean_excessive_colors(self, name):
         """Removes excessive colors and only keeps the ones that matter."""
