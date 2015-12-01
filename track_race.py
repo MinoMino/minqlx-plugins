@@ -10,7 +10,6 @@ Tracks race records and posts them to QLRace.com.
 import minqlx
 import minqlx.database
 import requests
-import threading
 import json
 from datetime import datetime
 import importlib
@@ -33,8 +32,9 @@ class track_race(minqlx.Plugin):
             self.race = True
             self.map_name = self.game.map.lower()
         elif stats["TYPE"] == "PLAYER_STATS":
-            threading.Thread(target=self.update_pb, args=(stats,)).start()
+            self.update_pb(stats)
 
+    @minqlx.thread
     def update_pb(self, stats):
         """Updates a players pb. If no knockback weapons were fired
         it sets mode to strafe.
