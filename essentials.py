@@ -204,9 +204,9 @@ class essentials(minqlx.Plugin):
             player.tell("There are no players connected at the moment.")
             return minqlx.RET_STOP_ALL
         
-        res = "{:^} | {:^17} | {:^20} | {:^}\n".format("ID", "SteamID64", "IP Address", "Name")
+        res = "{:^} | {:^17} | {:^15} | {:^}\n".format("ID", "SteamID64", "IP Address", "Name")
         for p in players:
-            res += "{:2} | {:17} | {:20} | {}\n".format(p.id, p.steam_id, p.ip, p)
+            res += "{:2} | {:17} | {:15} | {}\n".format(p.id, p.steam_id, p.ip, p)
 
         player.tell(res)
         return minqlx.RET_STOP_ALL
