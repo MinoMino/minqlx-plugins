@@ -243,11 +243,17 @@ class SimpleAsyncIrc(threading.Thread):
 
     def run(self):
         loop = asyncio.new_event_loop()
+        logger = minqlx.get_logger("irc")
         asyncio.set_event_loop(loop)
         while not self.stop_event.is_set():
-            loop.run_until_complete(self.connect())
-            # Disconnected. Try reconnecting in 60 seconds.
-            time.sleep(60)
+            try:
+                loop.run_until_complete(self.connect())
+            except Exception:
+                minqlx.log_exception()
+            
+            # Disconnected. Try reconnecting in 30 seconds.
+            logger.info("Disconnected from IRC. Reconnecting in 30 seconds...")
+            time.sleep(30)
         loop.close()
 
     def stop(self):
