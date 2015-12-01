@@ -38,7 +38,8 @@ class race(minqlx.Plugin):
         self.set_cvar_once("qlx_raceMode", "0")
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
-        self.maps = self.get_maps()
+        self.maps = []
+        self.get_maps()
 
     def cmd_disabled(self, player, msg, channel):
         """This is to disable !slap and !slay"""
@@ -81,7 +82,7 @@ class race(minqlx.Plugin):
             minqlx.set_cvar("g_startingWeapons", "3")
         elif "strafe" not in factory:
             minqlx.set_cvar("g_startingWeapons", "147")
-        self.maps = self.get_maps()
+        self.get_maps()
 
     def handle_server_command(self, player, cmd):
         """Stops server printing haste message."""
@@ -90,7 +91,7 @@ class race(minqlx.Plugin):
 
     def cmd_updatemaps(self, player, msg, channel):
         """Updates list of race maps"""
-        self.maps = self.get_maps()
+        self.get_maps()
 
     def cmd_pb(self, player, msg, channel):
         """Outputs the player's personal best time for a map."""
@@ -330,11 +331,10 @@ class race(minqlx.Plugin):
     def get_maps(self):
         """Gets the list of race maps from QLRace.com,
         adds current map to the list if it isn't in the list"""
-        maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
+        self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
         current_map = self.game.map.lower()
-        if current_map not in maps:
-            maps.append(current_map)
-        return maps
+        if current_map not in self.maps:
+            self.maps.append(current_map)
 
     def map_prefix(self, map_prefix):
         """Returns the first map which matches the prefix.
