@@ -34,7 +34,7 @@ class cleverbot(minqlx.Plugin):
         qlx_cleverbotChance * 100 percent of the time"""
         if msg.startswith(self.get_cvar("qlx_commandPrefix")):
             return
-        
+
         try:
             chance = self.get_cvar("qlx_cleverbotChance", float)
         except ValueError:

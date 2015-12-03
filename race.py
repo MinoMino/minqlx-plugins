@@ -69,15 +69,15 @@ class race(minqlx.Plugin):
         minqlx.set_configstring(3, brand_map)
 
         non_rocket_maps = ["df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
-                       "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil",
-                       "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
-                       "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
-                       "df_lickrevived2", "df_licksewage", "df_licksux", "df_licktards", "df_licktunnel",
-                       "df_palmslane", "df_enz12", "df_ghostcheerslick", "df_ghostslickthis", "df_liquidazot",
-                       "df_pornstarlambaslick", "df_ghostcheerextended", "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5",
-                       "cpm_6", "cpm_7", "cpm_8", "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05",
-                       "vanilla_06", "vanilla_07", "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity",
-                       "df_qsnrun"]
+                           "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt",
+                           "df_lickevil", "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar",
+                           "df_lickhuar2", "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2",
+                           "df_lickpads", "df_lickrevived", "df_lickrevived2", "df_licksewage", "df_licksux",
+                           "df_licktards", "df_licktunnel", "df_palmslane", "df_enz12", "df_ghostcheerslick",
+                           "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick", "df_ghostcheerextended",
+                           "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8", "cpm_10",
+                           "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
+                           "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun"]
         if map_name.lower() in non_rocket_maps:
             minqlx.set_cvar("g_startingWeapons", "3")
         elif "strafe" not in factory:
