@@ -212,6 +212,10 @@ class IrcDummyPlayer(minqlx.AbstractDummyPlayer):
     def steam_id(self):
         return minqlx.owner()
 
+    @property
+    def channel(self):
+        return IrcChannel(self.irc, self.user)
+
     def tell(self, msg):
         for line in msg.split("\n"):
             self.irc.msg(self.user, irc.translate_colors(line))
