@@ -31,8 +31,8 @@ class log(minqlx.Plugin):
         self.add_hook("chat", self.handle_chat, priority=minqlx.PRI_LOWEST)
         self.add_hook("command", self.handle_command, priority=minqlx.PRI_LOWEST)
 
-        self.set_cvar_once("qlx_chatlogs", "0")
-        self.set_cvar_once("qlx_chatlogsSize", str(5*10**6)) # 5 MB
+        self.set_cvar_once("qlx_chatlogs", "3")
+        self.set_cvar_once("qlx_chatlogsSize", str(3*10**6)) # 3 MB
 
         self.chatlog = logging.Logger(__name__)
         file_dir = os.path.join(minqlx.get_cvar("fs_homepath"), "chatlogs")

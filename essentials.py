@@ -41,10 +41,13 @@ class essentials(minqlx.Plugin):
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("command", self.handle_command, priority=minqlx.PRI_LOW)
         self.add_command("id", self.cmd_id, 1, usage="[part_of_name] ...")
+        self.add_command("players", self.cmd_players, 1)
+        self.add_command(("disconnects", "dcs"), self.cmd_disconnects, 1)
         self.add_command(("commands", "cmds"), self.cmd_commands, 2)
         self.add_command("shuffle", self.cmd_shuffle, 1)
         self.add_command("slap", self.cmd_slap, 2, usage="<id> [damage]")
         self.add_command("slay", self.cmd_slay, 2, usage="<id>")
+        self.add_command("sounds", self.cmd_enable_sounds, usage="<0/1>")
         self.add_command("sound", self.cmd_sound, 1, usage="<path>")
         self.add_command("music", self.cmd_music, 1, usage="<path>")
         self.add_command("stopsound", self.cmd_stopsound, 1)
@@ -87,6 +90,8 @@ class essentials(minqlx.Plugin):
 
         # A short history of recently executed commands.
         self.recent_cmds = deque(maxlen=11)
+        # A short history of recently disconnected players.
+        self.recent_dcs = deque(maxlen=10)
         
         # Map voting stuff. fs_homepath takes precedence.
         self.mappool = None
@@ -104,7 +109,8 @@ class essentials(minqlx.Plugin):
         self.update_player(player)
 
     def handle_player_disconnect(self, player, reason):
-        self.update_player(player)
+        self.recent_dcs.appendleft((player, time.time()))
+        self.update_seen_player(player)
 
     def handle_vote_called(self, caller, vote, args):
         # Enforce teamsizes.
@@ -189,7 +195,32 @@ class essentials(minqlx.Plugin):
                 player.tell("Sorry, but no players matched your tokens.")
 
         # We reply directly to the player, so no need to let the event pass.
-        return minqlx.RET_STOP_EVENT
+        return minqlx.RET_STOP_ALL
+
+    def cmd_players(self, player, msg, channel):
+        """A command that mimics the output of the "players" console command."""
+        players = self.players()
+        if not len(players):
+            player.tell("There are no players connected at the moment.")
+            return minqlx.RET_STOP_ALL
+        
+        res = "{:^} | {:^17} | {:^15} | {:^}\n".format("ID", "SteamID64", "IP Address", "Name")
+        for p in players:
+            res += "{:2} | {:17} | {:15} | {}\n".format(p.id, p.steam_id, p.ip, p)
+
+        player.tell(res)
+        return minqlx.RET_STOP_ALL
+
+    def cmd_disconnects(self, player, msg, channel):
+        if len(self.recent_dcs) == 0:
+            player.tell("No players have disconnected yet.")
+        else:
+            player.tell("The most recent ^6{}^7 player disconnects:".format(len(self.recent_dcs)))
+            for x in self.recent_dcs:
+                p, t = x
+                player.tell("  {} ({}): ^6{}^7 seconds ago".format(p.name, p.steam_id, round(time.time() - t)))
+
+        return minqlx.RET_STOP_ALL
 
     def cmd_commands(self, player, msg, channel):
         if len(self.recent_cmds) == 1:
@@ -199,7 +230,7 @@ class essentials(minqlx.Plugin):
             for cmd in list(self.recent_cmds)[1:]:
                 player.tell("  {} executed: {}".format(cmd[0].name, cmd[2]))
 
-        return minqlx.RET_STOP_EVENT
+        return minqlx.RET_STOP_ALL
 
     def cmd_shuffle(self, player, msg, channel):
         """Forces a shuffle instantly."""
@@ -217,19 +248,19 @@ class essentials(minqlx.Plugin):
                 raise ValueError
         except ValueError:
             player.tell("Invalid ID.")
-            return minqlx.RET_STOP_EVENT
+            return minqlx.RET_STOP_ALL
 
         if len(msg) > 2:
             try:
                 dmg = int(msg[2])
             except ValueError:
                 player.tell("Invalid damage value.")
-                return minqlx.RET_STOP_EVENT
+                return minqlx.RET_STOP_ALL
         else:
             dmg = 0
         
         self.slap(target_player, dmg)
-        return minqlx.RET_STOP_EVENT
+        return minqlx.RET_STOP_ALL
 
     def cmd_slay(self, player, msg, channel):
         """Kills a player instantly."""
@@ -243,35 +274,88 @@ class essentials(minqlx.Plugin):
                 raise ValueError
         except ValueError:
             player.tell("Invalid ID.")
-            return minqlx.RET_STOP_EVENT
-        
+            return minqlx.RET_STOP_ALL
+
         self.slay(target_player)
-        return minqlx.RET_STOP_EVENT
+        return minqlx.RET_STOP_ALL
+
+    def cmd_enable_sounds(self, player, msg, channel):
+        flag = self.db.get_flag(player, "essentials:sounds_enabled", default=True)
+        self.db.set_flag(player, "essentials:sounds_enabled", not flag)
+        
+        if flag:
+            player.tell("Sounds have been disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+        else:
+            player.tell("Sounds have been enabled. Use ^6{}sounds^7 to disable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+
+        return minqlx.RET_STOP_ALL
 
     def cmd_sound(self, player, msg, channel):
-        """Plays a sound for the whole server."""
+        """Plays a sound for the those who have it enabled."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
-        if not self.play_sound(msg[1]):
+        if not self.db.get_flag(player, "essentials:sounds_enabled", default=True):
+            player.tell("Sounds are disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+            return minqlx.RET_STOP_ALL
+
+        # Play locally to validate.
+        if not self.play_sound(msg[1], player):
             player.tell("Invalid sound.")
-            return minqlx.RET_STOP_EVENT
+            return minqlx.RET_STOP_ALL
+
+        # Play to all other players who haven't disabled sound
+        players = self.players()
+        players.remove(player)
+        for p in players:
+            if self.db.get_flag(p, "essentials:sounds_enabled", default=True):
+                self.play_sound(msg[1], p)
+
+        return minqlx.RET_STOP_ALL
 
     def cmd_music(self, player, msg, channel):
-        """Plays music for the whole server, but only for those with music volume on."""
+        """Plays music, but only for those with music volume on and the sounds flag on."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
-        if not self.play_sound(msg[1]):
-            player.tell("Invalid music.")
-            return minqlx.RET_STOP_EVENT
+        if not self.db.get_flag(player, "essentials:sounds_enabled", default=True):
+            player.tell("Sounds are disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+            return minqlx.RET_STOP_ALL
+
+        # Play locally to validate.
+        if not self.play_music(msg[1], player):
+            player.tell("Invalid sound.")
+            return minqlx.RET_STOP_ALL
+
+        # Play to all other players who haven't disabled sounds.
+        players = self.players()
+        players.remove(player)
+        for p in players:
+            if self.db.get_flag(p, "essentials:sounds_enabled", default=True):
+                self.play_music(msg[1], p)
+
+        return minqlx.RET_STOP_ALL
 
     def cmd_stopsound(self, player, msg, channel):
-        """Stops all sounds playing. Useful if someone players one of those really long ones."""
+        """Stops all sounds playing. Useful if someone plays one of those really long ones."""
+        if not self.db.get_flag(player, "essentials:sounds_enabled", default=True):
+            player.tell("Sounds are disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+            return minqlx.RET_STOP_ALL
+
         self.stop_sound()
 
     def cmd_stopmusic(self, player, msg, channel):
         """Stops any music playing."""
+        if not self.db.get_flag(player, "essentials:sounds_enabled", default=True):
+            player.tell("Sounds are disabled. Use ^6{}sounds^7 to enable them again."
+                .format(self.get_cvar("qlx_commandPrefix")))
+            return minqlx.RET_STOP_ALL
+
         self.stop_music()
 
     def cmd_kick(self, player, msg, channel):
@@ -522,7 +606,7 @@ class essentials(minqlx.Plugin):
         # TODO: Perhaps print some essential commands in !help
         player.tell("minqlx: ^6{}^7 - Plugins: ^6{}".format(minqlx.__version__, minqlx.__plugins_version__))
         player.tell("See ^6github.com/MinoMino/minqlx^7 for more info about the mod and its commands.")
-        return minqlx.RET_STOP_EVENT
+        return minqlx.RET_STOP_ALL
     
     def cmd_db(self, player, msg, channel):
         """Prints the value of a key in the database."""
@@ -620,14 +704,15 @@ class essentials(minqlx.Plugin):
         
         self.game.teamsize = n
         self.msg("The teamsize has been set to ^6{}^7 by {}.".format(n, player))
-        return minqlx.RET_STOP_EVENT
+        return minqlx.RET_STOP_ALL
 
     def cmd_rcon(self, player, msg, channel):
         """Sends an rcon command to the server."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
-        # TODO: Maybe hack up something to redirect the output of !rcon?
-        minqlx.console_command(" ".join(msg[1:]))
+        
+        with minqlx.redirect_print(channel):
+            minqlx.console_command(" ".join(msg[1:]))
 
     def cmd_mappool(self, player, msg, channel):
         if not self.mappool or not self.get_cvar("qlx_enforceMappool", bool):
@@ -635,7 +720,7 @@ class essentials(minqlx.Plugin):
         else:
             self.tell_mappool(player)
 
-        return minqlx.RET_STOP_EVENT
+        return minqlx.RET_STOP_ALL
 
 
     # ====================================================================
@@ -643,12 +728,20 @@ class essentials(minqlx.Plugin):
     # ====================================================================
 
     def update_player(self, player):
-        """Updates the 'last_seen' entry in the database.
+        """Updates the list of recent names and IPs used by the player,
+        and adds entries to the player list and IP entries.
 
         """
         base_key = "minqlx:players:" + str(player.steam_id)
         db = self.db.pipeline()
-        # The simplicity here is the reason why Redis is perfect for this.
+        
+        # Add to IP set and make IP entry.
+        if player.ip:
+            db.sadd("minqlx:ips", player.ip)
+            db.sadd("minqlx:ips:" + player.ip, player.steam_id)
+            db.sadd(base_key + ":ips", player.ip)
+        
+        # Make or update player entry.
         if base_key not in self.db:
             db.lpush(base_key, player.name)
             db.sadd("minqlx:players", player.steam_id)
@@ -658,9 +751,11 @@ class essentials(minqlx.Plugin):
                 db.lpush(base_key, player.name)
                 db.ltrim(base_key, 0, 19)
         
-        now = datetime.datetime.now().strftime(DATETIME_FORMAT)
-        db.set(base_key + ":last_seen", now)
         db.execute()
+
+    def update_seen_player(self, player):
+        key = "minqlx:players:" + str(player.steam_id) + ":last_seen"
+        self.db[key] = datetime.datetime.now().strftime(DATETIME_FORMAT)
         
     @minqlx.delay(29)
     def force(self, require, vote_id):

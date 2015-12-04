@@ -18,15 +18,14 @@
 
 import minqlx
 
-from minqlx.database import Redis
-
 class plugin_manager(minqlx.Plugin):
-    database = Redis
-
     def __init__(self):
         self.add_command("load", self.cmd_load, 5, usage="<plugin>")
         self.add_command("unload", self.cmd_unload, 5, usage="<plugin>")
         self.add_command("reload", self.cmd_reload, 5, usage="<plugin>")
+        self.add_command("loadall", self.cmd_loadall, 5)
+        self.add_command("unloadall", self.cmd_unloadall, 5)
+        self.add_command("reloadall", self.cmd_reloadall, 5)
     
     def cmd_load(self, player, msg, channel):
         if len(msg) < 2:
@@ -34,10 +33,10 @@ class plugin_manager(minqlx.Plugin):
         else:
             try:
                 minqlx.load_plugin(msg[1])
-                channel.reply("^7Plugin ^6{} ^7has been successfully loaded."
+                channel.reply("Plugin ^6{} ^7has been successfully loaded."
                     .format(msg[1]))
             except Exception as e:
-                channel.reply("^7Plugin ^6{} ^7has failed to load: {} - {}"
+                channel.reply("Plugin ^6{} ^7has failed to load: {} - {}"
                     .format(msg[1], e.__class__.__name__, e))
                 minqlx.log_exception(self)
     
@@ -47,10 +46,10 @@ class plugin_manager(minqlx.Plugin):
         else:
             try:
                 minqlx.unload_plugin(msg[1])
-                channel.reply("^7Plugin ^6{} ^7has been successfully unloaded."
+                channel.reply("Plugin ^6{} ^7has been successfully unloaded."
                     .format(msg[1]))
             except Exception as e:
-                channel.reply("^7Plugin ^6{} ^7has failed to unload: {} - {}"
+                channel.reply("Plugin ^6{} ^7has failed to unload: {} - {}"
                     .format(msg[1], e.__class__.__name__, e))
                 minqlx.log_exception(self)
     
@@ -58,11 +57,53 @@ class plugin_manager(minqlx.Plugin):
         if len(msg) < 2:
             return minqlx.CMD_USAGE
         else:
-            try:
-                minqlx.reload_plugin(msg[1])
-                channel.reply("^7Plugin ^6{} ^7has been successfully reloaded."
-                    .format(msg[1]))
-            except Exception as e:
-                channel.reply("^7Plugin ^6{} ^7has failed to reload: {} - {}"
-                    .format(msg[1], e.__class__.__name__, e))
-                minqlx.log_exception(self)
+            # Wrap in next_frame to avoid the command going off several times due
+            # to the plugins dict being modified mid-command execution.
+            @minqlx.next_frame
+            def f():
+                try:
+                    minqlx.reload_plugin(msg[1])
+                    channel.reply("Plugin ^6{} ^7has been successfully reloaded."
+                        .format(msg[1]))
+                except Exception as e:
+                    channel.reply("Plugin ^6{} ^7has failed to reload: {} - {}"
+                        .format(msg[1], e.__class__.__name__, e))
+                    minqlx.log_exception(self)
+
+            f()
+
+    def cmd_loadall(self, player, msg, channel):
+        try:
+            minqlx.load_preset_plugins()
+        except Exception as e:
+            channel.reply("Plugins failed to load: {} - {}"
+                .format(e.__class__.__name__, e))
+            minqlx.log_exception(self)
+
+        channel.reply("Successfully loaded all plugins in ^6qlx_plugins^7.")
+
+    def cmd_unloadall(self, player, msg, channel):
+        for plugin in self.plugins:
+            if plugin != self.__class__.__name__:
+                try:
+                    minqlx.unload_plugin(plugin)
+                except Exception as e:
+                    channel.reply("Plugin ^6{} ^7has failed to unload: {} - {}"
+                        .format(plugin, e.__class__.__name__, e))
+                    minqlx.log_exception(self)
+
+        channel.reply("Successfully unloaded all plugins except {}."
+            .format(self.__class__.__name__))
+
+    def cmd_reloadall(self, player, msg, channel):
+        for plugin in self.plugins:
+            if plugin != self.__class__.__name__:
+                try:
+                    minqlx.unload_plugin(plugin)
+                except Exception as e:
+                    channel.reply("Plugin ^6{} ^7has failed to unload: {} - {}"
+                        .format(plugin, e.__class__.__name__, e))
+                    minqlx.log_exception(self)
+
+        channel.reply("Successfully reloaded all plugins except {}."
+            .format(self.__class__.__name__))
