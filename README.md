@@ -42,19 +42,48 @@ for leaving too many games.
   before automatic banning takes place. If it determines a player cannot possibly recover even if they were to not leave
   any future games before the minimum, the player will still be banned.
     - Default: `15`
+- **silence**: Adds commands to mute a player for an extended period of time. This persists reconnects, as opposed to the
+default mute behavior of QLDS.
 - **clan**: Adds commands to let players have persistent clan tags without having to change the name on Steam.
 - **motd**: Adds commands to set a message of the day.
   - `qlx_motdSound`: The path to a sounds that is played when players connect and have the MOTD printed to them.
     - Default: `sound/vo/crash_new/37b_07_alt.wav`
+  - `qlx_motdHeader`: The header printed right before the MOTD itself.
+    - Default: `^6======= ^7Message of the Day ^6=======`
 - **permission**: Adds commands to set player permissions.
 - **names**: Adds a command to change names without relying on Steam.
   - `qlx_enforceSteamName`: A boolean deciding whether or not it should force players to use Steam names,
     but allowing colors, or to allow the player to set any name.
     - Default: `1`
 - **raw**: Adds commands to interact with the Python interpreter directly. Useful for debugging.
+- **irc**: Has a small built-in IRC client that can relay chat to and from an IRC channel. It can also be used to remotely execute
+minqlx commands.
+  - `qlx_ircServer`: The address to the IRC server. The default port is 6667, but if you need to change it, just append `:<port>`.
+    - Default: `irc.quakenet.org`
+  - `qlx_ircRelayChannel`: The channel where chat is relayed to and from. Note that you must not omit the `#` from the channel name.
+  - `qlx_ircRelayIrcChat`: A boolean determining whether or not it should relay messages from IRC to the game chat.
+    - Default: `1`
+  - `qlx_ircIdleChannels`: A list of channels you just want it to sit in and not do anything. Example: `#mychan1, #mychan2`.
+  - `qlx_ircNickname`: The nickname the client will use on IRC.
+    - Default: `minqlx-XXXX` where the last four characters is a random number between 1000 and 9999.
+  - `qlx_ircPassword`: A password that can be used to remotely execute commands. Leave it unconfigured if you don't want this feature.
+  - `qlx_ircColors`: A boolean determining whether or not it should take in-game colors and translate them to colors supported by
+  a lot of IRC clients. Note that if this is not on, it will simply remove colors from all in-game chat.
+    - Default: `0`
+  - `qlx_ircQuakenetUser`: The Quakenet auth username. Leave it as it is if you don't use Quakenet or don't care for the feature.
+  - `qlx_ircQuakenetPass`: The Quakenet auth password.
+  - `qlx_ircQuakenetHidden`: Whether or not it should use mode +x, which hides its own hostname.
+    - Default: `0`
+- **log**: A plugin that logs chat and commands. All logs go to `fs_homepath/chatlogs`.
+  - `qlx_chatlogs`: The maximum number of logs to keep around. If set to `0`, no maximum is enforced.
+    - Default: `0`
+  - `qlx_chatlogsSize`: The maximum size of a log in bytes before it starts with a new one.
+    - Default: `5000000` (5 MB)
+- **solorace**: A plugin that starts the game and keeps it running on a race server without requiring a minimum of two players,
+like you usually do with race.
+- **docs**: A plugin that generates a command list of all the plugins currently loaded, in the form of a Markdown file.
 
 ## kanzo's plugins
-
 - **race**: Adds commands such as !top, !pb, !all etc.
   - `qlx_raceMode`: 0 for turbo, 2 for classic.
     - Default: `0`
@@ -69,3 +98,4 @@ for leaving too many games.
   - `qlx_cleverbotKey`: cleverbot.io API Key.
   - `qlx_cleverbotNick`: cleverbot.io Bot nick.
     - Default: `cleverbot`
+

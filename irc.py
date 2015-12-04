@@ -21,7 +21,6 @@ import threading
 import asyncio
 import random
 import time
-import sys
 import re
 
 # Colors using the mIRC color standard palette (which several other clients also comply with).
@@ -36,16 +35,23 @@ class irc(minqlx.Plugin):
 
         self.set_cvar_once("qlx_ircServer", "irc.quakenet.org")
         self.set_cvar_once("qlx_ircRelayChannel", "")
+        self.set_cvar_once("qlx_ircRelayIrcChat", "1")
         self.set_cvar_once("qlx_ircIdleChannels", "")
         self.set_cvar_once("qlx_ircNickname", "minqlx-{}".format(random.randint(1000, 9999)))
         self.set_cvar_once("qlx_ircPassword", "")
         self.set_cvar_once("qlx_ircColors", "0")
+        self.set_cvar_once("qlx_ircQuakenetUser", "")
+        self.set_cvar_once("qlx_ircQuakenetPass", "")
+        self.set_cvar_once("qlx_ircQuakenetHidden", "0")
 
         self.server = self.get_cvar("qlx_ircServer")
         self.relay = self.get_cvar("qlx_ircRelayChannel")
         self.idle = self.get_cvar("qlx_ircIdleChannels", list)
         self.nickname = self.get_cvar("qlx_ircNickname")
         self.password = self.get_cvar("qlx_ircPassword")
+        self.qnet = (self.get_cvar("qlx_ircQuakenetUser"),
+            self.get_cvar("qlx_ircQuakenetPass"),
+            self.get_cvar("qlx_ircQuakenetHidden", bool))
 
         self.authed = set()
         self.auth_attempts = {}
@@ -81,10 +87,14 @@ class irc(minqlx.Plugin):
             self.irc.msg(self.relay, self.translate_colors("{} {}".format(player.name, reason)))
 
     def handle_msg(self, irc, user, channel, msg):
+        cmd = msg[0].lower()
         if channel == self.relay:
-            minqlx.CHAT_CHANNEL.reply("[IRC] ^6{}^7:^2 {}".format(user[0], " ".join(msg)))
+            if cmd in (".players", ".status", ".info", ".map", ".server"):
+                self.server_report(self.relay)
+            elif self.get_cvar("qlx_ircRelayIrcChat", bool):
+                minqlx.CHAT_CHANNEL.reply("[IRC] ^6{}^7:^2 {}".format(user[0], " ".join(msg)))
         elif channel == user[0]: # Is PM?
-            if len(msg) > 1 and msg[0].lower() == ".auth":
+            if len(msg) > 1 and msg[0].lower() == ".auth" and self.password:
                 if user in self.authed:
                     irc.msg(channel, "You are already authenticated.")
                 elif msg[1] == self.password:
@@ -106,6 +116,14 @@ class irc(minqlx.Plugin):
 
     def handle_perform(self, irc):
         self.logger.info("Connected to IRC!".format(self.server))
+
+        quser, qpass, qhidden = self.qnet
+        if quser and qpass and "NETWORK" in self.irc.server_options and self.irc.server_options["NETWORK"] == "QuakeNet":
+            self.logger.info("Authenticating on Quakenet as \"{}\"...".format(quser))
+            self.irc.msg("Q@CServe.quakenet.org", "AUTH {} {}".format(quser, qpass))
+            if qhidden:
+                self.irc.mode(self.irc.nickname, "+x")
+
         for channel in self.idle:
             irc.join(channel)
         if self.relay:
@@ -118,7 +136,7 @@ class irc(minqlx.Plugin):
             if user and user.groups() in self.authed:
                 # Update nick if an authed user changed it.
                 self.authed.remove(user.groups())
-                self.authed.add((split_msg[2][1:], *user.groups()[1:]))
+                self.authed.add((split_msg[2][1:], user.groups()[1], user.groups()[2]))
         elif len(split_msg) > 1 and split_msg[1] == "433":
             irc.nick(irc.nickname + "_")
 
@@ -131,6 +149,41 @@ class irc(minqlx.Plugin):
             text = text.replace("^{}".format(i), color)
 
         return text
+
+    @minqlx.next_frame
+    def server_report(self, channel):
+        teams = self.teams()
+        players = teams["free"] + teams["red"] + teams["blue"] + teams["spectator"]
+        game = self.game
+        # Make a list of players.
+        plist = []
+        for t in teams:
+            if not teams[t]:
+                continue
+            elif t == "free":
+                plist.append("Free: " + ", ".join([p.clean_name for p in teams["free"]]))
+            elif t == "red":
+                plist.append("\x0304Red\x03: " + ", ".join([p.clean_name for p in teams["red"]]))
+            elif t == "blue":
+                plist.append("\x0302Blue\x03: " + ", ".join([p.clean_name for p in teams["blue"]]))
+            elif t == "spectator":
+                plist.append("\x02Spec\x02: " + ", ".join([p.clean_name for p in teams["spectator"]]))
+                
+
+        # Info about the game state.
+        if game.state == "in_progress":
+            if game.type_short == "race" or game.type_short == "ffa":
+                ginfo = "The game is in progress"
+            else:
+                ginfo = "The score is \x02\x0304{}\x03 - \x0302{}\x03\x02".format(game.red_score, game.blue_score)
+        elif game.state == "countdown":
+            ginfo = "The game is about to start"
+        else:
+            ginfo = "The game is in warmup"
+
+        self.irc.msg(channel, "{} on \x02{}\x02 ({}) with \x02{}/{}\x02 players:" .format(ginfo, self.clean_text(game.map_title),
+            game.type_short.upper(), len(players), self.get_cvar("sv_maxClients")))
+        self.irc.msg(channel, "{}".format(" ".join(plist)))
 
 # ====================================================================
 #                     DUMMY PLAYER & IRC CHANNEL
@@ -146,7 +199,8 @@ class IrcChannel(minqlx.AbstractChannel):
         return "{} {}".format(str(self), self.recipient)
 
     def reply(self, msg):
-        self.irc.msg(self.recipient, irc.translate_colors(msg))
+        for line in msg.split("\n"):
+            self.irc.msg(self.recipient, irc.translate_colors(line))
 
 class IrcDummyPlayer(minqlx.AbstractDummyPlayer):
     def __init__(self, irc, user):
@@ -158,8 +212,13 @@ class IrcDummyPlayer(minqlx.AbstractDummyPlayer):
     def steam_id(self):
         return minqlx.owner()
 
+    @property
+    def channel(self):
+        return IrcChannel(self.irc, self.user)
+
     def tell(self, msg):
-        self.irc.msg(self.user, irc.translate_colors(msg))
+        for line in msg.split("\n"):
+            self.irc.msg(self.user, irc.translate_colors(line))
 
 # ====================================================================
 #                        SIMPLE ASYNC IRC
@@ -188,11 +247,17 @@ class SimpleAsyncIrc(threading.Thread):
 
     def run(self):
         loop = asyncio.new_event_loop()
+        logger = minqlx.get_logger("irc")
         asyncio.set_event_loop(loop)
         while not self.stop_event.is_set():
-            loop.run_until_complete(self.connect())
-            # Disconnected. Try reconnecting in 60 seconds.
-            time.sleep(60)
+            try:
+                loop.run_until_complete(self.connect())
+            except Exception:
+                minqlx.log_exception()
+            
+            # Disconnected. Try reconnecting in 30 seconds.
+            logger.info("Disconnected from IRC. Reconnecting in 30 seconds...")
+            time.sleep(30)
         loop.close()
 
     def stop(self):
@@ -203,22 +268,24 @@ class SimpleAsyncIrc(threading.Thread):
             with self._lock:
                 self.writer.write(msg.encode(errors="ignore"))
 
-    async def connect(self):
-        self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
+    @asyncio.coroutine
+    def connect(self):
+        self.reader, self.writer = yield from asyncio.open_connection(self.host, self.port)
         self.write("NICK {0}\r\nUSER {0} 0 * :{0}\r\n".format(self.nickname))
         
         while not self.stop_event.is_set():
-            line = await self.reader.readline()
+            line = yield from self.reader.readline()
             if not line:
                 break
             line = line.decode("utf-8", errors="ignore").rstrip()
             if line:
-                await self.parse_data(line)
+                yield from self.parse_data(line)
 
         self.write("QUIT Quit by user.\r\n")
         self.writer.close()
 
-    async def parse_data(self, msg):
+    @asyncio.coroutine
+    def parse_data(self, msg):
         split_msg = msg.split()
         if len(split_msg) > 1 and split_msg[0] == "PING":
             self.pong(split_msg[1].lstrip(":"))
