@@ -710,8 +710,9 @@ class essentials(minqlx.Plugin):
         """Sends an rcon command to the server."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
-        # TODO: Maybe hack up something to redirect the output of !rcon?
-        minqlx.console_command(" ".join(msg[1:]))
+        
+        with minqlx.redirect_print(channel):
+            minqlx.console_command(" ".join(msg[1:]))
 
     def cmd_mappool(self, player, msg, channel):
         if not self.mappool or not self.get_cvar("qlx_enforceMappool", bool):
