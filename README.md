@@ -89,13 +89,12 @@ like you usually do with race.
     - Default: `0`
   - `qlx_raceBrand`: What you want to appear before map name, example: QLRace.com - actf01
     - Default: `QLRace.com`
-- **track_race**: Tracks race times and posts them to QLRace.com.
+- **track_race**: Tracks race times and POSTs them to QLRace.com.
   - `qlx_raceKey`: QLRace.com API Key.
 - **spec_delay**: Adds 8 seconds delay when going to from the free team to spectator and back to free.
-- **vote_ban**: Ban people from voting.
-- **cleverbot**: Responds to !chat using cleverbot
+- **vote_ban**: Adds command to ban people from voting.
+- **cleverbot**: Responds to !chat using cleverbot.io API.
   - `qlx_cleverbotUser`: cleverbot.io API User.
   - `qlx_cleverbotKey`: cleverbot.io API Key.
-  - `qlx_cleverbotNick`: cleverbot.io Bot nick.
+  - `qlx_cleverbotNick`: cleverbot.io bot nick.
     - Default: `cleverbot`
-
