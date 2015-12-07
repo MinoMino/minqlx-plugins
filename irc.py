@@ -89,7 +89,7 @@ class irc(minqlx.Plugin):
 
     def handle_msg(self, irc, user, channel, msg):
         cmd = msg[0].lower()
-        if channel == self.relay:
+        if channel.lower() == self.relay.lower():
             if cmd in (".players", ".status", ".info", ".map", ".server"):
                 self.server_report(self.relay)
             elif self.is_relaying:
