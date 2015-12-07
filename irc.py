@@ -108,11 +108,14 @@ class irc(minqlx.Plugin):
                     if self.auth_attempts[user[2]] > 0:
                         irc.msg(channel, "Wrong password. You have {} attempts left.".format(self.auth_attempts[user[2]]))
             elif len(msg) > 1 and user in self.authed and msg[0].lower() == ".qlx":
-                try:
-                    minqlx.COMMANDS.handle_input(IrcDummyPlayer(self.irc, user[0]), " ".join(msg[1:]), IrcChannel(self.irc, user[0]))
-                except Exception as e:
-                    irc.msg(channel, "{}: {}".format(e.__class__.__name__, e))
-                    minqlx.log_exception()
+                @minqlx.next_frame
+                def f():
+                    try:
+                        minqlx.COMMANDS.handle_input(IrcDummyPlayer(self.irc, user[0]), " ".join(msg[1:]), IrcChannel(self.irc, user[0]))
+                    except Exception as e:
+                        irc.msg(channel, "{}: {}".format(e.__class__.__name__, e))
+                        minqlx.log_exception()
+                f()
 
     def handle_perform(self, irc):
         self.logger.info("Connected to IRC!".format(self.server))
