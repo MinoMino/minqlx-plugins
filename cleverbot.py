@@ -18,13 +18,14 @@ class cleverbot(minqlx.Plugin):
         self.add_hook("chat", self.handle_chat)
         self.add_command("create", self.cmd_create, 2, usage="<nick>")
         self.add_command("chat", self.cmd_chat, usage="<some text>")
+        self.add_command("chance", self.cmd_chance, 2, usage="<chance (0-1>")
 
         # Get an API key at cleverbot.io
         self.set_cvar_once("qlx_cleverbotUser", "")
         self.set_cvar_once("qlx_cleverbotKey", "")
         self.set_cvar_once("qlx_cleverbotNick", "cleverbot")
         # Percentage chance to respond to chat, float between 0 and 1.
-        self.set_cvar_once("qlx_cleverbotChance", "0.0")
+        self.set_cvar_limit_once("qlx_cleverbotChance", "0", "0", "1")
 
         self.created = False
         self.create()
@@ -65,6 +66,23 @@ class cleverbot(minqlx.Plugin):
             self.ask(text, channel)
         else:
             channel.reply("^3You need to create the bot or set API key first.")
+
+    def cmd_chance(self, player, msg, channel):
+        """Sets the chance that the bot responds to chat."""
+        if len(msg) != 2:
+            return minqlx.RET_USAGE
+
+        chance = 0
+        try:
+            chance = float(msg[1])
+        except ValueError:
+            channel.reply("{} is not a valid float.".format(msg[1]))
+
+        if 0 <= chance <= 1:
+            self.set_cvar("qlx_cleverbotChance", str(chance))
+            channel.reply("Chance was set to {}".format(chance))
+        else:
+            channel.reply("Chance must be between 0 and 1.")
 
     @minqlx.thread
     def create(self):
