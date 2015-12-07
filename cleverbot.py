@@ -69,7 +69,10 @@ class cleverbot(minqlx.Plugin):
 
     def cmd_chance(self, player, msg, channel):
         """Sets the chance that the bot responds to chat."""
-        if len(msg) != 2:
+        if len(msg) == 1:
+            chance = self.get_cvar("qlx_cleverbotChance")
+            channel.reply("Chance is currently {}".format(chance))
+        if len(msg) > 2:
             return minqlx.RET_USAGE
 
         chance = 0
