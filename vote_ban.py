@@ -23,8 +23,9 @@ class vote_ban(minqlx.Plugin):
     def handle_vote_called(self, player, vote, args):
         """Stops a banned player from voting."""
         if self.is_banned(player.steam_id):
-            player.tell("You are banned from voting.")
-            return minqlx.RET_STOP_ALL
+            if len(self.teams()["free"]) > 1:
+                player.tell("You are banned from voting.")
+                return minqlx.RET_STOP_ALL
 
     def cmd_voteban(self, player, msg, channel):
         """Bans a player from voting."""
