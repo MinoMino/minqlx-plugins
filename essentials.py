@@ -45,6 +45,8 @@ class essentials(minqlx.Plugin):
         self.add_command(("disconnects", "dcs"), self.cmd_disconnects, 1)
         self.add_command(("commands", "cmds"), self.cmd_commands, 2)
         self.add_command("shuffle", self.cmd_shuffle, 1)
+        self.add_command(("pause", "timeout"), self.cmd_pause, 1)
+        self.add_command(("unpause", "timein"), self.cmd_unpause, 1)
         self.add_command("slap", self.cmd_slap, 2, usage="<id> [damage]")
         self.add_command("slay", self.cmd_slay, 2, usage="<id>")
         self.add_command("sounds", self.cmd_enable_sounds, usage="<0/1>")
@@ -235,6 +237,14 @@ class essentials(minqlx.Plugin):
     def cmd_shuffle(self, player, msg, channel):
         """Forces a shuffle instantly."""
         self.shuffle()
+
+    def cmd_pause(self, player, msg, channel):
+        """Pauses the game."""
+        self.pause()
+
+    def cmd_unpause(self, player, msg, channel):
+        """Unpauses the game."""
+        self.unpause()
 
     def cmd_slap(self, player, msg, channel):
         """Slaps a player with optional damage."""
