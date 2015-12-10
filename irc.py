@@ -52,6 +52,7 @@ class irc(minqlx.Plugin):
         self.qnet = (self.get_cvar("qlx_ircQuakenetUser"),
             self.get_cvar("qlx_ircQuakenetPass"),
             self.get_cvar("qlx_ircQuakenetHidden", bool))
+        self.is_relaying = self.get_cvar("qlx_ircRelayIrcChat", bool)
 
         self.authed = set()
         self.auth_attempts = {}
@@ -87,11 +88,14 @@ class irc(minqlx.Plugin):
             self.irc.msg(self.relay, self.translate_colors("{} {}".format(player.name, reason)))
 
     def handle_msg(self, irc, user, channel, msg):
+        if not msg:
+            return
+        
         cmd = msg[0].lower()
-        if channel == self.relay:
+        if channel.lower() == self.relay.lower():
             if cmd in (".players", ".status", ".info", ".map", ".server"):
                 self.server_report(self.relay)
-            elif self.get_cvar("qlx_ircRelayIrcChat", bool):
+            elif self.is_relaying:
                 minqlx.CHAT_CHANNEL.reply("[IRC] ^6{}^7:^2 {}".format(user[0], " ".join(msg)))
         elif channel == user[0]: # Is PM?
             if len(msg) > 1 and msg[0].lower() == ".auth" and self.password:
