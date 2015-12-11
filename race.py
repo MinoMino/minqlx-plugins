@@ -83,8 +83,10 @@ class race(minqlx.Plugin):
         if factory in ["qlrace_turbo", "qlrace_classic"]:
             if map_name.lower() in non_rocket_maps:
                 minqlx.set_cvar("g_startingWeapons", "3")
+                minqlx.set_cvar("g_infiniteAmmo", "0")
             else:
                 minqlx.set_cvar("g_startingWeapons", "147")
+                minqlx.set_cvar("g_infiniteAmmo", "1")
         self.get_maps()
 
     def handle_server_command(self, player, cmd):
