@@ -462,7 +462,7 @@ class balance(minqlx.Plugin):
 
     def cmd_ratings(self, player, msg, channel):
         gt = self.game.type_short
-        if gt not in SUPPORTED_GAMETYPES:
+        if gt not in EXT_SUPPORTED_GAMETYPES:
             player.tell("This game mode is not supported by the balance plugin.")
             return minqlx.RET_STOP_ALL
         
