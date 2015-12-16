@@ -97,7 +97,7 @@ and thus not have the client download them automatically.
   - `qlx_workshopReferences`: A comma-separated list of workshop IDs for items you want to force the client to download.
   Use this for custom resources, such as sounds packs and whatnot.
 
-  ## kanzo's plugins
+## kanzo's plugins
 - **race**: Adds commands such as !top, !pb, !all etc.
   - `qlx_raceMode`: 0 for turbo, 2 for classic.
     - Default: `0`
