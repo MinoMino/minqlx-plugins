@@ -462,7 +462,7 @@ class balance(minqlx.Plugin):
 
     def cmd_ratings(self, player, msg, channel):
         gt = self.game.type_short
-        if gt not in SUPPORTED_GAMETYPES:
+        if gt not in EXT_SUPPORTED_GAMETYPES:
             player.tell("This game mode is not supported by the balance plugin.")
             return minqlx.RET_STOP_ALL
         
@@ -481,6 +481,10 @@ class balance(minqlx.Plugin):
                 self.add_request(d, self.callback_ratings, channel)
                 return
 
+        if teams["free"]:
+            free_sorted = sorted(teams["free"], key=lambda x: self.ratings[x.steam_id][gt]["elo"], reverse=True)
+            free = ", ".join(["{}: ^6{}^7".format(p.clean_name, self.ratings[p.steam_id][gt]["elo"]) for p in free_sorted])
+            channel.reply(free)
         if teams["red"]:
             red_sorted = sorted(teams["red"], key=lambda x: self.ratings[x.steam_id][gt]["elo"], reverse=True)
             red = ", ".join(["{}: ^1{}^7".format(p.clean_name, self.ratings[p.steam_id][gt]["elo"]) for p in red_sorted])

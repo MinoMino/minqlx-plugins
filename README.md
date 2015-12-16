@@ -42,6 +42,16 @@ for leaving too many games.
   before automatic banning takes place. If it determines a player cannot possibly recover even if they were to not leave
   any future games before the minimum, the player will still be banned.
     - Default: `15`
+- **balance**: Adds commands and cvars to help balance teams in team games using ratings provided by third-party services.
+  - `qlx_balanceAuto`: A boolean determining whether or not it should automatically try to balance teams if a shuffle vote passes.
+    - Default: `1`
+  - `qlx_balanceUseLocal`: A boolean determining whether or not it should use local ratings set by the *!setrating* command.
+    - Default: `1`
+  - `qlx_balanceMinimumSuggestionDiff`: The minimum rating difference before it suggests a switch when *!teams* is executed.
+    - Default: `25`
+  - `qlx_balanceUrl`: The address to the site hosting an instance of [PredatH0r's XonStat fork](https://github.com/PredatH0r/XonStat),
+  which is currently the only supported rating service.
+    - Default: `qlstats.net:8080`, which is hosted by PredatH0r himself.
 - **silence**: Adds commands to mute a player for an extended period of time. This persists reconnects, as opposed to the
 default mute behavior of QLDS.
 - **clan**: Adds commands to let players have persistent clan tags without having to change the name on Steam.
@@ -82,8 +92,12 @@ minqlx commands.
 - **solorace**: A plugin that starts the game and keeps it running on a race server without requiring a minimum of two players,
 like you usually do with race.
 - **docs**: A plugin that generates a command list of all the plugins currently loaded, in the form of a Markdown file.
+- **workshop**: A plugin that allows the use of custom workshop items that the server might not reference by default,
+and thus not have the client download them automatically.
+  - `qlx_workshopReferences`: A comma-separated list of workshop IDs for items you want to force the client to download.
+  Use this for custom resources, such as sounds packs and whatnot.
 
-## kanzo's plugins
+  ## kanzo's plugins
 - **race**: Adds commands such as !top, !pb, !all etc.
   - `qlx_raceMode`: 0 for turbo, 2 for classic.
     - Default: `0`
