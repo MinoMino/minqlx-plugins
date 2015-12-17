@@ -50,7 +50,7 @@ class log(minqlx.Plugin):
             .format(datetime.datetime.now()))
 
     def handle_player_connect(self, player):
-        self.chatlog.info("{}:{} connected.".format(player.clean_name, player.steam_id))
+        self.chatlog.info("{}:{}:{} connected.".format(player.clean_name, player.steam_id, player.ip))
 
     def handle_player_disconnect(self, player, reason):
         if reason and reason[-1] not in ("?", "!", "."):
