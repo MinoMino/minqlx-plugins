@@ -69,7 +69,12 @@ class balance(minqlx.Plugin):
 
     def handle_round_countdown(self, *args, **kwargs):
         if all(self.suggested_agree):
-            self.execute_suggestion()
+            # If we don't delay the switch a bit, the round countdown sound and
+            # text disappears for some weird reason.
+            @minqlx.next_frame
+            def f():
+                self.execute_suggestion()
+            f()
         
         self.in_countdown = True
 
