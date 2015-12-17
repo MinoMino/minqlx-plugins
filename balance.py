@@ -207,10 +207,10 @@ class balance(minqlx.Plugin):
                     target_player = self.player(sid)
                     sid = target_player.steam_id
             except ValueError:
-                channel.reply("Invalid ID. Use either a client ID or a SteamID64.")
+                player.tell("Invalid ID. Use either a client ID or a SteamID64.")
                 return minqlx.RET_STOP_ALL
             except minqlx.NonexistentPlayerError:
-                channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
+                player.tell("Invalid client ID. Use either a client ID or a SteamID64.")
                 return minqlx.RET_STOP_ALL
 
         if len(msg) > 2:
@@ -249,16 +249,16 @@ class balance(minqlx.Plugin):
                 target_player = self.player(sid)
                 sid = target_player.steam_id
         except ValueError:
-            channel.reply("Invalid ID. Use either a client ID or a SteamID64.")
+            player.tell("Invalid ID. Use either a client ID or a SteamID64.")
             return minqlx.RET_STOP_ALL
         except minqlx.NonexistentPlayerError:
-            channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
+            player.tell("Invalid client ID. Use either a client ID or a SteamID64.")
             return minqlx.RET_STOP_ALL
         
         try:
             rating = int(msg[2])
         except ValueError:
-            channel.reply("Invalid rating.")
+            player.tell("Invalid rating.")
             return minqlx.RET_STOP_ALL
 
         if target_player:
@@ -289,10 +289,10 @@ class balance(minqlx.Plugin):
                 target_player = self.player(sid)
                 sid = target_player.steam_id
         except ValueError:
-            channel.reply("Invalid ID. Use either a client ID or a SteamID64.")
+            player.tell("Invalid ID. Use either a client ID or a SteamID64.")
             return minqlx.RET_STOP_ALL
         except minqlx.NonexistentPlayerError:
-            channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
+            player.tell("Invalid client ID. Use either a client ID or a SteamID64.")
             return minqlx.RET_STOP_ALL
         
         if target_player:
