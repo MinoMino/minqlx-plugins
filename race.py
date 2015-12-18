@@ -88,6 +88,12 @@ class race(minqlx.Plugin):
             else:
                 minqlx.set_cvar("g_startingWeapons", "147")
                 minqlx.set_cvar("g_infiniteAmmo", "1")
+            if map_name.lower() == "walkathon":
+                minqlx.set_cvar("g_respawn_delay_min", "1000")
+                minqlx.set_cvar("g_respawn_delay_max", "1000")
+            else:
+                minqlx.set_cvar("g_respawn_delay_min", "10")
+                minqlx.set_cvar("g_respawn_delay_max", "10")
         self.get_maps()
 
     def handle_server_command(self, player, cmd):
