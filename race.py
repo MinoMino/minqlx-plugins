@@ -14,7 +14,7 @@ import random
 
 params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
           {"factory": "classic", "weapons": "false"}]
-
+_re_powerups = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
 
 class race(minqlx.Plugin):
     def __init__(self):
@@ -68,7 +68,7 @@ class race(minqlx.Plugin):
         brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name.lower())
         minqlx.set_configstring(3, brand_map)
 
-        non_rocket_maps = ["df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
+        no_weapons = ["df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
                            "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt",
                            "df_lickevil", "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar",
                            "df_lickhuar2", "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2",
@@ -78,10 +78,11 @@ class race(minqlx.Plugin):
                            "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8", "cpm_10",
                            "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
                            "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
-                           "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr"]
+                           "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
+                           "walkathon"]
 
         if factory in ["qlrace_turbo", "qlrace_classic"]:
-            if map_name.lower() in non_rocket_maps:
+            if map_name.lower() in no_weapons:
                 minqlx.set_cvar("g_startingWeapons", "3")
                 minqlx.set_cvar("g_infiniteAmmo", "0")
             else:
@@ -90,8 +91,8 @@ class race(minqlx.Plugin):
         self.get_maps()
 
     def handle_server_command(self, player, cmd):
-        """Stops server printing haste message."""
-        if re.match(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"', cmd):
+        """Stops server printing powerup messages."""
+        if _re_powerups.fullmatch(cmd):
             return minqlx.RET_STOP_EVENT
 
     def cmd_updatemaps(self, player, msg, channel):
