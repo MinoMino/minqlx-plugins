@@ -352,10 +352,10 @@ class race(minqlx.Plugin):
         """Returns the first map which matches the prefix.
         :param map_prefix: The prefix of a map
         """
-        if map_prefix in self.maps:
-            return map_prefix
+        if map_prefix.lower() in self.maps:
+            return map_prefix.lower()
 
-        return next((x for x in self.maps if x.startswith(map_prefix)), None)
+        return next((x for x in self.maps if x.startswith(map_prefix.lower())), None)
 
     def get_map_name_weapons(self, map_prefix, command, channel):
         """Get map name and weapons boolean.
