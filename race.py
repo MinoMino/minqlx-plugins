@@ -16,6 +16,7 @@ params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
           {"factory": "classic", "weapons": "false"}]
 _re_powerups = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
 
+
 class race(minqlx.Plugin):
     def __init__(self):
         super().__init__()
@@ -69,17 +70,16 @@ class race(minqlx.Plugin):
         minqlx.set_configstring(3, brand_map)
 
         no_weapons = ["df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
-                           "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt",
-                           "df_lickevil", "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar",
-                           "df_lickhuar2", "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2",
-                           "df_lickpads", "df_lickrevived", "df_lickrevived2", "df_licksewage", "df_licksux",
-                           "df_licktards", "df_licktunnel", "df_palmslane", "df_enz12", "df_ghostcheerslick",
-                           "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick", "df_ghostcheerextended",
-                           "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8", "cpm_10",
-                           "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
-                           "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
-                           "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
-                           "walkathon", "purpletorture"]
+                      "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil",
+                      "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
+                      "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
+                      "df_lickrevived2", "df_licksewage", "df_licksux", "df_licktards", "df_licktunnel", "df_palmslane",
+                      "df_enz12", "df_ghostcheerslick", "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick",
+                      "df_ghostcheerextended", "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8",
+                      "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
+                      "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
+                      "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
+                      "walkathon", "purpletorture"]
 
         if factory in ["qlrace_turbo", "qlrace_classic"]:
             if map_name.lower() in no_weapons:
@@ -318,7 +318,7 @@ class race(minqlx.Plugin):
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
         channel.reply(
-            "Commands: ^3!(s)pb !(s)rank !(s)top !(s)all !(s)ranktime !(s)avg !random")
+                "Commands: ^3!(s)pb !(s)rank !(s)top !(s)all !(s)ranktime !(s)avg !random")
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
