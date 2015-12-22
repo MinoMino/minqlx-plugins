@@ -94,6 +94,10 @@ class ban(minqlx.Plugin):
         self.players_start = teams["red"] + teams["blue"]
 
     def handle_game_end(self, data):
+        if data["ABORTED"]:
+            self.players_start = []
+            return
+
         teams = self.teams()
         players_end = teams["red"] + teams["blue"]
         leavers = []
