@@ -90,6 +90,10 @@ class balance(minqlx.Plugin):
             @minqlx.delay(3.5)
             def f():
                 players = self.teams()
+                if len(players["red"] + players["blue"]) % 2 != 0:
+                    self.msg("Teams were ^6NOT^7 balanced due to the total number of players being an odd number.")
+                    return
+                
                 players = dict([(p.steam_id, gt) for p in players["red"] + players["blue"]])
                 self.add_request(players, self.callback_balance, minqlx.CHAT_CHANNEL)
             f()
