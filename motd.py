@@ -53,8 +53,9 @@ class motd(minqlx.Plugin):
         This should be set to lowest priority so that we don't execute anything if "ban" or
         a similar plugin determines the player should be kicked.
         """
-        motd = self.db[self.motd_key]
-        if not motd:
+        try:
+            motd = self.db[self.motd_key]
+        except KeyError:
             return
         
         welcome_sound = self.get_cvar("qlx_motdSound")
