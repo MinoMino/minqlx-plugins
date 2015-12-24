@@ -68,6 +68,8 @@ class essentials(minqlx.Plugin):
         self.add_command("demote", self.cmd_demote, 5, usage="<id>")
         self.add_command("mute", self.cmd_mute, 1, usage="<id>")
         self.add_command("unmute", self.cmd_unmute, 1, usage="<id>")
+        self.add_command("lock", self.cmd_lock, 1, usage="[team]")
+        self.add_command("unlock", self.cmd_unlock, 1, usage="[team]")
         self.add_command("allready", self.cmd_allready, 2)
         self.add_command("abort", self.cmd_abort, 2)
         self.add_command(("map", "changemap"), self.cmd_map, 2, usage="<mapname> [factory]")
@@ -589,6 +591,36 @@ class essentials(minqlx.Plugin):
             return
 
         target_player.unmute()
+
+    def cmd_lock(self, player, msg, channel):
+        """Lock a team."""
+        if len(msg) > 1:
+            if msg[1][0].lower() == "s":
+                self.lock("spectator")
+            elif msg[1][0].lower() == "r":
+                self.lock("red")
+            elif msg[1][0].lower() == "b":
+                self.lock("blue")
+            else:
+                player.tell("Invalid team.")
+                return minqlx.RET_STOP_ALL
+        else:
+            self.lock()
+
+    def cmd_unlock(self, player, msg, channel):
+        """Unlock a team."""
+        if len(msg) > 1:
+            if msg[1][0].lower() == "s":
+                self.unlock("spectator")
+            elif msg[1][0].lower() == "r":
+                self.unlock("red")
+            elif msg[1][0].lower() == "b":
+                self.unlock("blue")
+            else:
+                player.tell("Invalid team.")
+                return minqlx.RET_STOP_ALL
+        else:
+            self.unlock()
     
     def cmd_allready(self, player, msg, channel):
         """Forces all players to ready up."""
