@@ -89,7 +89,13 @@ class ban(minqlx.Plugin):
         if self.get_cvar("qlx_leaverBan", bool):
             self.msg("Leavers are being kept track of. Repeat offenders ^6will^7 be banned.")
 
+    # Needs a delay here because players will sometimes have their teams reset during the event.
+    # TODO: Proper fix to self.teams() in game_start.
+    @minqlx.delay(1)
     def handle_game_start(self, game):
+        self.msg(self.teams())
+        for player in self.players():
+            self.msg(player.connection_state)
         teams = self.teams()
         self.players_start = teams["red"] + teams["blue"]
 
