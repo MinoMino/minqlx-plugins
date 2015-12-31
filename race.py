@@ -50,11 +50,11 @@ class race(minqlx.Plugin):
     def handle_vote_called(self, player, vote, args):
         """Cancels the vote when map called is a duplicate."""
         if vote.lower() == "map":
-            disabled_maps = ["q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
-                             "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2"]
-            map_name = args.lower().split()[0]
-            if map_name in disabled_maps:
-                player.tell("^3{} ^2is disabled(duplicate).".format(map_name))
+            disabled_maps = ("q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
+                             "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2", "wintersedge")
+            map_name = args.split()[0]
+            if map_name.lower() in disabled_maps:
+                player.tell("^3{} ^2is disabled(duplicate map).".format(map_name))
                 return minqlx.RET_STOP_ALL
 
     def handle_new_game(self):
@@ -69,7 +69,7 @@ class race(minqlx.Plugin):
         brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name.lower())
         minqlx.set_configstring(3, brand_map)
 
-        no_weapons = ["df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
+        no_weapons = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
                       "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil",
                       "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
                       "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
@@ -79,7 +79,7 @@ class race(minqlx.Plugin):
                       "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
                       "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
                       "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
-                      "walkathon", "purpletorture"]
+                      "walkathon", "purpletorture")
 
         if factory in ["qlrace_turbo", "qlrace_classic"]:
             if map_name.lower() in no_weapons:
