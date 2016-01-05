@@ -44,7 +44,7 @@ class motd(minqlx.Plugin):
 
         # Cvar to disable/change the welcome sound.
         self.set_cvar_once("qlx_motdSound", "sound/vo/crash_new/37b_07_alt.wav")
-        self.set_cvar_once("qlx_motdHeader", "^6======= ^7Message of the Day ^6=======")
+        self.set_cvar_once("qlx_motdHeader", "^6======= ^7Message of the Day ^6=======^7")
 
     @minqlx.delay(2)
     def handle_player_loaded(self, player):
