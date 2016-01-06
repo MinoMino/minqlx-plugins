@@ -63,8 +63,10 @@ class balance(minqlx.Plugin):
         self.set_cvar_once("qlx_balanceUrl", "qlstats.net:8080")
         self.set_cvar_once("qlx_balanceAuto", "1")
         self.set_cvar_once("qlx_balanceMinimumSuggestionDiff", "25")
+        self.set_cvar_once("qlx_balanceApi", "elo")
+
         self.use_local = self.get_cvar("qlx_balanceUseLocal", bool)
-        self.api_url = "http://{}/elo/".format(self.get_cvar("qlx_balanceUrl"))
+        self.api_url = "http://{}/{}/".format(self.get_cvar("qlx_balanceUrl"), self.get_cvar("qlx_balanceApi"))
 
     def handle_round_countdown(self, *args, **kwargs):
         if all(self.suggested_agree):
