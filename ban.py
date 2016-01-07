@@ -93,9 +93,6 @@ class ban(minqlx.Plugin):
     # TODO: Proper fix to self.teams() in game_start.
     @minqlx.delay(1)
     def handle_game_start(self, game):
-        self.msg(self.teams())
-        for player in self.players():
-            self.msg(player.connection_state)
         teams = self.teams()
         self.players_start = teams["red"] + teams["blue"]
 
