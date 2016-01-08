@@ -44,7 +44,7 @@ class motd(minqlx.Plugin):
 
         # Cvar to disable/change the welcome sound.
         self.set_cvar_once("qlx_motdSound", "sound/vo/crash_new/37b_07_alt.wav")
-        self.set_cvar_once("qlx_motdHeader", "^6======= ^7Message of the Day ^6=======")
+        self.set_cvar_once("qlx_motdHeader", "^6======= ^7Message of the Day ^6=======^7")
 
     @minqlx.delay(2)
     def handle_player_loaded(self, player):
@@ -53,8 +53,9 @@ class motd(minqlx.Plugin):
         This should be set to lowest priority so that we don't execute anything if "ban" or
         a similar plugin determines the player should be kicked.
         """
-        motd = self.db[self.motd_key]
-        if not motd:
+        try:
+            motd = self.db[self.motd_key]
+        except KeyError:
             return
         
         welcome_sound = self.get_cvar("qlx_motdSound")

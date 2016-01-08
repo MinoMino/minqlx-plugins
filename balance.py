@@ -26,10 +26,9 @@ import time
 from minqlx.database import Redis
 
 RATING_KEY = "minqlx:players:{0}:ratings:{1}" # 0 == steam_id, 1 == short gametype.
-API_URL = "http://qlstats.net:8080/elo/{}"
 MAX_ATTEMPTS = 3
 CACHE_EXPIRE = 60*30 # 30 minutes TTL.
-DEFAULT_RATING = 1000
+DEFAULT_RATING = 1500
 SUPPORTED_GAMETYPES = ("ca", "ctf", "dom", "ft", "tdm")
 # Externally supported game types. Used by !getrating for game types the API works with.
 EXT_SUPPORTED_GAMETYPES = ("ca", "ctf", "dom", "ft", "tdm", "duel", "ffa")
@@ -64,12 +63,19 @@ class balance(minqlx.Plugin):
         self.set_cvar_once("qlx_balanceUrl", "qlstats.net:8080")
         self.set_cvar_once("qlx_balanceAuto", "1")
         self.set_cvar_once("qlx_balanceMinimumSuggestionDiff", "25")
+        self.set_cvar_once("qlx_balanceApi", "elo")
+
         self.use_local = self.get_cvar("qlx_balanceUseLocal", bool)
-        self.api_url = "http://{}/elo/".format(self.get_cvar("qlx_balanceUrl"))
+        self.api_url = "http://{}/{}/".format(self.get_cvar("qlx_balanceUrl"), self.get_cvar("qlx_balanceApi"))
 
     def handle_round_countdown(self, *args, **kwargs):
         if all(self.suggested_agree):
-            self.execute_suggestion()
+            # If we don't delay the switch a bit, the round countdown sound and
+            # text disappears for some weird reason.
+            @minqlx.next_frame
+            def f():
+                self.execute_suggestion()
+            f()
         
         self.in_countdown = True
 
@@ -85,6 +91,10 @@ class balance(minqlx.Plugin):
             @minqlx.delay(3.5)
             def f():
                 players = self.teams()
+                if len(players["red"] + players["blue"]) % 2 != 0:
+                    self.msg("Teams were ^6NOT^7 balanced due to the total number of players being an odd number.")
+                    return
+                
                 players = dict([(p.steam_id, gt) for p in players["red"] + players["blue"]])
                 self.add_request(players, self.callback_balance, minqlx.CHAT_CHANNEL)
             f()
@@ -207,10 +217,10 @@ class balance(minqlx.Plugin):
                     target_player = self.player(sid)
                     sid = target_player.steam_id
             except ValueError:
-                channel.reply("Invalid ID. Use either a client ID or a SteamID64.")
+                player.tell("Invalid ID. Use either a client ID or a SteamID64.")
                 return minqlx.RET_STOP_ALL
             except minqlx.NonexistentPlayerError:
-                channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
+                player.tell("Invalid client ID. Use either a client ID or a SteamID64.")
                 return minqlx.RET_STOP_ALL
 
         if len(msg) > 2:
@@ -249,16 +259,16 @@ class balance(minqlx.Plugin):
                 target_player = self.player(sid)
                 sid = target_player.steam_id
         except ValueError:
-            channel.reply("Invalid ID. Use either a client ID or a SteamID64.")
+            player.tell("Invalid ID. Use either a client ID or a SteamID64.")
             return minqlx.RET_STOP_ALL
         except minqlx.NonexistentPlayerError:
-            channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
+            player.tell("Invalid client ID. Use either a client ID or a SteamID64.")
             return minqlx.RET_STOP_ALL
         
         try:
             rating = int(msg[2])
         except ValueError:
-            channel.reply("Invalid rating.")
+            player.tell("Invalid rating.")
             return minqlx.RET_STOP_ALL
 
         if target_player:
@@ -289,10 +299,10 @@ class balance(minqlx.Plugin):
                 target_player = self.player(sid)
                 sid = target_player.steam_id
         except ValueError:
-            channel.reply("Invalid ID. Use either a client ID or a SteamID64.")
+            player.tell("Invalid ID. Use either a client ID or a SteamID64.")
             return minqlx.RET_STOP_ALL
         except minqlx.NonexistentPlayerError:
-            channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
+            player.tell("Invalid client ID. Use either a client ID or a SteamID64.")
             return minqlx.RET_STOP_ALL
         
         if target_player:

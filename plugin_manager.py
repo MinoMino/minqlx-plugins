@@ -29,7 +29,7 @@ class plugin_manager(minqlx.Plugin):
     
     def cmd_load(self, player, msg, channel):
         if len(msg) < 2:
-            return minqlx.CMD_USAGE
+            return minqlx.RET_USAGE
         else:
             try:
                 minqlx.load_plugin(msg[1])
@@ -42,7 +42,7 @@ class plugin_manager(minqlx.Plugin):
     
     def cmd_unload(self, player, msg, channel):
         if len(msg) < 2:
-            return minqlx.CMD_USAGE
+            return minqlx.RET_USAGE
         else:
             try:
                 minqlx.unload_plugin(msg[1])
@@ -55,7 +55,7 @@ class plugin_manager(minqlx.Plugin):
     
     def cmd_reload(self, player, msg, channel):
         if len(msg) < 2:
-            return minqlx.CMD_USAGE
+            return minqlx.RET_USAGE
         else:
             # Wrap in next_frame to avoid the command going off several times due
             # to the plugins dict being modified mid-command execution.

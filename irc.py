@@ -32,6 +32,9 @@ class irc(minqlx.Plugin):
         self.add_hook("unload", self.handle_unload)
         self.add_hook("player_connect", self.handle_player_connect, priority=minqlx.PRI_LOWEST)
         self.add_hook("player_disconnect", self.handle_player_disconnect, priority=minqlx.PRI_LOWEST)
+        self.add_hook("vote_started", self.handle_vote_started)
+        self.add_hook("vote_ended", self.handle_vote_ended)
+        self.add_hook("map", self.handle_map)
 
         self.set_cvar_once("qlx_ircServer", "irc.quakenet.org")
         self.set_cvar_once("qlx_ircRelayChannel", "")
@@ -86,6 +89,22 @@ class irc(minqlx.Plugin):
         
         if self.irc and self.relay:
             self.irc.msg(self.relay, self.translate_colors("{} {}".format(player.name, reason)))
+
+    def handle_vote_started(self, caller, vote, args):
+        if self.irc and self.relay:
+            caller = caller.name if caller else "The server"
+            self.irc.msg(self.relay, self.translate_colors("{} called a vote: {} {}".format(caller, vote, args)))
+
+    def handle_vote_ended(self, votes, vote, args, passed):
+        if self.irc and self.relay:
+            if passed:
+                self.irc.msg(self.relay, self.translate_colors("Vote passed ({} - {}).".format(*votes)))
+            else:
+                self.irc.msg(self.relay, self.translate_colors("Vote failed."))
+
+    def handle_map(self, map, factory):
+        if self.irc and self.relay:
+            self.irc.msg(self.relay, self.translate_colors("Changing map to {}...".format(map)))
 
     def handle_msg(self, irc, user, channel, msg):
         if not msg:

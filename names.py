@@ -47,7 +47,8 @@ class names(minqlx.Plugin):
                 player.name = db_name
 
     def handle_player_disconnect(self, player, reason):
-        del self.steam_names[player.steam_id]
+        if player.steam_id in self.steam_names:
+            del self.steam_names[player.steam_id]
 
     def handle_userinfo(self, player, changed):
         # Make sure we're not doing anything if our script set the name.
