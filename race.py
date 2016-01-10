@@ -12,8 +12,8 @@ import requests
 import re
 import random
 
-params = [{}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
-          {"factory": "classic", "weapons": "false"}]
+PARAMS = ({}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
+          {"factory": "classic", "weapons": "false"})
 _re_powerups = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
 
 
@@ -81,7 +81,7 @@ class race(minqlx.Plugin):
                       "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
                       "walkathon", "purpletorture")
 
-        if factory in ["qlrace_turbo", "qlrace_classic"]:
+        if factory in ("qlrace_turbo", "qlrace_classic"):
             if map_name.lower() in no_weapons:
                 minqlx.set_cvar("g_startingWeapons", "3")
                 minqlx.set_cvar("g_infiniteAmmo", "0")
@@ -299,7 +299,7 @@ class race(minqlx.Plugin):
 
     @minqlx.thread
     def avg(self, player, mode, strafe, channel):
-        data = requests.get("https://qlrace.com/api/player/{}".format(player.steam_id), params=params[mode]).json()
+        data = requests.get("https://qlrace.com/api/player/{}".format(player.steam_id), params=PARAMS[mode]).json()
         name = data["name"]
         total_maps = len(data["records"])
         if name is not None and total_maps > 0:
@@ -451,7 +451,7 @@ class RaceRecords:
 
     def get_data(self):
         """Gets the records for the map and mode from qlrace.com."""
-        data = requests.get("https://qlrace.com/api/map/{}".format(self.map_name), params=params[self.mode]).json()
+        data = requests.get("https://qlrace.com/api/map/{}".format(self.map_name), params=PARAMS[self.mode]).json()
         return data['records']
 
 
