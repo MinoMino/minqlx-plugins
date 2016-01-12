@@ -83,17 +83,17 @@ class race(minqlx.Plugin):
 
         if factory in ("qlrace_turbo", "qlrace_classic"):
             if map_name.lower() in no_weapons:
-                minqlx.set_cvar("g_startingWeapons", "3")
-                minqlx.set_cvar("g_infiniteAmmo", "0")
+                self.set_cvar("g_startingWeapons", "3")
+                self.set_cvar("g_infiniteAmmo", "0")
             else:
-                minqlx.set_cvar("g_startingWeapons", "147")
-                minqlx.set_cvar("g_infiniteAmmo", "1")
+                self.set_cvar("g_startingWeapons", "147")
+                self.set_cvar("g_infiniteAmmo", "1")
             if map_name.lower() == "walkathon":
-                minqlx.set_cvar("g_respawn_delay_min", "1000")
-                minqlx.set_cvar("g_respawn_delay_max", "1000")
+                self.set_cvar("g_respawn_delay_min", "1000")
+                self.set_cvar("g_respawn_delay_max", "1000")
             else:
-                minqlx.set_cvar("g_respawn_delay_min", "10")
-                minqlx.set_cvar("g_respawn_delay_max", "10")
+                self.set_cvar("g_respawn_delay_min", "10")
+                self.set_cvar("g_respawn_delay_max", "10")
         self.get_maps()
 
     def handle_server_command(self, player, cmd):
