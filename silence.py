@@ -222,7 +222,7 @@ class silence(minqlx.Plugin):
         if res:
             expires, score, reason = res
             if reason:
-                channel.reply("^6{}^7 is silenced until ^6{}^7 for the following reason:^6 {}".format(name, *res))
+                channel.reply("^6{}^7 is silenced until ^6{}^7 for the following reason:^6 {}".format(name, expires, reason))
             else:
                 channel.reply("^6{}^7 is silenced until ^6{}^7.".format(name, expires))
             return

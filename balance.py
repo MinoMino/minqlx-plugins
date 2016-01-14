@@ -156,7 +156,7 @@ class balance(minqlx.Plugin):
 
                     # Fill the rest of the game types the API didn't return but supports.
                     for gt in SUPPORTED_GAMETYPES:
-                        if gt not in self.ratings[sid]:
+                        if gt not in self.ratings[sid] or (gt in self.ratings[sid] and self.ratings[sid][gt] == 0):
                             self.ratings[sid][gt] = {"games": -1, "elo": DEFAULT_RATING, "local": False, "time": time.time()}
 
             # If the API didn't return all the players, we set them to the default rating.
