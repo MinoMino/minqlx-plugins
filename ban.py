@@ -82,7 +82,7 @@ class ban(minqlx.Plugin):
     def handle_player_disconnect(self, player, reason):
         # Allow people to disconnect without getting a leave if teams are uneven.
         teams = self.teams()
-        if len(teams["red"] + teams["blue"]) % 2 == 0 and player in self.players_start:
+        if len(teams["red"] + teams["blue"]) % 2 != 0 and player in self.players_start:
             self.players_start.remove(player)
 
     def handle_game_countdown(self):
