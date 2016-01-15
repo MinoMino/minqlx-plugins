@@ -12,8 +12,8 @@ import minqlx.database
 import requests
 import json
 from datetime import datetime
-import importlib
-race = importlib.import_module("minqlx-plugins.race")
+
+RECORDS_KEY = "minqlx:race_records"
 
 
 class track_race(minqlx.Plugin):
@@ -22,50 +22,68 @@ class track_race(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("stats", self.handle_stats)
+        self.add_hook("map", self.handle_map)
+
+        # QLRace.com API key.
         self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
-        self.race = False
+        self.mode = self.get_cvar("qlx_raceMode", int)
+        self.enabled = False
         self.map_name = ""
 
     def handle_stats(self, stats):
-        """Gets zmq stats"""
-        if stats["TYPE"] == "PLAYER_RACECOMPLETE":
-            self.race = True
+        """Gets ZMQ stats."""
+        if stats["TYPE"] == "PLAYER_RACECOMPLETE" and self.mode in (0, 2):
+            self.enabled = True
             self.map_name = self.game.map.lower()
         elif stats["TYPE"] == "PLAYER_STATS":
             self.update_pb(stats)
 
+    def handle_map(self, map_name, factory):
+        """
+        Checks whether the current game mode is race.
+        """
+        if self.game.type_short == "race" and self.mode in (0, 2):
+            self.enabled = True
+        else:
+            self.enabled = False
+
     @minqlx.thread
     def update_pb(self, stats):
-        """Updates a players pb. If no knockback weapons were fired
-        it sets mode to strafe.
+        """Updates a players pb.
         :param stats: ZMQ PLAYER_STATS
         """
-        if not self.race:
+        if not self.enabled:
             return
 
         time = stats["DATA"]["SCORE"]
         if time == -1 or time == 2147483647 or time == 0:
             return
 
-        mode = self.get_cvar("qlx_raceMode", int)
-        weapon_stats = stats["DATA"]["WEAPONS"]
-        # if no knockback weapons fired, set mode to strafe
-        if weapon_stats["PLASMA"]["S"] == 0 and weapon_stats["ROCKET"]["S"] == 0 and weapon_stats["PROXMINE"]["S"] == 0\
-                and weapon_stats["GRENADE"]["S"] == 0 and weapon_stats["BFG"]["S"] == 0:
-            mode += 1
-
+        mode = self.get_mode(stats["DATA"]["WEAPONS"])
         player_id = int(stats["DATA"]["STEAM_ID"])
         name = self.clean_text(stats["DATA"]["NAME"])
         match_guid = stats["DATA"]["MATCH_GUID"]
         payload = {"map": self.map_name, "mode": mode, "player_id": player_id, "name": name,
                    "time": time, "match_guid": match_guid}
-        pb = self.post_data(payload)
-        if pb:
-            records = race.RaceRecords(self.map_name, mode)
-            rank, time = records.pb(player_id)
-            out = records.output(name, rank, time)
-            out = out.replace(" ^2is rank ^3", " ^2is now rank ^3")
-            self.msg(out)
+        record = self.post_data(payload)
+        if record:
+            if record["rank"] == 1:
+                self.msg("^7{} ^2just set a new ^2world record!".format(name))
+            else:
+                self.msg("^7{} ^2set a new pb and is now rank ^3{}".format(name, record["rank"]))
+
+    def get_mode(self, weapon_stats):
+        """
+        Returns the race mode of a player. 0 or 2 for weapons
+        and 1 or 3 for strafe.
+        :param weapon_stats: ZMQ weapon stats
+        """
+        knockback_weapons = ("ROCKET", "PLASMA", "GRENADE", "BFG", "PROXMINE")
+        for weapon in knockback_weapons:
+            if weapon_stats[weapon]["S"] != 0:
+                return self.mode
+
+        return self.mode + 1
 
     def post_data(self, payload):
         """Posts record to QLRace.com. If there's any records
@@ -76,21 +94,17 @@ class track_race(minqlx.Plugin):
         headers = {"X-Api-Key": self.get_cvar("qlx_raceKey")}
         try:
             r = requests.post("https://qlrace.com/api/new", data=payload, headers=headers)
-            if r.status_code == 200:
-                pb = True
-            elif r.status_code == 304:
-                pb = False
-            elif r.status_code == 401:
-                self.push_db(payload)
-                self.msg("Invalid api key, ^2Your time has been saved locally")
-                return
-            if self.db.llen("minqlx:race_records") != 0:
-                payload = json.loads(self.db.rpop("minqlx:race_records"))
+            r.raise_for_status()
+
+            if self.db.llen(RECORDS_KEY) != 0:
+                payload = json.loads(self.db.rpop(RECORDS_KEY))
                 self.post_data(payload)
-            return pb
-        except:
+
+            if r.status_code == 200:
+                return r.json()
+        except requests.exceptions.RequestException as e:
             self.push_db(payload)
-            self.msg("^2QLRace.com is down ^6:( ^2Your time has been saved locally")
+            self.msg("^2Error, {}".format(e))
 
     def push_db(self, payload):
         """Add record to redis list
@@ -98,4 +112,4 @@ class track_race(minqlx.Plugin):
         """
         payload["date"] = str(datetime.utcnow())
         record = json.dumps(payload)
-        self.db.lpush("minqlx:race_records", record)
+        self.db.lpush(RECORDS_KEY, record)
