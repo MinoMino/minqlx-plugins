@@ -68,7 +68,7 @@ class track_race(minqlx.Plugin):
         record = self.post_data(payload)
         if record:
             if record["rank"] == 1:
-                self.msg("^7{} ^2just set a new ^2world record!".format(name))
+                self.msg("^7{} ^2just set a new ^3world record!".format(name))
             else:
                 self.msg("^7{} ^2set a new pb and is now rank ^3{}".format(name, record["rank"]))
 
