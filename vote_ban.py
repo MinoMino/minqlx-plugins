@@ -10,6 +10,8 @@ Ban players from voting.
 import minqlx
 import minqlx.database
 
+VOTE_BAN_KEY = "minqlx:vote_ban"
+
 
 class vote_ban(minqlx.Plugin):
     database = minqlx.database.Redis
@@ -32,64 +34,65 @@ class vote_ban(minqlx.Plugin):
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
-        try:
-            ident = int(msg[1])
-            target_player = None
-            if 0 <= ident < 64:
-                target_player = self.player(ident)
-                ident = target_player.steam_id
-        except ValueError:
-            channel.reply("Invalid ID. Use either a client ID or a SteamID64.")
+        ident, name = self.get_player(msg[1], channel)
+        if ident is None:
             return
-        except minqlx.NonexistentPlayerError:
-            channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
-            return
-
-        if target_player:
-            name = target_player.name
-        else:
-            name = ident
 
         # Players with permissions level 1 or higher cannot be banned from voting.
         if self.db.has_permission(ident, 1):
-            channel.reply("^6{}^7 has permission level 1 or higher and cannot be banned from voting.".format(name))
+            channel.reply("^7{} ^3has permission level 1 or higher and cannot be banned from voting.".format(name))
             return
 
-        self.db.sadd("minqlx:vote_ban", ident)
-        channel.reply("^6{} ^7has been banned from voting".format(name))
+        if self.is_banned(ident):
+            self.db.sadd(VOTE_BAN_KEY, ident)
+            channel.reply("^7{} ^1has been banned from voting".format(name))
+        else:
+            channel.reply("^7{} ^3is already banned from voting".format(name))
 
     def cmd_voteunban(self, player, msg, channel):
         """Unbans a player from voting."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
+        ident, name = self.get_player(msg[1], channel)
+        if ident is None:
+            return
+
+        if self.is_banned(ident):
+            self.db.srem(VOTE_BAN_KEY, ident)
+            channel.reply("^7{} ^2is now unbanned from voting.".format(name))
+        else:
+            channel.reply("^7{} ^3is not banned from voting.".format(name))
+
+    def get_player(self, ident, channel):
+        """
+        Gets name and id a of player.
+        :param ident: Client or Steam ID
+        :param channel: Channel to reply to.
+        """
         try:
-            ident = int(msg[1])
+            ident = int(ident)
             target_player = None
             if 0 <= ident < 64:
                 target_player = self.player(ident)
                 ident = target_player.steam_id
         except ValueError:
             channel.reply("Invalid ID. Use either a client ID or a SteamID64.")
-            return
+            return None, None
         except minqlx.NonexistentPlayerError:
             channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
-            return
+            return None, None
 
         if target_player:
             name = target_player.name
         else:
             name = ident
 
-        if self.is_banned(ident):
-            self.db.srem("minqlx:vote_ban", ident)
-            channel.reply("{} is now unbanned from voting.".format(name))
-        else:
-            channel.reply("{} is not banned from voting.".format(name))
+        return ident, name
 
     def is_banned(self, steam_id):
         """Returns whether a player is banned"""
-        banned = self.db.sismember("minqlx:vote_ban", steam_id)
+        banned = self.db.sismember(VOTE_BAN_KEY, steam_id)
         if banned == 1:
             return True
         else:
