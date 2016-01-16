@@ -364,11 +364,10 @@ class race(minqlx.Plugin):
         return next((x for x in self.maps if x.startswith(map_prefix.lower())), None)
 
     def get_map_name_weapons(self, map_prefix, command, channel):
-        """Get map name and weapons boolean.
+        """Returns map name and weapons boolean.
         :param map_prefix: Prefix of a map
         :param command: Command the player entered
         :param channel: Channel to reply to.
-        :return: Map name and weapons boolean
         """
         map_name = self.map_prefix(map_prefix)
         if not map_name:
@@ -381,7 +380,6 @@ class race(minqlx.Plugin):
         """Returns race records from QLRace.com
         :param map_name: Map name
         :param weapons: Weapons boolean
-        :return: Race records
         """
         if weapons:
             mode = self.get_cvar("qlx_raceMode", int)
