@@ -65,8 +65,7 @@ class vote_ban(minqlx.Plugin):
             channel.reply("^7{} ^3is not banned from voting.".format(name))
 
     def get_player(self, ident, channel):
-        """
-        Gets name and id a of player.
+        """Gets name and id a of player.
         :param ident: Client or Steam ID
         :param channel: Channel to reply to.
         """
