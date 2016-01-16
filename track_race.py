@@ -39,9 +39,7 @@ class track_race(minqlx.Plugin):
             self.update_pb(stats)
 
     def handle_map(self, map_name, factory):
-        """
-        Checks whether the current game mode is race.
-        """
+        """Checks whether the current game mode is race."""
         if self.game.type_short == "race" and self.mode in (0, 2):
             self.enabled = True
         else:
@@ -73,8 +71,7 @@ class track_race(minqlx.Plugin):
                 self.msg("^7{} ^2set a new pb and is now rank ^3{}".format(name, record["rank"]))
 
     def get_mode(self, weapon_stats):
-        """
-        Returns the race mode of a player. 0 or 2 for weapons
+        """Returns the race mode of a player. 0 or 2 for weapons
         and 1 or 3 for strafe.
         :param weapon_stats: ZMQ weapon stats
         """
@@ -107,7 +104,7 @@ class track_race(minqlx.Plugin):
             self.msg("^2Error, {}".format(e))
 
     def push_db(self, payload):
-        """Add record to redis list
+        """Pushes record to redis list
         :param payload: record data
         """
         payload["date"] = str(datetime.utcnow())
