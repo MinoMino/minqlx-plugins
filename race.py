@@ -43,12 +43,12 @@ class race(minqlx.Plugin):
         self.get_maps()
 
     def cmd_disabled(self, player, msg, channel):
-        """This is to disable !slap and !slay"""
+        """Disables !slap and !slay."""
         player.tell("^6{} ^7is disabled".format(msg[0]))
         return minqlx.RET_STOP_ALL
 
     def handle_vote_called(self, player, vote, args):
-        """Cancels the vote when map called is a duplicate."""
+        """Cancels the vote when a duplicated map is voted for."""
         if vote.lower() == "map":
             disabled_maps = ("q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
                              "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2", "wintersedge")
@@ -58,17 +58,16 @@ class race(minqlx.Plugin):
                 return minqlx.RET_STOP_ALL
 
     def handle_new_game(self):
-        """Brands server."""
+        """Brands map title on new game."""
         map_name = self.game.map.lower()
-        brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name)
-        minqlx.set_configstring(3, brand_map)
+        self.brand_map(map_name)
 
     def handle_map(self, map_name, factory):
-        """Brands server and updates list of race maps on map change.
-        Also sets starting weapons to only mg and gauntlet if strafe map.
+        """Brands map title and updates list of race maps on map change.
+        Also sets starting weapons to only mg and gauntlet if map should
+        not have weapons.
         """
-        brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name.lower())
-        minqlx.set_configstring(3, brand_map)
+        self.brand_map(map_name.lower())
 
         no_weapons = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
                       "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil",
@@ -130,7 +129,9 @@ class race(minqlx.Plugin):
             channel.reply("^2No time found for ^7{} ^2on ^3{}".format(player, map_name))
 
     def cmd_rank(self, player, msg, channel):
-        """Outputs the x rank time for a map. Default rank if none is given is 1."""
+        """Outputs the x rank time for a map. Default rank
+        if none is given is 1.
+        """
         if len(msg) == 1:
             rank = 1
             map_prefix = self.game.map.lower()
@@ -166,8 +167,8 @@ class race(minqlx.Plugin):
             channel.reply("^2No rank ^3{} ^2time found on ^3{}".format(rank, map_name))
 
     def cmd_top(self, player, msg, channel):
-        """Outputs top x amount of times for a map. Default amount if none is given is 3.
-        Maximum amount is 20.
+        """Outputs top x amount of times for a map. Default amount
+        if none is given is 3. Maximum amount is 20.
         """
         if len(msg) == 1:
             amount = 3
@@ -213,7 +214,9 @@ class race(minqlx.Plugin):
         self.output_times(map_name, times, channel)
 
     def cmd_all(self, player, msg, channel):
-        """Outputs the ranks and times of everyone on the server for a map."""
+        """Outputs the ranks and times of everyone on
+        the server for a map.
+        """
         if len(msg) == 1:
             map_prefix = self.game.map
         elif len(msg) == 2:
@@ -324,12 +327,11 @@ class race(minqlx.Plugin):
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
-        """Outputs times to the channel. Will split lines so that each
-        record is not on 2 different lines.
-        :param map_name: The map name
+        """Outputs times to the channel. Will split
+        lines so that each record is not on 2 separate lines.
+        :param map_name: Map name
         :param times: List of map times
-        :param channel: The channel to reply to
-        :return:
+        :param channel: Channel to reply to
         """
         output = ["^2{}:".format(map_name)]
         for time in times:
@@ -343,8 +345,8 @@ class race(minqlx.Plugin):
 
     @minqlx.thread
     def get_maps(self):
-        """Gets the list of race maps from QLRace.com,
-        adds current map to the list if it isn't in the list
+        """Gets the list of race maps from QLRace.com and
+        adds current map to the list if it isn't already.
         """
         self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
         current_map = self.game.map.lower()
@@ -353,7 +355,7 @@ class race(minqlx.Plugin):
 
     def map_prefix(self, map_prefix):
         """Returns the first map which matches the prefix.
-        :param map_prefix: The prefix of a map
+        :param map_prefix: Prefix of a map
         """
         if map_prefix.lower() in self.maps:
             return map_prefix.lower()
@@ -362,10 +364,10 @@ class race(minqlx.Plugin):
 
     def get_map_name_weapons(self, map_prefix, command, channel):
         """Get map name and weapons boolean.
-        :param map_prefix: The prefix of a map
-        :param command: The command the player entered
-        :param channel: The channel to reply to. Usually chat.
-        :return: The map name and weapons boolean.
+        :param map_prefix: Prefix of a map
+        :param command: Command the player entered
+        :param channel: Channel to reply to.
+        :return: Map name and weapons boolean
         """
         map_name = self.map_prefix(map_prefix)
         if not map_name:
@@ -375,10 +377,10 @@ class race(minqlx.Plugin):
         return map_name, weapons
 
     def get_records(self, map_name, weapons):
-        """Gets race records
-        :param map_name: The map name
+        """Returns race records from QLRace.com
+        :param map_name: Map name
         :param weapons: Weapons boolean
-        :return: race records
+        :return: Race records
         """
         if weapons:
             mode = self.get_cvar("qlx_raceMode", int)
@@ -386,6 +388,13 @@ class race(minqlx.Plugin):
         else:
             mode = self.get_cvar("qlx_raceMode", int) + 1
             return RaceRecords(map_name, mode)
+
+    def brand_map(self, map_name):
+        """Brands map title with "<qlx_raceBrand> - map name".
+        :param map_name: Current map
+        """
+        brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name)
+        minqlx.set_configstring(3, brand_map)
 
 
 class RaceRecords:
@@ -402,7 +411,7 @@ class RaceRecords:
 
     def rank(self, rank):
         """Returns name, actual rank and time of the rank.
-        :param rank: The rank of the time which will be returned
+        :param rank: Rank of a record
         """
         try:
             record = self.records[rank - 1]
@@ -416,7 +425,7 @@ class RaceRecords:
 
     def rank_from_time(self, time):
         """Returns the rank the time would be.
-        :param time: The time in milliseconds which will be ranked
+        :param time: Time in milliseconds
         """
         for i, record in enumerate(self.records):
             if time <= record["time"]:
@@ -424,7 +433,7 @@ class RaceRecords:
 
     def pb(self, player_id):
         """Returns a players rank and time.
-        :param player_id: The player id
+        :param player_id: Player id
         """
         for record in self.records:
             if player_id == record["player_id"]:
@@ -453,7 +462,7 @@ class RaceRecords:
             .format(name, tied, rank, self.last_rank, time, time_diff, self.map_name, strafe)
 
     def get_data(self):
-        """Gets the records for the map and mode from qlrace.com."""
+        """Returns the records for the map and mode from qlrace.com."""
         data = requests.get("https://qlrace.com/api/map/{}".format(self.map_name), params=PARAMS[self.mode]).json()
         return data['records']
 
