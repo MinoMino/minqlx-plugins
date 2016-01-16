@@ -31,7 +31,8 @@ class cleverbot(minqlx.Plugin):
         self.create()
 
     def handle_chat(self, player, msg, channel):
-        """Responds to chat message qlx_cleverbotChance * 100 percent of the time"""
+        """Responds to chat messages
+        qlx_cleverbotChance * 100 percent of the time."""
         if msg.startswith(self.get_cvar("qlx_commandPrefix")) or channel != "chat":
             return
 
@@ -56,7 +57,7 @@ class cleverbot(minqlx.Plugin):
     def cmd_chat(self, player, msg, channel):
         """Responds to !chat some text
         Example: !chat Just a small town girl
-        cleverbot: Livin' in a lonely world
+        cleverbot: Livin' in a lonely world.
         """
         if len(msg) == 1:
             return minqlx.RET_USAGE
@@ -69,24 +70,27 @@ class cleverbot(minqlx.Plugin):
             channel.reply("^3You need to create the bot or set API key first.")
 
     def cmd_chance(self, player, msg, channel):
-        """Sets the chance that the bot responds to chat."""
+        """Sets chance that the bot responds to chat."""
         if len(msg) == 1:
             chance = self.get_cvar("qlx_cleverbotChance")
             channel.reply("Chance is currently {}".format(chance))
+            return minqlx.RET_STOP_ALL
         if len(msg) > 2:
             return minqlx.RET_USAGE
 
-        chance = 0
         try:
             chance = float(msg[1])
         except ValueError:
             channel.reply("{} is not a valid float.".format(msg[1]))
+            return minqlx.RET_STOP_ALL
 
         if 0 <= chance <= 1:
             self.set_cvar("qlx_cleverbotChance", str(chance))
             channel.reply("Chance was set to {}".format(chance))
+            return minqlx.RET_STOP_ALL
         else:
             channel.reply("Chance must be between 0 and 1.")
+            return minqlx.RET_STOP_ALL
 
     @minqlx.thread
     def create(self):
@@ -101,9 +105,10 @@ class cleverbot(minqlx.Plugin):
 
     @minqlx.thread
     def ask(self, text, channel):
-        """Doc: https://cleverbot.io/1.0/ask
-        :param text: Text to send to the bot.
-        :param channel: Channel to reply to.
+        """Sends a message to bot.
+        Doc: https://cleverbot.io/1.0/ask
+        :param text: Text to send to the bot
+        :param channel: Channel to reply to
         """
         response = self.post_data("https://cleverbot.io/1.0/ask", text)
         if response:
@@ -111,10 +116,10 @@ class cleverbot(minqlx.Plugin):
             channel.reply("^6{}^7: {}".format(nick, response["response"]))
 
     def post_data(self, url, text=''):
-        """POSTS data to cleverbot.io
-        :param url: The url to POST to, either /ask or /create.
-        :param text: The text to send to the bot.
-        :return: JSON response.
+        """Posts data to cleverbot.io
+        :param url: URL to POST to, either /ask or /create
+        :param text: Text to send to the bot
+        :return: JSON response
         """
         user = self.get_cvar("qlx_cleverbotUser")
         key = self.get_cvar("qlx_cleverbotKey")
@@ -124,12 +129,11 @@ class cleverbot(minqlx.Plugin):
             return
         if user and key:
             payload = {"user": user, "key": key, "nick": nick, "text": text}
-            r = requests.post(url, data=payload)
-            if r.status_code == 200:
+            try:
+                r = requests.post(url, data=payload)
+                r.raise_for_status()
                 return r.json()
-            elif r.status_code == 400:
-                self.msg("^1Bad request.")
-            else:
-                self.msg("^1Error: ^7{}, {}".format(r.status_code, r.reason))
+            except requests.exceptions.RequestException as e:
+                self.logger.info("ERROR: {}".format(e))
         else:
             self.msg("^3You need to set qlx_cleverbotUser and qlx_cleverbotKey")
