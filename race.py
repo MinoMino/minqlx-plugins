@@ -463,9 +463,13 @@ class RaceRecords:
             .format(name, tied, rank, self.last_rank, time, time_diff, self.map_name, strafe)
 
     def get_data(self):
-        """Returns the records for the map and mode from qlrace.com."""
-        data = requests.get("https://qlrace.com/api/map/{}".format(self.map_name), params=PARAMS[self.mode]).json()
-        return data['records']
+        """Returns the records for the map and mode from QLRace.com."""
+        try:
+            r = requests.get("https://qlrace.com/api/map/{}".format(self.map_name), params=PARAMS[self.mode])
+            r.raise_for_status()
+            return r.json()["records"]
+        except requests.exceptions.RequestException:
+            return []
 
 
 def time_ms(time_string):
