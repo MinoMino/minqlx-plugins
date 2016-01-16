@@ -65,7 +65,8 @@ class race(minqlx.Plugin):
 
     def handle_map(self, map_name, factory):
         """Brands server and updates list of race maps on map change.
-        Also sets starting weapons to only mg and gauntlet if strafe map."""
+        Also sets starting weapons to only mg and gauntlet if strafe map.
+        """
         brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name.lower())
         minqlx.set_configstring(3, brand_map)
 
@@ -166,7 +167,8 @@ class race(minqlx.Plugin):
 
     def cmd_top(self, player, msg, channel):
         """Outputs top x amount of times for a map. Default amount if none is given is 3.
-        Maximum amount is 20."""
+        Maximum amount is 20.
+        """
         if len(msg) == 1:
             amount = 3
             map_prefix = self.game.map
@@ -342,7 +344,8 @@ class race(minqlx.Plugin):
     @minqlx.thread
     def get_maps(self):
         """Gets the list of race maps from QLRace.com,
-        adds current map to the list if it isn't in the list"""
+        adds current map to the list if it isn't in the list
+        """
         self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
         current_map = self.game.map.lower()
         if current_map not in self.maps:

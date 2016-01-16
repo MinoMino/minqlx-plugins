@@ -56,7 +56,8 @@ class cleverbot(minqlx.Plugin):
     def cmd_chat(self, player, msg, channel):
         """Responds to !chat some text
         Example: !chat Just a small town girl
-        cleverbot: Livin' in a lonely world"""
+        cleverbot: Livin' in a lonely world
+        """
         if len(msg) == 1:
             return minqlx.RET_USAGE
         else:
@@ -90,7 +91,8 @@ class cleverbot(minqlx.Plugin):
     @minqlx.thread
     def create(self):
         """Creates the bot.
-        Doc: https://docs.cleverbot.io/docs/getting-started"""
+        Doc: https://docs.cleverbot.io/docs/getting-started
+        """
         response = self.post_data("https://cleverbot.io/1.0/create")
         if response:
             nick = self.get_cvar("qlx_cleverbotNick")
