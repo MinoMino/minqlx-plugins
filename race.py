@@ -210,8 +210,6 @@ class race(minqlx.Plugin):
             channel.reply("^2No times were found on ^3{}".format(map_name))
             return
 
-        if amount > len(records.records):
-            amount = len(records.records)
         times = []
         for i in range(amount):
             try:
@@ -243,8 +241,6 @@ class race(minqlx.Plugin):
             channel.reply("^2No old times were found on ^3{}".format(map_name))
             return
 
-        if amount > len(records):
-            amount = len(records)
         times = []
         for i in range(amount):
             try:
