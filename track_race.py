@@ -66,9 +66,11 @@ class track_race(minqlx.Plugin):
         record = self.post_data(payload)
         if record:
             if record["rank"] == 1:
-                self.msg("^7{} ^2just set a new ^3world record!".format(name))
+                time_diff = "^0[^2-" + time_string(record["time_diff"]) + "^0]"
+                self.msg("^7{} ^2just set a new ^3world record! {}".format(name, time_diff))
             else:
-                self.msg("^7{} ^2set a new pb and is now rank ^3{}".format(name, record["rank"]))
+                time_diff = "^0[^1+" + time_string(record["time_diff"]) + "^0]"
+                self.msg("^7{} ^2set a new pb and is now rank ^3{} {}".format(name, record["rank"], time_diff))
 
     def get_mode(self, weapon_stats):
         """Returns the race mode of a player. 0 or 2 for weapons
@@ -110,3 +112,19 @@ class track_race(minqlx.Plugin):
         payload["date"] = str(datetime.utcnow())
         record = json.dumps(payload)
         self.db.lpush(RECORDS_KEY, record)
+
+
+def time_string(time):
+    """Returns a time string in the format s.ms or m:s.ms if time is more than
+    or equal to 1 minute.
+    :param time: Time in milliseconds
+    """
+    time = int(time)
+    s, ms = divmod(time, 1000)
+    ms = str(ms).zfill(3)
+    if s < 60:
+        return "{}.{}".format(s, ms)
+    time //= 1000
+    m, s = divmod(time, 60)
+    s = str(s).zfill(2)
+    return "{}:{}.{}".format(m, s, ms)
