@@ -28,31 +28,27 @@ class race(minqlx.Plugin):
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
         self.add_command(("rank", "srank", "r", "sr"), self.cmd_rank, usage="[rank] [map]")
-        self.add_command(("top", "stop", "t", "st"), self.cmd_top, usage="[amount] [map]")
+        self.add_command(("top", "stop", "t", "st", "oldtop", "oldstop"), self.cmd_top, usage="[amount] [map]")
         self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
         self.add_command(("ranktime", "sranktime", "rt", "srt"), self.cmd_ranktime, usage="<time> [map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
         self.add_command("random", self.cmd_random)
-        self.add_command(("help", "cmds", "commands"), self.cmd_commands, priority=minqlx.PRI_HIGH)
+        self.add_command(("commands", "cmds", "help"), self.cmd_commands, priority=minqlx.PRI_HIGH)
 
         # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceMode", "0")
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
         self.maps = []
+        self.old_maps = []
         self.get_maps()
-
-    def cmd_disabled(self, player, msg, channel):
-        """Disables !slap and !slay."""
-        player.tell("^6{} ^7is disabled".format(msg[0]))
-        return minqlx.RET_STOP_ALL
 
     def handle_vote_called(self, player, vote, args):
         """Cancels the vote when a duplicated map is voted for."""
         if vote.lower() == "map":
-            disabled_maps = ("q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
-                             "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2", "wintersedge")
             if len(args) > 0:
+                disabled_maps = ("q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
+                                 "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2", "wintersedge")
                 map_name = args.split()[0]
                 if map_name.lower() in disabled_maps:
                     player.tell("^3{} ^2is disabled(duplicate map).".format(map_name))
@@ -101,6 +97,11 @@ class race(minqlx.Plugin):
         """Stops server printing powerup messages."""
         if _re_powerups.fullmatch(cmd):
             return minqlx.RET_STOP_EVENT
+
+    def cmd_disabled(self, player, msg, channel):
+        """Disables !slap and !slay."""
+        player.tell("^6{} ^7is disabled".format(msg[0]))
+        return minqlx.RET_STOP_ALL
 
     def cmd_updatemaps(self, player, msg, channel):
         """Updates list of race maps"""
@@ -190,8 +191,15 @@ class race(minqlx.Plugin):
             channel.reply("^2Please use value <=20")
             return
 
-        map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
-        self.top(map_name, weapons, amount, channel)
+        if "old" in msg[0]:
+            map_name = self.map_prefix(map_prefix, old=True)
+            if map_name not in self.old_maps:
+                channel.reply("^3{} ^2has no times on ql.leeto.fi".format(map_name))
+            else:
+                self.old_top(map_name, msg[0], amount, channel)
+        else:
+            map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
+            self.top(map_name, weapons, amount, channel)
 
     @minqlx.thread
     def top(self, map_name, weapons, amount, channel):
@@ -208,6 +216,39 @@ class race(minqlx.Plugin):
         for i in range(amount):
             try:
                 record = records.records[i]
+                times.append(" ^3{}. ^4{} ^2{}".format(record['rank'], record['name'], time_string(record['time'])))
+            except IndexError:
+                break
+
+        self.output_times(map_name, times, channel)
+
+    @minqlx.thread
+    def old_top(self, map_name, command, amount, channel):#
+        if "s" in command:
+            weapons = False
+            mode = self.get_cvar("qlx_raceMode", int)
+        else:
+            weapons = True
+            mode = self.get_cvar("qlx_raceMode", int) + 1
+
+        try:
+            records = requests.get("https://qlrace.com/oldtop/{}/{}.json".format(map_name, mode)).json()["records"]
+        except requests.exceptions.RequestException as e:
+            self.logger.info("ERROR: {}".format(e))
+            return
+
+        if not weapons:
+            map_name += "^2(strafe)"
+        if not records:
+            channel.reply("^2No old times were found on ^3{}".format(map_name))
+            return
+
+        if amount > len(records):
+            amount = len(records)
+        times = []
+        for i in range(amount):
+            try:
+                record = records[i]
                 times.append(" ^3{}. ^4{} ^2{}".format(record['rank'], record['name'], time_string(record['time'])))
             except IndexError:
                 break
@@ -305,7 +346,12 @@ class race(minqlx.Plugin):
 
     @minqlx.thread
     def avg(self, player, mode, strafe, channel):
-        data = requests.get("https://qlrace.com/api/player/{}".format(player.steam_id), params=PARAMS[mode]).json()
+        try:
+            data = requests.get("https://qlrace.com/api/player/{}".format(player.steam_id), params=PARAMS[mode]).json()
+        except requests.exceptions.RequestException as e:
+            self.logger.info("ERROR: {}".format(e))
+            return
+
         name = data["name"]
         total_maps = len(data["records"])
         if name is not None and total_maps > 0:
@@ -349,19 +395,30 @@ class race(minqlx.Plugin):
         """Gets the list of race maps from QLRace.com and
         adds current map to the list if it isn't already.
         """
-        self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
+        try:
+            self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
+            self.old_maps = requests.get("https://qlrace.com/oldtop/maps.json").json()["maps"]
+        except requests.exceptions.RequestException as e:
+            self.logger.info("ERROR getting maps, {}".format(e))
+
         current_map = self.game.map.lower()
         if current_map not in self.maps:
             self.maps.append(current_map)
 
-    def map_prefix(self, map_prefix):
+    def map_prefix(self, map_prefix, old=False):
         """Returns the first map which matches the prefix.
         :param map_prefix: Prefix of a map
+        :param old: Optional, whether to use old maps list.
         """
-        if map_prefix.lower() in self.maps:
+        if old:
+            maps = self.old_maps
+        else:
+            maps = self.maps
+
+        if map_prefix.lower() in maps:
             return map_prefix.lower()
 
-        return next((x for x in self.maps if x.startswith(map_prefix.lower())), None)
+        return next((x for x in maps if x.startswith(map_prefix.lower())), None)
 
     def get_map_name_weapons(self, map_prefix, command, channel):
         """Returns map name and weapons boolean.
