@@ -28,7 +28,7 @@ class race(minqlx.Plugin):
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
         self.add_command(("rank", "srank", "r", "sr"), self.cmd_rank, usage="[rank] [map]")
-        self.add_command(("top", "stop", "t", "st", "oldtop", "oldstop"), self.cmd_top, usage="[amount] [map]")
+        self.add_command(("top", "stop", "t", "st", "oldtop", "oldstop", "ot", "ost"), self.cmd_top, usage="[amount] [map]")
         self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
         self.add_command(("ranktime", "sranktime", "rt", "srt"), self.cmd_ranktime, usage="<time> [map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
@@ -191,7 +191,7 @@ class race(minqlx.Plugin):
             channel.reply("^2Please use value <=20")
             return
 
-        if "old" in msg[0]:
+        if "!o" in msg[0] or msg[0].startswith("o"):
             map_name = self.map_prefix(map_prefix, old=True)
             if map_name not in self.old_maps:
                 channel.reply("^3{} ^2has no times on ql.leeto.fi".format(map_name))
@@ -224,10 +224,10 @@ class race(minqlx.Plugin):
     def old_top(self, map_name, command, amount, channel):#
         if "s" in command:
             weapons = False
-            mode = self.get_cvar("qlx_raceMode", int)
+            mode = self.get_cvar("qlx_raceMode", int) + 1
         else:
             weapons = True
-            mode = self.get_cvar("qlx_raceMode", int) + 1
+            mode = self.get_cvar("qlx_raceMode", int)
 
         try:
             records = requests.get("https://qlrace.com/oldtop/{}/{}.json".format(map_name, mode)).json()["records"]
