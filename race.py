@@ -224,7 +224,7 @@ class race(minqlx.Plugin):
     def old_top(self, map_name, command, amount, channel):#
         if "s" in command:
             weapons = False
-            mode = self.get_cvar("qlx_raceMode", int) + 1`
+            mode = self.get_cvar("qlx_raceMode", int) + 1
         else:
             weapons = True
             mode = self.get_cvar("qlx_raceMode", int)
