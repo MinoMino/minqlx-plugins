@@ -32,7 +32,7 @@ class race(minqlx.Plugin):
         self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
         self.add_command(("ranktime", "sranktime", "rt", "srt"), self.cmd_ranktime, usage="<time> [map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
-        self.add_command("random", self.cmd_random)
+        self.add_command("randommap", self.cmd_random_map)
         self.add_command(("commands", "cmds", "help"), self.cmd_commands, priority=minqlx.PRI_HIGH)
 
         # 0 = Turbo/PQL, 2 = Classic/VQL
@@ -224,7 +224,7 @@ class race(minqlx.Plugin):
     def old_top(self, map_name, command, amount, channel):#
         if "s" in command:
             weapons = False
-            mode = self.get_cvar("qlx_raceMode", int) + 1
+            mode = self.get_cvar("qlx_raceMode", int) + 1`
         else:
             weapons = True
             mode = self.get_cvar("qlx_raceMode", int)
@@ -358,7 +358,7 @@ class race(minqlx.Plugin):
         else:
             channel.reply("^7{} ^2has no {}records :(".format(player, strafe))
 
-    def cmd_random(self, player, msg, channel):
+    def cmd_random_map(self, player, msg, channel):
         """Callvotes a random map."""
         map_name = random.choice(self.maps)
         minqlx.client_command(player.id, "cv map {}".format(map_name))
@@ -366,7 +366,7 @@ class race(minqlx.Plugin):
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
         channel.reply(
-                "Commands: ^3!(s)pb !(s)rank !(s)top !(s)all !(s)ranktime !(s)avg !random")
+                "Commands: ^3!(s)pb !(s)rank !(s)top !(s)all !(s)ranktime !(s)avg !randommap")
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
