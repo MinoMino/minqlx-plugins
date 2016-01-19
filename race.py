@@ -194,7 +194,7 @@ class race(minqlx.Plugin):
         if "!o" in msg[0] or msg[0].startswith("o"):
             map_name = self.map_prefix(map_prefix, old=True)
             if map_name not in self.old_maps:
-                channel.reply("^3{} ^2has no times on ql.leeto.fi".format(map_name))
+                channel.reply("^3{} ^2has no times on ql.leeto.fi".format(map_prefix))
             else:
                 self.old_top(map_name, msg[0], amount, channel)
         else:
