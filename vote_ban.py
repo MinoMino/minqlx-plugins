@@ -24,7 +24,7 @@ class vote_ban(minqlx.Plugin):
 
     def handle_vote_called(self, player, vote, args):
         """Stops a banned player from voting."""
-        if self.is_banned(player.steam_id):
+        if self.db.sismember(VOTE_BAN_KEY, player.steam_id):
             if len(self.teams()["free"]) > 1:
                 player.tell("You are banned from voting.")
                 return minqlx.RET_STOP_ALL
@@ -34,17 +34,17 @@ class vote_ban(minqlx.Plugin):
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
-        ident, name = self.get_player(msg[1], channel)
-        if ident is None:
+        steam_id, name = self.get_player(msg[1], channel)
+        if steam_id is None:
             return
 
         # Players with permissions level 1 or higher cannot be banned from voting.
-        if self.db.has_permission(ident, 1):
+        if self.db.has_permission(steam_id, 1):
             channel.reply("^7{} ^3has permission level 1 or higher and cannot be banned from voting.".format(name))
             return
 
-        if self.is_banned(ident):
-            self.db.sadd(VOTE_BAN_KEY, ident)
+        if self.db.sismember(VOTE_BAN_KEY, steam_id):
+            self.db.sadd(VOTE_BAN_KEY, steam_id)
             channel.reply("^7{} ^1has been banned from voting".format(name))
         else:
             channel.reply("^7{} ^3is already banned from voting".format(name))
@@ -54,12 +54,12 @@ class vote_ban(minqlx.Plugin):
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
-        ident, name = self.get_player(msg[1], channel)
-        if ident is None:
+        steam_id, name = self.get_player(msg[1], channel)
+        if steam_id is None:
             return
 
-        if self.is_banned(ident):
-            self.db.srem(VOTE_BAN_KEY, ident)
+        if self.db.sismember(VOTE_BAN_KEY, steam_id):
+            self.db.srem(VOTE_BAN_KEY, steam_id)
             channel.reply("^7{} ^2is now unbanned from voting.".format(name))
         else:
             channel.reply("^7{} ^3is not banned from voting.".format(name))
@@ -88,11 +88,3 @@ class vote_ban(minqlx.Plugin):
             name = ident
 
         return ident, name
-
-    def is_banned(self, steam_id):
-        """Returns whether a player is banned"""
-        banned = self.db.sismember(VOTE_BAN_KEY, steam_id)
-        if banned == 1:
-            return True
-        else:
-            return False
