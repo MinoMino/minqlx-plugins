@@ -311,7 +311,11 @@ class ban(minqlx.Plugin):
             channel.reply("I do not know ^6{}^7.".format(name))
             return
         
-        leaves = int(self.db[base_key + ":games_left"])
+        try:
+            leaves = int(self.db[base_key + ":games_left"])
+        except KeyError:
+            leaves = 0
+        
         if leaves <= 0:
             channel.reply("^6{}^7's leaves are already at ^6{}^7.".format(name, leaves))
             return
