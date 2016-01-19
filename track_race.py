@@ -65,12 +65,17 @@ class track_race(minqlx.Plugin):
                    "time": time, "match_guid": match_guid}
         record = self.post_data(payload)
         if record:
+            if mode % 2 != 0:
+                strafe = " ^2(strafe)"
+            else:
+                strafe = ""
+
             if record["rank"] == 1:
                 time_diff = "^0[^2{}^0]".format(time_string(record["time_diff"]))
-                self.msg("^7{} ^2just set a new ^3world record! {}".format(name, time_diff))
+                self.msg("^7{} ^2just set a new ^3world record! {}{}".format(name, time_diff, strafe))
             else:
                 time_diff = "^0[^1+{}^0]".format(time_string(record["time_diff"]))
-                self.msg("^7{} ^2set a new pb and is now rank ^3{} {}".format(name, record["rank"], time_diff))
+                self.msg("^7{} ^2set a new pb and is now rank ^3{} {}{}".format(name, record["rank"], time_diff, strafe))
 
     def get_mode(self, weapon_stats):
         """Returns the race mode of a player. 0 or 2 for weapons
