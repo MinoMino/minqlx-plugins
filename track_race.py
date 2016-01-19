@@ -70,11 +70,12 @@ class track_race(minqlx.Plugin):
             else:
                 strafe = ""
 
+            time = time_string(abs(record["time_diff"]))
             if record["rank"] == 1:
-                time_diff = "^0[^2{}^0]".format(time_string(record["time_diff"]))
+                time_diff = "^0[^2-{}^0]".format(time)
                 self.msg("^7{} ^2just set a new ^3world record! {}{}".format(name, time_diff, strafe))
             else:
-                time_diff = "^0[^1+{}^0]".format(time_string(record["time_diff"]))
+                time_diff = "^0[^1+{}^0]".format(time)
                 self.msg("^7{} ^2set a new pb and is now rank ^3{} {}{}".format(name, record["rank"], time_diff, strafe))
 
     def get_mode(self, weapon_stats):
