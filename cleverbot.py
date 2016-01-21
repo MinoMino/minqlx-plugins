@@ -32,7 +32,8 @@ class cleverbot(minqlx.Plugin):
 
     def handle_chat(self, player, msg, channel):
         """Responds to chat messages
-        qlx_cleverbotChance * 100 percent of the time."""
+        qlx_cleverbotChance * 100 percent of the time.
+        """
         if msg.startswith(self.get_cvar("qlx_commandPrefix")) or channel != "chat":
             return
 
