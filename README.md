@@ -114,3 +114,5 @@ and thus not have the client download them automatically.
   - `qlx_cleverbotKey`: cleverbot.io API Key.
   - `qlx_cleverbotNick`: cleverbot.io bot nick.
     - Default: `cleverbot`
+  - `qlx_cleverbotChance`: Chance that cleverbot responds to chat. Float between 0 and 1.
+    - Default: `0.0` 
