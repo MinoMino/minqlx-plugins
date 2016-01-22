@@ -14,6 +14,7 @@ import random
 
 PARAMS = ({}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
           {"factory": "classic", "weapons": "false"})
+OLDTOP_URL = "https://raw.githubusercontent.com/cstewart90/QLRace-oldtop/master/oldtop"
 _re_powerups = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
 
 
@@ -230,7 +231,7 @@ class race(minqlx.Plugin):
             mode = self.get_cvar("qlx_raceMode", int)
 
         try:
-            records = requests.get("https://qlrace.com/oldtop/{}/{}.json".format(map_name, mode)).json()["records"]
+            records = requests.get("{}/{}/{}.json".format(OLDTOP_URL, map_name, mode)).json()["records"]
         except requests.exceptions.RequestException as e:
             self.logger.info("ERROR: {}".format(e))
             return
@@ -393,7 +394,7 @@ class race(minqlx.Plugin):
         """
         try:
             self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
-            self.old_maps = requests.get("https://qlrace.com/oldtop/maps.json").json()["maps"]
+            self.old_maps = requests.get("{}/maps.json".format(OLDTOP_URL)).json()["maps"]
         except requests.exceptions.RequestException as e:
             self.logger.info("ERROR getting maps, {}".format(e))
 
