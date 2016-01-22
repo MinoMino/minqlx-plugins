@@ -367,7 +367,7 @@ class race(minqlx.Plugin):
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
         channel.reply(
-                "Commands: ^3!(s)pb !(s)rank !(s)top !(s)all !(s)ranktime !(s)avg !randommap")
+                "Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap")
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
