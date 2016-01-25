@@ -397,5 +397,5 @@ class ban(minqlx.Plugin):
         return action, ratio
 
     def warn_player(self, player, ratio):
-        player.tell("^7You have only completed ^6{}^7 percent of your games.".format(round(ratio * 100, 1)))
+        player.tell("^7You have only completed ^6{}^7 percent of your games.".format(round((completed / total) * 100, 1)))
         player.tell("^7If you keep leaving you ^6will^7 be banned.")
