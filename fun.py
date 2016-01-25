@@ -57,7 +57,6 @@ _re_oohwee = re.compile(r"^ooh+wee\W?$", flags=re.IGNORECASE)
 _re_erah = re.compile(r"^erah\W?$", flags=re.IGNORECASE)
 _re_yeahhh = re.compile(r"^yeahhh\W?$", flags=re.IGNORECASE)
 _re_scream = re.compile(r"^scream\W?$", flags=re.IGNORECASE)
-_re_demon_scream = re.compile(r"^demon scream\W?$", flags=re.IGNORECASE)
 _re_salute = re.compile(r"^salute\W?$", flags=re.IGNORECASE)
 _re_squish = re.compile(r"^squish\W?$", flags=re.IGNORECASE)
 _re_oh_god = re.compile(r"^oh god\W?$", flags=re.IGNORECASE)
@@ -153,8 +152,6 @@ class fun(minqlx.Plugin):
             self.play_sound("sound/player/major/taunt.wav")
         elif _re_scream.match(msg):
             self.play_sound("sound/player/bones/taunt.wav")
-        elif _re_demon_scream.match(msg):
-            self.play_sound("sound/player/klesk/taunt.wav")
         elif _re_salute.match(msg):
             self.play_sound("sound/player/sarge/taunt.wav")
         elif _re_squish.match(msg):
