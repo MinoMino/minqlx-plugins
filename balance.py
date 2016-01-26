@@ -149,6 +149,8 @@ class balance(minqlx.Plugin):
                         p[gt]["time"] = t
                         p[gt]["local"] = False
                         self.ratings[sid][gt] = p[gt]
+                        if self.ratings[sid][gt]["elo"] == 0 and self.ratings[sid][gt]["games"] == 0:
+                            self.ratings[sid][gt]["elo"] = DEFAULT_RATING
                         
                         if sid in players and gt == players[sid]:
                             # The API gave us the game type we wanted, so we remove it.
@@ -156,7 +158,7 @@ class balance(minqlx.Plugin):
 
                     # Fill the rest of the game types the API didn't return but supports.
                     for gt in SUPPORTED_GAMETYPES:
-                        if gt not in self.ratings[sid] or (gt in self.ratings[sid] and self.ratings[sid][gt] == 0):
+                        if gt not in self.ratings[sid]:
                             self.ratings[sid][gt] = {"games": -1, "elo": DEFAULT_RATING, "local": False, "time": time.time()}
 
             # If the API didn't return all the players, we set them to the default rating.
@@ -431,7 +433,7 @@ class balance(minqlx.Plugin):
 
         minimum_suggestion_diff = self.get_cvar("qlx_balanceMinimumSuggestionDiff", int)
         if switch and switch[1] >= minimum_suggestion_diff:
-            channel.reply("SUGGESTION: switch ^6{}^7 with ^6{}^7. Type !a to agree."
+            channel.reply("SUGGESTION: switch ^6{}^7 with ^6{}^7. Mentioned players can type !a to agree."
                 .format(switch[0][0].clean_name, switch[0][1].clean_name))
             if not self.suggested_pair or self.suggested_pair[0] != switch[0][0] or self.suggested_pair[1] != switch[0][1]:
                 self.suggested_pair = (switch[0][0], switch[0][1])
