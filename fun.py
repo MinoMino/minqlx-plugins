@@ -53,6 +53,14 @@ _re_woohoo = re.compile(r"^woo+hoo+\W?$", flags=re.IGNORECASE)
 _re_quakelive = re.compile(r"^(?:ql|quake live)\W?$", flags=re.IGNORECASE)
 _re_chaching = re.compile(r"(?:\$|€|£)\d+", flags=re.IGNORECASE)
 _re_uh_ah = re.compile(r"^uh ah$", flags=re.IGNORECASE)
+_re_oohwee = re.compile(r"^ooh+wee\W?$", flags=re.IGNORECASE)
+_re_erah = re.compile(r"^erah\W?$", flags=re.IGNORECASE)
+_re_yeahhh = re.compile(r"^yeahhh\W?$", flags=re.IGNORECASE)
+_re_scream = re.compile(r"^scream\W?$", flags=re.IGNORECASE)
+_re_salute = re.compile(r"^salute\W?$", flags=re.IGNORECASE)
+_re_squish = re.compile(r"^squish\W?$", flags=re.IGNORECASE)
+_re_oh_god = re.compile(r"^oh god\W?$", flags=re.IGNORECASE)
+_re_snarl = re.compile(r"^snarl\W?$", flags=re.IGNORECASE)
 
 class fun(minqlx.Plugin):
     database = Redis
@@ -136,6 +144,22 @@ class fun(minqlx.Plugin):
             self.play_sound("sound/misc/chaching")
         elif _re_uh_ah.match(msg):
             self.play_sound("sound/player/mynx/taunt.wav")
+        elif _re_oohwee.match(msg):
+            self.play_sound("sound/player/anarki/taunt.wav")
+        elif _re_erah.match(msg):
+            self.play_sound("sound/player/bitterman/taunt.wav")
+        elif _re_yeahhh.match(msg):
+            self.play_sound("sound/player/major/taunt.wav")
+        elif _re_scream.match(msg):
+            self.play_sound("sound/player/bones/taunt.wav")
+        elif _re_salute.match(msg):
+            self.play_sound("sound/player/sarge/taunt.wav")
+        elif _re_squish.match(msg):
+            self.play_sound("sound/player/orb/taunt.wav")
+        elif _re_oh_god.match(msg):
+            self.play_sound("sound/player/ranger/taunt.wav")
+        elif _re_snarl.match(msg):
+            self.play_sound("sound/player/sorlag/taunt.wav")
 
     def play_sound(self, path):
         if not self.last_sound:
