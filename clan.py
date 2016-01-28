@@ -33,8 +33,9 @@ class clan(minqlx.Plugin):
         if not value: # Player disconnected?
             return
         elif 529 <= index < 529 + 64:
-            player = self.player(index - 529)
-            if not player:
+            try:
+                player = self.player(index - 529)
+            except minqlx.NonexistentPlayerError:
                 # This happens when someone connects, but the player
                 # has yet to be properly initialized. We can safely
                 # skip it because the clan will be set later.
