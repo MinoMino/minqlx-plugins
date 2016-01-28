@@ -43,8 +43,9 @@ class solorace(minqlx.Plugin):
     def handle_new_game(self):
         if minqlx.GAMETYPES_SHORT[self.get_cvar("g_gametype", int)] == "race":
             self.set_cvar("g_doWarmup", "0")
-            self.set_cvar("timelimit", "0")
+            self.set_cvar("g_warmup", "0")
             self.set_cvar("g_allowVoteMidGame", "1")
+            self.set_cvar("timelimit", "0")
             minqlx.allow_single_player(True)
         else:
             self.set_cvar("g_doWarmup", "1")
