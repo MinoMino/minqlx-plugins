@@ -542,7 +542,6 @@ def time_string(time):
     ms = str(ms).zfill(3)
     if s < 60:
         return "{}.{}".format(s, ms)
-    time //= 1000
-    m, s = divmod(time, 60)
+    m, s = divmod(s, 60)
     s = str(s).zfill(2)
     return "{}:{}.{}".format(m, s, ms)
