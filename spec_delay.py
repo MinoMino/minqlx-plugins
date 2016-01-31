@@ -52,4 +52,7 @@ class spec_delay(minqlx.Plugin):
         if self.spec_delays.get(player.steam_id):
             # Remove spec delay
             self.spec_delays.pop(player.steam_id, None)
-            player.tell("^6You can join now")
+            try:
+                player.center_print("^6You can join now")
+            except AttributeError:
+                return
