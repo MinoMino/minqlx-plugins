@@ -79,10 +79,14 @@ class race(minqlx.Plugin):
                       "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
                       "walkathon", "purpletorture", "sodomia")
 
+        grenade_only = ("grenadorade")
+
         if factory in ("qlrace_turbo", "qlrace_classic"):
             if map_name.lower() in no_weapons:
                 self.set_cvar("g_startingWeapons", "3")
                 self.set_cvar("g_infiniteAmmo", "0")
+            elif map_name.lower in grenade_only:
+                self.set_cvar("g_startingWeapons", "11")
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
