@@ -87,6 +87,7 @@ class race(minqlx.Plugin):
                 self.set_cvar("g_infiniteAmmo", "0")
             elif map_name.lower in grenade_only:
                 self.set_cvar("g_startingWeapons", "11")
+                self.set_cvar("g_infiniteAmmo", "1")
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
