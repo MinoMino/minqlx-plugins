@@ -77,7 +77,7 @@ class race(minqlx.Plugin):
                       "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
                       "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
                       "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
-                      "walkathon", "purpletorture")
+                      "walkathon", "purpletorture", "sodomia")
 
         if factory in ("qlrace_turbo", "qlrace_classic"):
             if map_name.lower() in no_weapons:
