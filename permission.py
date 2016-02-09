@@ -59,7 +59,7 @@ class permission(minqlx.Plugin):
             return
         
         self.db.set_permission(ident, level)
-        name = target_player.name if target_player else str(ident)
+        name = target_player.clean_name if target_player else str(ident)
 
         channel.reply("^6{}^7 was given permission level ^6{}^7.".format(name, level))
 
@@ -85,7 +85,7 @@ class permission(minqlx.Plugin):
         if perm is None:
             channel.reply("I do not know ^6{}^7.".format(msg[1]))
         else:
-            name = target_player.name if target_player else str(ident)
+            name = target_player.clean_name if target_player else str(ident)
             channel.reply("^6{}^7 has permission level ^6{}^7.".format(name, perm))
 
     def cmd_myperm(self, player, msg, channel):
