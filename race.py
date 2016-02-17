@@ -44,17 +44,6 @@ class race(minqlx.Plugin):
         self.old_maps = []
         self.get_maps()
 
-    def handle_vote_called(self, player, vote, args):
-        """Cancels the vote when a duplicated map is voted for."""
-        if vote.lower() == "map":
-            if len(args) > 0:
-                disabled_maps = ("q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
-                                 "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2", "wintersedge")
-                map_name = args.split()[0]
-                if map_name.lower() in disabled_maps:
-                    player.tell("^3{} ^2is disabled(duplicate map).".format(map_name))
-                    return minqlx.RET_STOP_ALL
-
     def handle_new_game(self):
         """Brands map title on new game."""
         map_name = self.game.map.lower()
@@ -78,7 +67,6 @@ class race(minqlx.Plugin):
                       "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
                       "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
                       "walkathon", "purpletorture", "sodomia")
-
         grenade_only = ("grenadorade")
 
         if factory in ("qlrace_turbo", "qlrace_classic"):
@@ -97,7 +85,19 @@ class race(minqlx.Plugin):
             else:
                 self.set_cvar("g_respawn_delay_min", "10")
                 self.set_cvar("g_respawn_delay_max", "10")
+
         self.get_maps()
+
+    def handle_vote_called(self, player, vote, args):
+        """Cancels the vote when a duplicated map is voted for."""
+        if vote.lower() == "map":
+            if len(args) > 0:
+                disabled_maps = ("q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
+                                 "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2", "wintersedge")
+                map_name = args.split()[0]
+                if map_name.lower() in disabled_maps:
+                    player.tell("^3{} ^2is disabled(duplicate map).".format(map_name))
+                    return minqlx.RET_STOP_ALL
 
     def handle_server_command(self, player, cmd):
         """Stops server printing powerup messages."""

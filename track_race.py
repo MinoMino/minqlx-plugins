@@ -21,14 +21,21 @@ class track_race(minqlx.Plugin):
 
     def __init__(self):
         super().__init__()
-        self.add_hook("stats", self.handle_stats)
         self.add_hook("map", self.handle_map)
+        self.add_hook("stats", self.handle_stats)
 
         # QLRace.com API key.
         self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
         self.mode = self.get_cvar("qlx_raceMode", int)
         self.enabled = False
         self.map_name = ""
+
+    def handle_map(self, map_name, factory):
+        """Checks whether the current game mode is race."""
+        if self.game.type_short == "race" and self.mode in (0, 2):
+            self.enabled = True
+        else:
+            self.enabled = False
 
     def handle_stats(self, stats):
         """Gets ZMQ stats."""
@@ -37,13 +44,6 @@ class track_race(minqlx.Plugin):
             self.map_name = self.game.map.lower()
         elif stats["TYPE"] == "PLAYER_STATS":
             self.update_pb(stats)
-
-    def handle_map(self, map_name, factory):
-        """Checks whether the current game mode is race."""
-        if self.game.type_short == "race" and self.mode in (0, 2):
-            self.enabled = True
-        else:
-            self.enabled = False
 
     @minqlx.thread
     def update_pb(self, stats):
