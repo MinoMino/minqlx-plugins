@@ -25,6 +25,13 @@ class spec_delay(minqlx.Plugin):
         self.spec_delays[player.steam_id] = True
         self.allow_join(player)
 
+    def handle_team_switch_attempt(self, player, old_team, new_team):
+        """Stops the player joining if spec delay is true."""
+        if new_team != "spectator" and old_team == "spectator":
+            if self.spec_delays.get(player.steam_id):
+                player.tell("^6You must wait 8 seconds before joining after spectating")
+                return minqlx.RET_STOP_EVENT
+
     def handle_team_switch(self, player, old_team, new_team):
         """Sets a delay on joining when the player joins spectator"""
         if new_team == "spectator" and old_team == "free":
@@ -33,13 +40,6 @@ class spec_delay(minqlx.Plugin):
             self.allow_join(player)
         # This is only needed to stop \team s; team f
         elif new_team == "free" and old_team == "spectator":
-            if self.spec_delays.get(player.steam_id):
-                player.tell("^6You must wait 8 seconds before joining after spectating")
-                return minqlx.RET_STOP_EVENT
-
-    def handle_team_switch_attempt(self, player, old_team, new_team):
-        """Stops the player joining if spec delay is true."""
-        if new_team != "spectator" and old_team == "spectator":
             if self.spec_delays.get(player.steam_id):
                 player.tell("^6You must wait 8 seconds before joining after spectating")
                 return minqlx.RET_STOP_EVENT
