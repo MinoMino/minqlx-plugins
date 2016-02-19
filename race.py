@@ -398,8 +398,8 @@ class race(minqlx.Plugin):
             self.logger.info("ERROR: {}".format(e))
             return
 
-        maps = data["maps"]
-        channel.reply("Most recent maps(by first record date): ^3{}".format(maps[:amount]))
+        maps = ', '.join(data["maps"][:amount])
+        channel.reply("Most recent maps(by first record date): ^3{}".format(maps))
 
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
