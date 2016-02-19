@@ -398,7 +398,7 @@ class race(minqlx.Plugin):
             self.logger.info("ERROR: {}".format(e))
             return
 
-        maps = ', '.join(data["maps"][:amount])
+        maps = '^7, ^3'.join(data["maps"][:amount])
         channel.reply("Most recent maps(by first record date): ^3{}".format(maps))
 
     def cmd_commands(self, player, msg, channel):
