@@ -8,9 +8,9 @@ Race plugin for minqlx. Adds commands such as !pb, !top, !all etc
 """
 
 import minqlx
-import requests
-import re
 import random
+import re
+import requests
 
 PARAMS = ({}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
           {"factory": "classic", "weapons": "false"})
@@ -29,11 +29,13 @@ class race(minqlx.Plugin):
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
         self.add_command(("rank", "srank", "r", "sr"), self.cmd_rank, usage="[rank] [map]")
-        self.add_command(("top", "stop", "t", "st", "oldtop", "oldstop", "ot", "ost"), self.cmd_top, usage="[amount] [map]")
+        self.add_command(("top", "stop", "t", "st", "oldtop", "oldstop", "ot", "ost"), self.cmd_top,
+                         usage="[amount] [map]")
         self.add_command(("all", "sall", "a", "sa"), self.cmd_all, usage="[map]")
         self.add_command(("ranktime", "sranktime", "rt", "srt"), self.cmd_ranktime, usage="<time> [map]")
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
         self.add_command("randommap", self.cmd_random_map)
+        self.add_command("recent", self.cmd_recent, usage="[amount]")
         self.add_command(("commands", "cmds", "help"), self.cmd_commands, priority=minqlx.PRI_HIGH)
 
         # 0 = Turbo/PQL, 2 = Classic/VQL
@@ -178,21 +180,22 @@ class race(minqlx.Plugin):
         """Outputs top x amount of times for a map. Default amount
         if none is given is 3. Maximum amount is 20.
         """
-        if len(msg) == 1:
-            amount = 3
-            map_prefix = self.game.map
-        elif len(msg) == 2:
-            if msg[1].isdigit():
+        amount = 3
+        map_prefix = self.game.map
+        if len(msg) == 2:
+            try:
                 amount = int(msg[1])
-                map_prefix = self.game.map
-            else:
-                amount = 3
+            except ValueError:
                 map_prefix = msg[1]
         elif len(msg) == 3:
-            amount = int(msg[1])
+            try:
+                amount = int(msg[1])
+            except ValueError:
+                return minqlx.RET_USAGE
             map_prefix = msg[2]
-        else:
+        elif len(msg) > 3:
             return minqlx.RET_USAGE
+
         if amount > 20:
             channel.reply("^2Please use value <=20")
             return
@@ -227,7 +230,7 @@ class race(minqlx.Plugin):
         self.output_times(map_name, times, channel)
 
     @minqlx.thread
-    def old_top(self, map_name, command, amount, channel):#
+    def old_top(self, map_name, command, amount, channel):  #
         if "s" in command:
             weapons = False
             mode = self.get_cvar("qlx_raceMode", int) + 1
@@ -348,6 +351,7 @@ class race(minqlx.Plugin):
 
     @minqlx.thread
     def avg(self, player, mode, strafe, channel):
+        """API Doc: https://qlrace.com/apidoc/1.0/records/player.html"""
         try:
             data = requests.get("https://qlrace.com/api/player/{}".format(player.steam_id), params=PARAMS[mode]).json()
         except requests.exceptions.RequestException as e:
@@ -369,10 +373,38 @@ class race(minqlx.Plugin):
         map_name = random.choice(self.maps)
         minqlx.client_command(player.id, "cv map {}".format(map_name))
 
+    def cmd_recent(self, player, msg, channel):
+        """Outputs the most recent maps from QLRace.com"""
+        amount = 10
+        if len(msg) == 2:
+            try:
+                amount = int(msg[1])
+                if not (0 <= amount <= 20):
+                    raise ValueError
+            except ValueError:
+                player.tell("amount must be positive integer <= 20")
+                return minqlx.RET_STOP_ALL
+        elif len(msg) > 2:
+            return minqlx.RET_USAGE
+
+        self.recent(channel, amount)
+
+    @minqlx.thread
+    def recent(self, channel, amount):
+        """API Doc: https://qlrace.com/apidoc/1.0/Maps/maps.html"""
+        try:
+            data = requests.get("https://qlrace.com/api/maps?sort=recent").json()
+        except requests.exceptions.RequestException as e:
+            self.logger.info("ERROR: {}".format(e))
+            return
+
+        maps = data["maps"]
+        channel.reply("Most recent maps(by first record date): ^3{}".format(maps[:amount]))
+
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
         channel.reply(
-                "Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap")
+            "Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent")
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
@@ -456,7 +488,7 @@ class race(minqlx.Plugin):
 
 
 class RaceRecords:
-    """Race records object. Gets records using QLRace.com API"""
+    """Race records object. Gets records using QLRace.com API."""
 
     def __init__(self, map_name, mode):
         self.map_name = map_name.lower()
@@ -520,7 +552,8 @@ class RaceRecords:
             .format(name, tied, rank, self.last_rank, time, time_diff, self.map_name, strafe)
 
     def get_data(self):
-        """Returns the records for the map and mode from QLRace.com."""
+        """Returns the records for the map and mode from QLRace.com
+        API Doc: https://qlrace.com/apidoc/1.0/records/map.html"""
         try:
             r = requests.get("https://qlrace.com/api/map/{}".format(self.map_name), params=PARAMS[self.mode])
             r.raise_for_status()
