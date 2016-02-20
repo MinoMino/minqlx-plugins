@@ -379,10 +379,10 @@ class race(minqlx.Plugin):
         if len(msg) == 2:
             try:
                 amount = int(msg[1])
-                if not (0 <= amount <= 20):
+                if not (0 <= amount <= 30):
                     raise ValueError
             except ValueError:
-                player.tell("amount must be positive integer <= 20")
+                player.tell("amount must be positive integer <= 30")
                 return minqlx.RET_STOP_ALL
         elif len(msg) > 2:
             return minqlx.RET_USAGE
@@ -428,6 +428,7 @@ class race(minqlx.Plugin):
     def get_maps(self):
         """Gets the list of race maps from QLRace.com and
         adds current map to the list if it isn't already.
+        API Doc: https://qlrace.com/apidoc/1.0/Maps/maps.html
         """
         try:
             self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
