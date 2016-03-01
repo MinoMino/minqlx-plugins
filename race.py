@@ -12,10 +12,26 @@ import random
 import re
 import requests
 
-PARAMS = ({}, {"weapons": "false"}, {"factory": "classic", "weapons": "true"},
-          {"factory": "classic", "weapons": "false"})
+PARAMS = ({}, {"weapons": "false"}, {"factory": "classic"}, {"factory": "classic", "weapons": "false"})
 OLDTOP_URL = "https://raw.githubusercontent.com/cstewart90/QLRace-oldtop/master/oldtop"
-_re_powerups = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
+
+HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "df_verihard", "df_luna",
+         "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
+         "cursed_temple", "skacharohuth", "randommap", "just_jump_3", "criclejump", "eatme")
+NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
+              "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil",
+              "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
+              "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
+              "df_lickrevived2", "df_licksewage", "df_licksux", "df_licktards", "df_licktunnel", "df_palmslane",
+              "df_enz12", "df_ghostcheerslick", "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick",
+              "df_ghostcheerextended", "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8",
+              "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
+              "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
+              "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
+              "walkathon", "purpletorture", "sodomia")
+GRENADE_ONLY = ("grenadorade")
+
+_RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
 
 
 class race(minqlx.Plugin):
@@ -36,10 +52,10 @@ class race(minqlx.Plugin):
         self.add_command(("avg", "savg"), self.cmd_avg, usage="[id]")
         self.add_command("randommap", self.cmd_random_map)
         self.add_command("recent", self.cmd_recent, usage="[amount]")
+        self.add_command(("goto", "tp"), self.cmd_goto, usage="<id>")
         self.add_command(("commands", "cmds", "help"), self.cmd_commands, priority=minqlx.PRI_HIGH)
 
-        # 0 = Turbo/PQL, 2 = Classic/VQL
-        self.set_cvar_once("qlx_raceMode", "0")
+        self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
         self.maps = []
@@ -58,24 +74,11 @@ class race(minqlx.Plugin):
         """
         self.brand_map(map_name.lower())
 
-        no_weapons = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
-                      "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil",
-                      "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
-                      "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
-                      "df_lickrevived2", "df_licksewage", "df_licksux", "df_licktards", "df_licktunnel", "df_palmslane",
-                      "df_enz12", "df_ghostcheerslick", "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick",
-                      "df_ghostcheerextended", "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8",
-                      "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
-                      "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
-                      "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
-                      "walkathon", "purpletorture", "sodomia")
-        grenade_only = ("grenadorade")
-
         if factory in ("qlrace_turbo", "qlrace_classic"):
-            if map_name.lower() in no_weapons:
+            if map_name.lower() in NO_WEAPONS:
                 self.set_cvar("g_startingWeapons", "3")
                 self.set_cvar("g_infiniteAmmo", "0")
-            elif map_name.lower() in grenade_only:
+            elif map_name.lower() in GRENADE_ONLY:
                 self.set_cvar("g_startingWeapons", "9")
                 self.set_cvar("g_infiniteAmmo", "1")
             else:
@@ -103,7 +106,7 @@ class race(minqlx.Plugin):
 
     def handle_server_command(self, player, cmd):
         """Stops server printing powerup messages."""
-        if _re_powerups.fullmatch(cmd):
+        if _RE_POWERUPS.fullmatch(cmd):
             return minqlx.RET_STOP_EVENT
 
     def cmd_disabled(self, player, msg, channel):
@@ -401,10 +404,40 @@ class race(minqlx.Plugin):
         maps = '^7, ^3'.join(data["maps"][:amount])
         channel.reply("Most recent maps(by first record date): ^3{}".format(maps))
 
+    def cmd_goto(self, player, msg, channel):
+        """Teleports player to chosen player."""
+        # so you can't /team f;team s;!goto x, plus QL is buggy when you do player_spawn() as spec
+        if player.team == "spectator":
+            player.tell("You must join the game first to use this command.")
+            return minqlx.RET_STOP_EVENT
+
+        if len(msg) == 2:
+            try:
+                i = int(msg[1])
+                target_player = self.player(i)
+                if not (0 <= i < 64) or not target_player or not self.player(i).is_alive or i == player.id:
+                    raise ValueError
+                p = target_player
+            except ValueError:
+                player.tell("Invalid ID.")
+                return minqlx.RET_STOP_EVENT
+        elif len(msg) != 2:
+            return minqlx.RET_USAGE
+
+        minqlx.player_spawn(player.id)  # respawn player so he can't cheat by touching the start flag then !goto finish
+        player.position(x=p.state.position.x, y=p.state.position.y,
+                        z=p.state.position.z + 26)  # +26 needed or else you're stuck in the ground
+
+        if self.game.map.lower() == "kraglejump":
+            # some stages need haste and some don't, so 60 is a compromise...
+            player.powerups(haste=60)
+        elif self.game.map.lower() in HASTE:
+            player.powerups(haste=999)
+
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
         channel.reply(
-            "Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent")
+            "Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent !goto")
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
