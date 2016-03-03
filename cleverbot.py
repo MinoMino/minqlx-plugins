@@ -52,7 +52,7 @@ class cleverbot(minqlx.Plugin):
     def cmd_create(self, player, msg, channel):
         """Creates the bot with the nick given.
         API Doc: https://docs.cleverbot.io/docs/getting-started"""
-        if len(msg) != 2:
+        if len(msg) == 1:
             return minqlx.RET_USAGE
 
         nick = ' '.join(msg[1:])
