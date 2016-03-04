@@ -130,7 +130,8 @@ class motd(minqlx.Plugin):
         return minqlx.RET_STOP_EVENT
 
     def send_motd(self, player, motd):
-        player.tell(self.get_cvar("qlx_motdHeader"))
+        for line in self.get_cvar("qlx_motdHeader").split("\\n"):
+            player.tell(line)
         for line in motd.split("\\n"):
             player.tell(line)
 
