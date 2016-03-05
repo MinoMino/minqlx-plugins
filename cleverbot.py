@@ -123,8 +123,7 @@ class cleverbot(minqlx.Plugin):
             self.msg("^3You need to set qlx_cleverbotUser and qlx_cleverbotKey")
 
     def callback(self, response, channel=None):
-        """
-        Responds to chat with the response from the bot.
+        """Responds to chat with the response from the bot.
         Called after data has been POSTed.
         :param response: JSON data from cleverbot.io
         :param channel: Channel to reply to
