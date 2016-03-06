@@ -129,7 +129,6 @@ class cleverbot(minqlx.Plugin):
         :param channel: Channel to reply to
         """
         nick = self.get_cvar("qlx_cleverbotNick")
-        self.msg(response)
         if "response" in response:
             channel.reply("^6{}^7: {}".format(nick, response["response"]))
         else:
