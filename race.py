@@ -13,7 +13,7 @@ import re
 import requests
 
 PARAMS = ({}, {"weapons": "false"}, {"factory": "classic"}, {"factory": "classic", "weapons": "false"})
-OLDTOP_URL = "https://cdn.rawgit.com/cstewart90/QLRace-oldtop/master/oldtop/"
+OLDTOP_URL = "https://cdn.rawgit.com/QLRace/QLRace-oldtop/master/oldtop/"
 
 HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "df_verihard", "df_luna",
          "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
