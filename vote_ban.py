@@ -25,7 +25,7 @@ class vote_ban(minqlx.Plugin):
     def handle_vote_called(self, player, vote, args):
         """Stops a banned player from voting."""
         if self.db.sismember(VOTE_BAN_KEY, player.steam_id):
-            if len(self.teams()["free"]) > 1:
+            if len(self.teams()["free"] + self.teams()["red"] + self.teams()["blue"]) > 1:
                 player.tell("You are banned from voting.")
                 return minqlx.RET_STOP_ALL
 
@@ -44,10 +44,10 @@ class vote_ban(minqlx.Plugin):
             return
 
         if self.db.sismember(VOTE_BAN_KEY, steam_id):
+            channel.reply("^7{} ^3is already banned from voting".format(name))
+        else:
             self.db.sadd(VOTE_BAN_KEY, steam_id)
             channel.reply("^7{} ^1has been banned from voting".format(name))
-        else:
-            channel.reply("^7{} ^3is already banned from voting".format(name))
 
     def cmd_voteunban(self, player, msg, channel):
         """Unbans a player from voting."""
