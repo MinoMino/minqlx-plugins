@@ -10,26 +10,26 @@ Ban players from voting.
 import minqlx
 import minqlx.database
 
-VOTE_BAN_KEY = "minqlx:vote_ban"
+BANVOTE_KEY = "minqlx:vote_ban"
 
 
-class vote_ban(minqlx.Plugin):
+class banvote(minqlx.Plugin):
     database = minqlx.database.Redis
 
     def __init__(self):
         super().__init__()
         self.add_hook("vote_called", self.handle_vote_called, priority=minqlx.PRI_HIGH)
-        self.add_command("voteban", self.cmd_voteban, 2, usage="<id>")
-        self.add_command("voteunban", self.cmd_voteunban, 2, usage="<id>")
+        self.add_command("banvote", self.cmd_banvote, 2, usage="<id>")
+        self.add_command("unbanvote", self.cmd_unbanvote, 2, usage="<id>")
 
     def handle_vote_called(self, player, vote, args):
         """Stops a banned player from voting."""
-        if self.db.sismember(VOTE_BAN_KEY, player.steam_id):
+        if self.db.sismember(BANVOTE_KEY, player.steam_id):
             if len(self.teams()["free"] + self.teams()["red"] + self.teams()["blue"]) > 1:
                 player.tell("You are banned from voting.")
                 return minqlx.RET_STOP_ALL
 
-    def cmd_voteban(self, player, msg, channel):
+    def cmd_banvote(self, player, msg, channel):
         """Bans a player from voting."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
@@ -43,13 +43,13 @@ class vote_ban(minqlx.Plugin):
             channel.reply("^7{} ^3has permission level 1 or higher and cannot be banned from voting.".format(name))
             return
 
-        if self.db.sismember(VOTE_BAN_KEY, steam_id):
+        if self.db.sismember(BANVOTE_KEY, steam_id):
             channel.reply("^7{} ^3is already banned from voting".format(name))
         else:
-            self.db.sadd(VOTE_BAN_KEY, steam_id)
+            self.db.sadd(BANVOTE_KEY, steam_id)
             channel.reply("^7{} ^1has been banned from voting".format(name))
 
-    def cmd_voteunban(self, player, msg, channel):
+    def cmd_unbanvote(self, player, msg, channel):
         """Unbans a player from voting."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
@@ -58,8 +58,8 @@ class vote_ban(minqlx.Plugin):
         if steam_id is None:
             return
 
-        if self.db.sismember(VOTE_BAN_KEY, steam_id):
-            self.db.srem(VOTE_BAN_KEY, steam_id)
+        if self.db.sismember(BANVOTE_KEY, steam_id):
+            self.db.srem(BANVOTE_KEY, steam_id)
             channel.reply("^7{} ^2is now unbanned from voting.".format(name))
         else:
             channel.reply("^7{} ^3is not banned from voting.".format(name))
