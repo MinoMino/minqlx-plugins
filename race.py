@@ -7,10 +7,9 @@
 Race plugin for minqlx. Adds commands such as !pb, !top, !all etc
 """
 
+import minqlx
 import random
 import re
-
-import minqlx
 import requests
 
 PARAMS = ({}, {"weapons": "false"}, {"factory": "classic"}, {"factory": "classic", "weapons": "false"})
