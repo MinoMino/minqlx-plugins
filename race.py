@@ -7,9 +7,10 @@
 Race plugin for minqlx. Adds commands such as !pb, !top, !all etc
 """
 
-import minqlx
 import random
 import re
+
+import minqlx
 import requests
 
 PARAMS = ({}, {"weapons": "false"}, {"factory": "classic"}, {"factory": "classic", "weapons": "false"})
@@ -18,17 +19,16 @@ OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
 HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna",
          "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
          "cursed_temple", "skacharohuth", "randommap", "just_jump_3", "criclejump", "eatme")
-NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
-              "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil",
-              "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
-              "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
-              "df_lickrevived2", "df_licksewage", "df_licksux", "df_licktards", "df_licktunnel", "df_palmslane",
-              "df_enz12", "df_ghostcheerslick", "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick",
-              "df_ghostcheerextended", "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8",
-              "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
-              "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
-              "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
-              "walkathon", "purpletorture", "sodomia")
+NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells", "df_lickcells2",
+              "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil", "df_lickfast",
+              "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2", "df_lickhuarstyle",
+              "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived", "df_lickrevived2",
+              "df_licksux", "df_licktards", "df_licktunnel", "df_palmslane", "df_enz12", "df_ghostcheerslick",
+              "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick", "df_ghostcheerextended", "cpm_1", "cpm_2",
+              "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8", "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04",
+              "vanilla_05", "vanilla_06", "vanilla_07", "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity",
+              "df_qsnrun", "df_handbreaker4", "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown",
+              "df_extremepkr", "walkathon", "purpletorture", "sodomia")
 GRENADE_ONLY = ("grenadorade")
 
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
