@@ -27,7 +27,7 @@ NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lick
               "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8", "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04",
               "vanilla_05", "vanilla_06", "vanilla_07", "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity",
               "df_qsnrun", "df_handbreaker4", "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown",
-              "df_extremepkr", "walkathon", "purpletorture", "sodomia")
+              "df_extremepkr", "walkathon", "purpletorture", "sodomia", "r7_pyramid")
 GRENADE_ONLY = ("grenadorade")
 
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
