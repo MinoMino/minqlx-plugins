@@ -9,8 +9,8 @@ Tracks race records and posts them to QLRace.com.
 
 import minqlx
 import minqlx.database
-import requests
 import json
+import requests
 from datetime import datetime
 
 RECORDS_KEY = "minqlx:race_records"
@@ -70,13 +70,14 @@ class track_race(minqlx.Plugin):
             else:
                 strafe = ""
 
-            time = time_string(abs(record["time_diff"]))
+            time = self.plugins["race"].time_string(abs(record["time_diff"]))
             if record["rank"] == 1:
                 time_diff = "^0[^2-{}^0]".format(time)
                 self.msg("^7{} ^2just set a new ^3world record! {}{}".format(name, time_diff, strafe))
             else:
                 time_diff = "^0[^1+{}^0]".format(time)
-                self.msg("^7{} ^2set a new pb and is now rank ^3{} {}{}".format(name, record["rank"], time_diff, strafe))
+                self.msg(
+                    "^7{} ^2set a new pb and is now rank ^3{} {}{}".format(name, record["rank"], time_diff, strafe))
 
     def get_mode(self, weapon_stats):
         """Returns the race mode of a player. 0 or 2 for weapons
@@ -118,18 +119,3 @@ class track_race(minqlx.Plugin):
         payload["date"] = str(datetime.utcnow())
         record = json.dumps(payload)
         self.db.lpush(RECORDS_KEY, record)
-
-
-def time_string(time):
-    """Returns a time string in the format s.ms or m:s.ms if time is more than
-    or equal to 1 minute.
-    :param time: Time in milliseconds
-    """
-    time = int(time)
-    s, ms = divmod(time, 1000)
-    ms = str(ms).zfill(3)
-    if s < 60:
-        return "{}.{}".format(s, ms)
-    m, s = divmod(s, 60)
-    s = str(s).zfill(2)
-    return "{}:{}.{}".format(m, s, ms)
