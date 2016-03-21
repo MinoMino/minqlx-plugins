@@ -225,7 +225,7 @@ class Race(minqlx.Plugin):
         for i in range(amount):
             try:
                 record = records.records[i]
-                times.append(" ^3{}. ^4{} ^2{}".format(record['rank'], record['name'], time_string(record['time'])))
+                times.append(" ^3{}. ^4{} ^2{}".format(record['rank'], record['name'], race.time_string(record['time'])))
             except IndexError:
                 break
 
@@ -256,7 +256,7 @@ class Race(minqlx.Plugin):
         for i in range(amount):
             try:
                 record = records[i]
-                times.append(" ^3{}. ^4{} ^2{}".format(record['rank'], record['name'], time_string(record['time'])))
+                times.append(" ^3{}. ^4{} ^2{}".format(record['rank'], record['name'], race.time_string(record['time'])))
             except IndexError:
                 break
 
@@ -283,7 +283,7 @@ class Race(minqlx.Plugin):
         for p in self.players():
             rank, time = records.pb(p.steam_id)
             if rank:
-                times[rank] = "^7{} ^2{}".format(p, time_string(time))
+                times[rank] = "^7{} ^2{}".format(p, race.time_string(time))
 
         if not weapons:
             map_name += "^2(strafe)"
@@ -301,10 +301,10 @@ class Race(minqlx.Plugin):
             time = player.score
             map_prefix = self.game.map
         elif len(msg) == 2:
-            time = time_ms(msg[1])
+            time = race.time_ms(msg[1])
             map_prefix = self.game.map
         elif len(msg) == 3:
-            time = time_ms(msg[1])
+            time = race.time_ms(msg[1])
             map_prefix = msg[2]
         else:
             channel.reply("^7Usage: ^6{0} <time> [map] ^7or just ^6{0} ^7if you have set a time".format(msg[0]))
@@ -324,7 +324,7 @@ class Race(minqlx.Plugin):
         if not weapons:
             map_name += "^2(strafe)"
 
-        channel.reply("^3{} ^2would be rank ^3{} ^2of ^3{} ^2on ^3{}".format(time_string(time), rank,
+        channel.reply("^3{} ^2would be rank ^3{} ^2of ^3{} ^2on ^3{}".format(race.time_string(time), rank,
                                                                              last_rank, map_name))
 
     def cmd_avg(self, player, msg, channel):
@@ -519,6 +519,29 @@ class Race(minqlx.Plugin):
         brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name)
         minqlx.set_configstring(3, brand_map)
 
+    @staticmethod
+    def time_ms(time_string):
+        """Returns time in milliseconds.
+        :param time_string: Time as a string, examples 2.300, 1:12.383
+        """
+        minutes, seconds = (["0"] + time_string.split(":"))[-2:]
+        return int(60000 * int(minutes) + round(1000 * float(seconds)))
+
+    @staticmethod
+    def time_string(time):
+        """Returns a time string in the format s.ms or m:s.ms if time is more than
+        or equal to 1 minute.
+        :param time: Time in milliseconds
+        """
+        time = int(time)
+        s, ms = divmod(time, 1000)
+        ms = str(ms).zfill(3)
+        if s < 60:
+            return "{}.{}".format(s, ms)
+        m, s = divmod(s, 60)
+        s = str(s).zfill(2)
+        return "{}:{}.{}".format(m, s, ms)
+
 
 class RaceRecords:
     """Race records object. Gets records using QLRace.com API."""
@@ -575,10 +598,10 @@ class RaceRecords:
         if rank != 1:
             time_diff = str(time - self.first_time)
             time_diff = time_diff.zfill(3)
-            time_diff = "^0[^1+" + time_string(time_diff) + "^0]"
+            time_diff = "^0[^1+" + race.time_string(time_diff) + "^0]"
         else:
             time_diff = ""
-        time = time_string(time)
+        time = race.time_string(time)
         strafe = "^2(strafe)" if not self.weapons else ""
         tied = "tied " if tied else ""
         return "^7{} ^2is {}rank ^3{} ^2of ^3{} ^2with ^3{}{} ^2on ^3{}{}" \
@@ -593,26 +616,3 @@ class RaceRecords:
             return r.json()["records"]
         except requests.exceptions.RequestException:
             return []
-
-
-def time_ms(time_string):
-    """Returns time in milliseconds.
-    :param time_string: Time as a string, examples 2.300, 1:12.383
-    """
-    minutes, seconds = (["0"] + time_string.split(":"))[-2:]
-    return int(60000 * int(minutes) + round(1000 * float(seconds)))
-
-
-def time_string(time):
-    """Returns a time string in the format s.ms or m:s.ms if time is more than
-    or equal to 1 minute.
-    :param time: Time in milliseconds
-    """
-    time = int(time)
-    s, ms = divmod(time, 1000)
-    ms = str(ms).zfill(3)
-    if s < 60:
-        return "{}.{}".format(s, ms)
-    m, s = divmod(s, 60)
-    s = str(s).zfill(2)
-    return "{}:{}.{}".format(m, s, ms)
