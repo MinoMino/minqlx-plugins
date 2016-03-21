@@ -24,7 +24,7 @@ a minimum of two players on a server, like you usually do.
 import minqlx
 
 
-class solorace(minqlx.Plugin):
+class SoloRace(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("team_switch", self.handle_team_switch)

@@ -16,7 +16,7 @@ from datetime import datetime
 RECORDS_KEY = "minqlx:race_records"
 
 
-class track_race(minqlx.Plugin):
+class TrackRace(minqlx.Plugin):
     database = minqlx.database.Redis
 
     def __init__(self):

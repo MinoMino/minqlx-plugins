@@ -14,7 +14,7 @@ import requests
 import random
 
 
-class cleverbot(minqlx.Plugin):
+class Cleverbot(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("chat", self.handle_chat)

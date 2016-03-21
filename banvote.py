@@ -13,7 +13,7 @@ import minqlx.database
 BANVOTE_KEY = "minqlx:vote_ban"
 
 
-class banvote(minqlx.Plugin):
+class BanVote(minqlx.Plugin):
     database = minqlx.database.Redis
 
     def __init__(self):
