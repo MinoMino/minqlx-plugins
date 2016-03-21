@@ -33,7 +33,7 @@ GRENADE_ONLY = ("grenadorade")
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
 
 
-class Race(minqlx.Plugin):
+class race(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("new_game", self.handle_new_game)
