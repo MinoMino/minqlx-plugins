@@ -29,6 +29,7 @@ NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lick
               "df_qsnrun", "df_handbreaker4", "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown",
               "df_extremepkr", "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture")
 GRENADE_ONLY = ("grenadorade")
+GAUNTLET_ONLY = ("k4n")
 
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
 
@@ -80,9 +81,13 @@ class race(minqlx.Plugin):
             elif map_name.lower() in GRENADE_ONLY:
                 self.set_cvar("g_startingWeapons", "9")
                 self.set_cvar("g_infiniteAmmo", "1")
+            elif map_name.lower() in GAUNTLET_ONLY:
+                self.set_cvar("g_startingWeapons", "1")
+                self.set_cvar("g_infiniteAmmo", "0")
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
+
             if map_name.lower() == "walkathon":
                 self.set_cvar("g_respawn_delay_min", "1000")
                 self.set_cvar("g_respawn_delay_max", "1000")
