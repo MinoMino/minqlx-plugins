@@ -29,7 +29,6 @@ NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lick
               "df_qsnrun", "df_handbreaker4", "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown",
               "df_extremepkr", "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture")
 GRENADE_ONLY = ("grenadorade")
-GAUNTLET_ONLY = ("k4n")
 
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
 
@@ -81,12 +80,16 @@ class race(minqlx.Plugin):
             elif map_name.lower() in GRENADE_ONLY:
                 self.set_cvar("g_startingWeapons", "9")
                 self.set_cvar("g_infiniteAmmo", "1")
-            elif map_name.lower() in GAUNTLET_ONLY:
+            elif map_name.lower() == "k4n":
                 self.set_cvar("g_startingWeapons", "1")
                 self.set_cvar("g_infiniteAmmo", "0")
+                # requested by recrut, end of k4n needs vql nade velocity.
+                self.set_cvar("g_velocity_gl", "700")
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
+                if self.get_cvar("qlx_raceMode", int) == 0:
+                    self.set_cvar("g_velocity_gl", "800")
 
             if map_name.lower() == "walkathon":
                 self.set_cvar("g_respawn_delay_min", "1000")
