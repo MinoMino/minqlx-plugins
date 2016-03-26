@@ -88,8 +88,9 @@ class race(minqlx.Plugin):
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
-                if self.get_cvar("qlx_raceMode", int) == 0:
-                    self.set_cvar("g_velocity_gl", "800")
+
+            if self.get_cvar("qlx_raceMode", int) == 0 and map_name.lower() != "k4n":
+                self.set_cvar("g_velocity_gl", "800")
 
             if map_name.lower() == "walkathon":
                 self.set_cvar("g_respawn_delay_min", "1000")
