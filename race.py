@@ -18,6 +18,7 @@ OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
 HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna",
          "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
          "cursed_temple", "skacharohuth", "randommap", "just_jump_3", "criclejump", "eatme")
+GAUNTLET_ONLY = ("k4n", "ndql")
 NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells", "df_lickcells2",
               "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil", "df_lickfast",
               "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2", "df_lickhuarstyle",
@@ -71,28 +72,30 @@ class race(minqlx.Plugin):
         Also sets starting weapons to only mg and gauntlet if map should
         not have weapons.
         """
-        self.brand_map(map_name.lower())
+        map_name = map_name.lower()
+        self.brand_map(map_name)
 
         if factory in ("qlrace_turbo", "qlrace_classic"):
-            if map_name.lower() in NO_WEAPONS:
+            if map_name in NO_WEAPONS:
                 self.set_cvar("g_startingWeapons", "3")
                 self.set_cvar("g_infiniteAmmo", "0")
-            elif map_name.lower() in GRENADE_ONLY:
+            elif map_name in GRENADE_ONLY:
                 self.set_cvar("g_startingWeapons", "9")
                 self.set_cvar("g_infiniteAmmo", "1")
-            elif map_name.lower() == "k4n":
+            elif map_name in GAUNTLET_ONLY:
                 self.set_cvar("g_startingWeapons", "1")
                 self.set_cvar("g_infiniteAmmo", "0")
-                # requested by recrut, end of k4n needs vql nade velocity.
-                self.set_cvar("g_velocity_gl", "700")
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
 
-            if self.get_cvar("qlx_raceMode", int) == 0 and map_name.lower() != "k4n":
-                self.set_cvar("g_velocity_gl", "800")
+            if self.get_cvar("qlx_raceMode", int) == 0:
+                if map_name == "k4n":
+                    self.set_cvar("g_velocity_gl", "700")
+                else:
+                    self.set_cvar("g_velocity_gl", "800")
 
-            if map_name.lower() == "walkathon":
+            if map_name == "walkathon":
                 self.set_cvar("g_respawn_delay_min", "1000")
                 self.set_cvar("g_respawn_delay_max", "1000")
             else:
