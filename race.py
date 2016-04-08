@@ -85,6 +85,9 @@ class race(minqlx.Plugin):
             elif map_name in GAUNTLET_ONLY:
                 self.set_cvar("g_startingWeapons", "1")
                 self.set_cvar("g_infiniteAmmo", "0")
+            elif map_name == "think1":
+                self.set_cvar("g_startingWeapons", "131")
+                self.set_cvar("g_infiniteAmmo", "1")
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
