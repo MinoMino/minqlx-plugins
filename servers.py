@@ -62,7 +62,7 @@ class servers(minqlx.Plugin):
             return "Error: Invalid port", "^1..."
         except socket.gaierror as e:
             self.logger.error(e)
-            return "Error:Invalid/nonexistent address", "^1..."
+            return "Error: Invalid/nonexistent address", "^1..."
         except a2s.NoResponseError as e:
             self.logger.error(e)
             return "Error: Timed out", "^1..."
