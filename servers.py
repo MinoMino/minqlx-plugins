@@ -30,6 +30,7 @@ class servers(minqlx.Plugin):
             return
 
         self.get_servers(servers, player)
+        return minqlx.RET_STOP_ALL
 
     @minqlx.thread
     def get_servers(self, servers, player):
@@ -58,10 +59,10 @@ class servers(minqlx.Plugin):
             return info['server_name'], "{player_count}/{max_players}".format(**info)
         except ValueError as e:
             self.logger.error(e)
-            return "^1Error: Invalid port", "^1..."
+            return "Error: Invalid port", "^1..."
         except socket.gaierror as e:
             self.logger.error(e)
-            return "^1Error:Invalid/nonexistent address", "^1..."
+            return "Error:Invalid/nonexistent address", "^1..."
         except a2s.NoResponseError as e:
             self.logger.error(e)
-            return "^1Error: Timed out", "^1..."
+            return "Error: Timed out", "^1..."
