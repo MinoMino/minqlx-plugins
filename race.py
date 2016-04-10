@@ -91,11 +91,11 @@ class race(minqlx.Plugin):
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
-
-           if map_name == "hangtime":
-               self.set_cvar("g_startingAmmo_mg", "1")
-           else:
-               self.set_cvar("g_startingAmmo_mg", "100")
+            
+            if map_name == "hangtime":
+                self.set_cvar("g_startingAmmo_mg", "1")
+            else:
+                self.set_cvar("g_startingAmmo_mg", "100")
 
             if self.get_cvar("qlx_raceMode", int) == 0:
                 if map_name == "k4n":
