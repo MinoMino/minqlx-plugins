@@ -118,7 +118,7 @@ class cleverbot(minqlx.Plugin):
                 self.callback(r.json(), channel)
                 return
             except requests.exceptions.RequestException as e:
-                self.logger.error("{}".format(e))
+                self.logger.error(e)
         else:
             self.msg("^3You need to set qlx_cleverbotUser and qlx_cleverbotKey")
 

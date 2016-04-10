@@ -258,7 +258,7 @@ class race(minqlx.Plugin):
         try:
             records = requests.get("{}/{}/{}.json".format(OLDTOP_URL, map_name, mode)).json()["records"]
         except requests.exceptions.RequestException as e:
-            self.logger.error("{}".format(e))
+            self.logger.error(e)
             return
 
         if not weapons:
@@ -372,7 +372,7 @@ class race(minqlx.Plugin):
         try:
             data = requests.get("https://qlrace.com/api/player/{}".format(player.steam_id), params=PARAMS[mode]).json()
         except requests.exceptions.RequestException as e:
-            self.logger.error("{}".format(e))
+            self.logger.error(e)
             return
 
         name = data["name"]
@@ -412,7 +412,7 @@ class race(minqlx.Plugin):
         try:
             data = requests.get("https://qlrace.com/api/maps?sort=recent").json()
         except requests.exceptions.RequestException as e:
-            self.logger.error("{}".format(e))
+            self.logger.error(e)
             return
 
         maps = '^7, ^3'.join(data["maps"][:amount])
@@ -481,7 +481,7 @@ class race(minqlx.Plugin):
             self.maps = requests.get("https://qlrace.com/api/maps").json()["maps"]
             self.old_maps = requests.get("{}/maps.json".format(OLDTOP_URL)).json()["maps"]
         except requests.exceptions.RequestException as e:
-            self.logger.error("{}".format(e))
+            self.logger.error(e)
 
         current_map = self.game.map.lower()
         if current_map not in self.maps:

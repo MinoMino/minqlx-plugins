@@ -110,7 +110,8 @@ class track_race(minqlx.Plugin):
                 return r.json()
         except requests.exceptions.RequestException as e:
             self.push_db(payload)
-            self.msg("^2Error, {}".format(e))
+            self.logger.error(e)
+            self.msg("^2Error, connecting to qlrace.com")
 
     def push_db(self, payload):
         """Pushes record to redis list
