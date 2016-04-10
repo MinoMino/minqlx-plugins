@@ -37,13 +37,13 @@ class servers(minqlx.Plugin):
         res = "{} | {} | {}\n".format("IP".center(21), "sv_hostname".center(40), "Player Count")
         for server in servers:
             hostname, player_count = self.get_server_info(server)
-        if player_count[0].isdigit():
-            players = [int(n) for n in player_count.split("/")]
-        if players[0] == players[1]:
-            player_count = "^3{}".format(player_count)
-        else:
-            player_count = "^2{}".format(player_count)
-        res += "{:21} | {:40} | {}^7\n".format(server, hostname, player_count)
+            if player_count[0].isdigit():
+                players = [int(n) for n in player_count.split("/")]
+            if players[0] == players[1]:
+                player_count = "^3{}".format(player_count)
+            else:
+                player_count = "^2{}".format(player_count)
+            res += "{:21} | {:40} | {}^7\n".format(server, hostname, player_count)
 
         player.tell(res)
 
@@ -56,12 +56,12 @@ class servers(minqlx.Plugin):
             server = a2s.ServerQuerier(address)
             info = server.get_info()
             return info['server_name'], "{player_count}/{max_players}".format(**info)
-        except ValueError:
-            self.logger.error("Error: {} port is invalid".format(server))
+        except ValueError as e:
+            self.logger.error(e)
             return "^1Error: Invalid port", "^1..."
         except socket.gaierror as e:
-            self.logger.error("Error: {}".format(e))
-            return "^1Error: Invalid/nonexistent address", "^1..."
+            self.logger.error(e)
+            return "^1Error:Invalid/nonexistent address", "^1..."
         except a2s.NoResponseError as e:
-            self.logger.error("Error: {}".format(e))
+            self.logger.error(e)
             return "^1Error: Timed out", "^1..."
