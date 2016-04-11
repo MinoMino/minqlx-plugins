@@ -21,11 +21,13 @@ class delayedrestart(minqlx.Plugin):
         self.restart = False
 
     def handle_team_switch(self, player, old_team, new_team):
+        """Quits server when no one playing after a player moves to spectator."""
         if self.restart and self.amount_playing() == 0:
             self.msg("restarting server")
             minqlx.console_command("quit")
 
     def handle_player_disconnect(self, player, reason):
+        """Quits server when no one playing after a player disconnects."""
         if self.restart and self.amount_playing() <= 1 and player.team != "spectator":
             self.msg("restarting server")
             minqlx.console_command("quit")
