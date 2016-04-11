@@ -21,6 +21,7 @@ class delayedrestart(minqlx.Plugin):
 
     def handle_team_switch(self, player, old_team, new_team):
         if self.restart and self.amount_playing() == 0:
+            self.msg("restarting server")
             minqlx.console_command("quit")
 
     def handle_player_disconnect(self, player, reason):
