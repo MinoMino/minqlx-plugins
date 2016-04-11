@@ -19,23 +19,27 @@ class servers(minqlx.Plugin):
         self.add_command("servers", self.cmd_servers)
 
         # Example value "108.61.190.53:27960, 108.61.190.53:27961, il.qlrace.com:27960"
-        self.set_cvar_once("qlx_servers", "ip:port, ip:port")
+        self.set_cvar_once("qlx_servers", "")
+        self.set_cvar_once("qlx_serversShowInChat", "0")
 
     def cmd_servers(self, player, msg, channel):
         """ If `qlx_servers` is set then it tells player the info for each server."""
         servers = self.get_cvar("qlx_servers", list)
-        if servers[0] == "ip:port":
+        if not servers:
             self.logger.warning("qlx_servers is not set")
             player.tell("qlx_servers is not set")
-            return
+            return minqlx.RET_STOP_ALL
 
-        self.get_servers(servers, player)
-        return minqlx.RET_STOP_ALL
+        if not self.get_cvar("qlx_serversShowInChat", bool):
+            self.get_servers(servers, minqlx.TellChannel(player))
+            return minqlx.RET_STOP_ALL
+
+        self.get_servers(servers, channel)
 
     @minqlx.thread
-    def get_servers(self, servers, player):
+    def get_servers(self, servers, channel):
         """Gets and outputs info for all servers in `qlx_servers`."""
-        res = "{} | {} | {}\n".format("IP".center(21), "sv_hostname".center(40), "Player Count")
+        output = "{} | {} | {}\n".format("IP".center(21), "sv_hostname".center(40), "Player Count")
         for server in servers:
             hostname, player_count = self.get_server_info(server)
             if player_count[0].isdigit():
@@ -44,9 +48,9 @@ class servers(minqlx.Plugin):
                 player_count = "^3{}".format(player_count)
             else:
                 player_count = "^2{}".format(player_count)
-            res += "{:21} | {:40} | {}^7\n".format(server, hostname, player_count)
+            output += "{:21} | {:40} | {}^7\n".format(server, hostname, player_count)
 
-        player.tell(res)
+        channel.reply(output)
 
     def get_server_info(self, server):
         """Gets server info using python-valve."""
