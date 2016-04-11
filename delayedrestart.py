@@ -4,7 +4,8 @@
 # (at your option) any later version.
 
 """
-Adds !delayedrestart which will restart(quit + supervisor spawns new process) when server is empty/.
+Adds !delayedrestart which will restart(quit + supervisor spawns new process) when
+no one is playing.
 """
 
 import minqlx
@@ -33,8 +34,9 @@ class delayedrestart(minqlx.Plugin):
         if self.amount_playing() == 0:
             channel.reply("restarting server")
             minqlx.console_command("quit")
-        player.tell("Server will restart when it is empty.")
-        self.restart = True
+        else:
+            player.tell("Server will restart when no one is playing.")
+            self.restart = True
 
     def amount_playing(self):
         """Returns the amount of players which are not spectating."""
