@@ -30,6 +30,9 @@ class delayedrestart(minqlx.Plugin):
             minqlx.console_command("quit")
 
     def cmd_delayedrestart(self, player, msg, channel):
+        if self.amount_playing() == 0:
+            channel.reply("restarting server")
+            minqlx.console_command("quit")
         player.tell("Server will restart when it is empty.")
         self.restart = True
 
