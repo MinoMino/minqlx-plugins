@@ -458,7 +458,11 @@ transaction who receives a copy of the work also receives whatever
 licenses to the work the party's predecessor in interest had or could
 give under the previous paragraph, plus a right to possession of the
 Corresponding Source of the work from the predecessor in interest, if
+<<<<<<< HEAD
 the predecessor has it or can get it with reasonable efforts.
+=======
+the predecessor has it or -can get it with reasonable efforts.
+>>>>>>> 3a54b78f7060121a6782dda42802c0a8e24fab5d
 
   You may not impose any further restrictions on the exercise of the
 rights granted or affirmed under this License.  For example, you may
@@ -672,4 +676,3 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
-
