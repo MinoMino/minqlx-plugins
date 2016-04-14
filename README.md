@@ -116,5 +116,5 @@ and thus not have the client download them automatically.
     - Default: `Cleverbot`
   - `qlx_cleverbotChance`: Chance that cleverbot responds to chat. Float between 0 and 1.
     - Default: `0`
--- **servers**: Adds !servers command which shows info for a server.
+- **servers**: Adds !servers command which shows info for a server.
   - `qlx_servers`: List of servers.
