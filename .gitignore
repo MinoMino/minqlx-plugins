@@ -1,0 +1,4 @@
+minqlx/
+.idea/
+*.pyc
+test.py
