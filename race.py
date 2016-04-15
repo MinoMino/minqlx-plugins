@@ -29,7 +29,7 @@ NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lick
               "vanilla_05", "vanilla_06", "vanilla_07", "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity",
               "df_qsnrun", "df_handbreaker4", "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown",
               "df_extremepkr", "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild",
-              "hangtime")
+              "hangtime", "poptart")
 PLASMA_ONLY = ("think1", "xproject")
 GRENADE_ONLY = ("grenadorade")
 
@@ -80,7 +80,10 @@ class race(minqlx.Plugin):
         if factory in ("qlrace_turbo", "qlrace_classic"):
             if map_name in NO_WEAPONS:
                 self.set_cvar("g_startingWeapons", "3")
-                self.set_cvar("g_infiniteAmmo", "0")
+                if map_name == "poptart":
+                    self.set_cvar("g_infiniteAmmo", "1")
+                else:
+                    self.set_cvar("g_infiniteAmmo", "0")
             elif map_name in GRENADE_ONLY:
                 self.set_cvar("g_startingWeapons", "9")
                 self.set_cvar("g_infiniteAmmo", "1")
