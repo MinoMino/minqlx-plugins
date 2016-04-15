@@ -433,6 +433,10 @@ class race(minqlx.Plugin):
     def cmd_goto(self, player, msg, channel):
         """Teleports player to chosen player."""
         # so you can't /team f;team s;!goto x, plus QL is buggy when you do player_spawn() as spec
+        if self.game.map.lower() == "ndql":
+            player.tell("goto is disabled on ndql")
+            return minqlx.RET_STOP_EVENT
+
         if player.team == "spectator":
             player.tell("You must join the game first to use this command.")
             return minqlx.RET_STOP_EVENT
