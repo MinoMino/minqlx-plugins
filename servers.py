@@ -55,7 +55,8 @@ class servers(minqlx.Plugin):
 
         channel.reply(output)
 
-    def get_server_info(self, server):
+    @staticmethod
+    def get_server_info(server):
         """Gets server info using python-valve."""
         # set port to 27960 if no port
         address = (server.split(":") + [27960])[:2]
