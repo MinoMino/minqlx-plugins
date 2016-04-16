@@ -42,7 +42,7 @@ class servers(minqlx.Plugin):
     @minqlx.thread
     def get_servers(self, servers, channel):
         """Gets and outputs info for all servers in `qlx_servers`."""
-        output = "{} | {} | {}\n".format("IP".center(21), "sv_hostname".center(40), "Player Count")
+        output = "{:^21} | {:^40} | {}\n".format("IP", "sv_hostname", "Player Count")
         for server in servers:
             hostname, player_count = self.get_server_info(server)
             if player_count[0].isdigit():
