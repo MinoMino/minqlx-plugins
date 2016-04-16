@@ -28,12 +28,12 @@ class servers(minqlx.Plugin):
         Outputs to chat if `qlx_serversShowInChat` is 1, otherwise it will
         output to the player who called the command only."""
         servers = self.get_cvar("qlx_servers", list)
-        if not servers:
+        if len(servers) == 1 and servers[0] == "":
             self.logger.warning("qlx_servers is not set")
             player.tell("qlx_servers is not set")
             return minqlx.RET_STOP_ALL
 
-        if not self.get_cvar("qlx_serversShowInChat", bool):
+        if not self.get_cvar("qlx_serversShowInChat", bool) and not isinstance(player, minqlx.AbstractDummyPlayer):
             self.get_servers(servers, minqlx.TellChannel(player))
             return minqlx.RET_STOP_ALL
 
@@ -42,7 +42,7 @@ class servers(minqlx.Plugin):
     @minqlx.thread
     def get_servers(self, servers, channel):
         """Gets and outputs info for all servers in `qlx_servers`."""
-        output = "{:^21} | {:^40} | {}\n".format("IP", "sv_hostname", "Player Count")
+        output = "{:^25} | {:^40} | {}\n".format("IP", "sv_hostname", "Player Count")
         for server in servers:
             hostname, player_count = self.get_server_info(server)
             if player_count[0].isdigit():
@@ -51,7 +51,7 @@ class servers(minqlx.Plugin):
                     player_count = "^3{}".format(player_count)
                 else:
                     player_count = "^2{}".format(player_count)
-            output += "{:21} | {:40} | {}^7\n".format(server, hostname, player_count)
+            output += "{:25} | {:40} | {}^7\n".format(server, hostname, player_count)
 
         channel.reply(output)
 
