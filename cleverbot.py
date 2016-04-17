@@ -42,7 +42,7 @@ class cleverbot(minqlx.Plugin):
         try:
             chance = self.get_cvar("qlx_cleverbotChance", float)
         except ValueError:
-            self.logger.error("qlx_cleverbotChance is not a valid float.")
+            self.logger.warning("qlx_cleverbotChance is not a valid float.")
             return
 
         if random.random() < chance:

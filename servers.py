@@ -38,6 +38,7 @@ class servers(minqlx.Plugin):
             return minqlx.RET_STOP_ALL
 
         self.get_servers(servers, channel)
+        return minqlx.RET_STOP_ALL
 
     @minqlx.thread
     def get_servers(self, servers, channel):
