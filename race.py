@@ -17,7 +17,7 @@ OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
 
 HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna",
          "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
-         "cursed_temple", "skacharohuth", "randommap", "just_jump_3", "criclejump", "eatme", "bounce")
+         "cursed_temple", "skacharohuth", "randommap", "just_jump_3", "criclejump", "eatme")
 GAUNTLET_ONLY = ("k4n", "ndql")
 NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells", "df_lickcells2",
               "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil", "df_lickfast",
@@ -433,7 +433,7 @@ class race(minqlx.Plugin):
     def cmd_goto(self, player, msg, channel):
         """Teleports player to chosen player."""
         # so you can't /team f;team s;!goto x, plus QL is buggy when you do player_spawn() as spec
-        if self.game.map.lower() == "ndql":
+        if self.game.map.lower() == "ndql" or "bounce":
             player.tell("goto is disabled on ndql")
             return minqlx.RET_STOP_EVENT
 
