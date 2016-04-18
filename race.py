@@ -15,9 +15,11 @@ import requests
 PARAMS = ({}, {"weapons": "false"}, {"factory": "classic"}, {"factory": "classic", "weapons": "false"})
 OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
 
+GOTO_DISABLED = ("nqdl", "bounce")
 HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna",
          "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
          "cursed_temple", "skacharohuth", "randommap", "just_jump_3", "criclejump", "eatme")
+
 GAUNTLET_ONLY = ("k4n", "ndql")
 NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells", "df_lickcells2",
               "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil", "df_lickfast",
@@ -102,11 +104,10 @@ class race(minqlx.Plugin):
             else:
                 self.set_cvar("g_startingAmmo_mg", "100")
 
-            if self.get_cvar("qlx_raceMode", int) == 0:
-                if map_name == "k4n":
-                    self.set_cvar("g_velocity_gl", "700")
-                else:
-                    self.set_cvar("g_velocity_gl", "800")
+            if self.get_cvar("qlx_raceMode", int) == 0 and map_name == "k4n":
+                self.set_cvar("g_velocity_gl", "700")
+            else:
+                self.set_cvar("g_velocity_gl", "800")
 
             if map_name == "walkathon":
                 self.set_cvar("g_respawn_delay_min", "1000")
@@ -431,10 +432,11 @@ class race(minqlx.Plugin):
         channel.reply("Most recent maps(by first record date): ^3{}".format(maps))
 
     def cmd_goto(self, player, msg, channel):
-        """Teleports player to chosen player."""
+        """Go to a player's location."""
         # so you can't /team f;team s;!goto x, plus QL is buggy when you do player_spawn() as spec
-        if self.game.map.lower() == "ndql" or "bounce":
-            player.tell("goto is disabled on ndql")
+        map_name = self.game.map.lower()
+        if map_name in GOTO_DISABLED:
+            player.tell("!goto is disabled on {}".format(map_name))
             return minqlx.RET_STOP_EVENT
 
         if player.team == "spectator":
@@ -454,9 +456,10 @@ class race(minqlx.Plugin):
         elif len(msg) != 2:
             return minqlx.RET_USAGE
 
-        minqlx.player_spawn(player.id)  # respawn player so he can't cheat by touching the start flag then !goto finish
-        player.position(x=p.state.position.x, y=p.state.position.y,
-                        z=p.state.position.z + 26)  # +26 needed or else you're stuck in the ground
+        # respawn player so he can't cheat by touching the start flag then !goto finish
+        minqlx.player_spawn(player.id)
+        # +26 z needed or else you're stuck in the ground
+        player.position(x=p.state.position.x, y=p.state.position.y, z=p.state.position.z + 26)
 
         if self.game.map.lower() == "kraglejump":
             # some stages need haste and some don't, so 60 is a compromise...
@@ -468,7 +471,6 @@ class race(minqlx.Plugin):
         """Outputs list of race commands."""
         channel.reply(
             "Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent !goto")
-        return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
         """Outputs times to the channel. Will split
