@@ -433,14 +433,9 @@ class race(minqlx.Plugin):
 
     def cmd_goto(self, player, msg, channel):
         """Go to a player's location."""
-        # so you can't /team f;team s;!goto x, plus QL is buggy when you do player_spawn() as spec
         map_name = self.game.map.lower()
         if map_name in GOTO_DISABLED:
             player.tell("!goto is disabled on {}".format(map_name))
-            return minqlx.RET_STOP_EVENT
-
-        if player.team == "spectator":
-            player.tell("You must join the game first to use this command.")
             return minqlx.RET_STOP_EVENT
 
         if len(msg) == 2:
@@ -456,10 +451,12 @@ class race(minqlx.Plugin):
         elif len(msg) != 2:
             return minqlx.RET_USAGE
 
+        if player.team == "spectator":
+            player.team = "free"
+
         # respawn player so he can't cheat by touching the start flag then !goto finish
         minqlx.player_spawn(player.id)
-        # +26 z needed or else you're stuck in the ground
-        player.position(x=p.state.position.x, y=p.state.position.y, z=p.state.position.z + 26)
+        minqlx.set_position(player.id, p.position())
 
         if self.game.map.lower() == "kraglejump":
             # some stages need haste and some don't, so 60 is a compromise...
