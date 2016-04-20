@@ -367,9 +367,12 @@ class race(minqlx.Plugin):
                 player = target_player
             except ValueError:
                 player.tell("Invalid ID.")
-                return minqlx.RET_STOP_EVENT
+                return minqlx.RET_STOP_ALL
+            except minqlx.NonexistentPlayerError:
+                player.tell("Invalid ID.")
+                return minqlx.RET_STOP_ALL
         elif len(msg) > 2:
-            return minqlx.RET_USAGE
+            return
 
         if "s" in msg[0].lower():
             mode = self.get_cvar("qlx_raceMode", int) + 1
@@ -437,7 +440,7 @@ class race(minqlx.Plugin):
         map_name = self.game.map.lower()
         if map_name in GOTO_DISABLED:
             player.tell("!goto is disabled on {}".format(map_name))
-            return minqlx.RET_STOP_EVENT
+            return minqlx.RET_STOP_ALL
 
         if len(msg) == 2:
             try:
@@ -445,10 +448,12 @@ class race(minqlx.Plugin):
                 target_player = self.player(i)
                 if not (0 <= i < 64) or not target_player or not self.player(i).is_alive or i == player.id:
                     raise ValueError
-                p = target_player
             except ValueError:
                 player.tell("Invalid ID.")
-                return minqlx.RET_STOP_EVENT
+                return minqlx.RET_STOP_ALL
+            except minqlx.NonexistentPlayerError:
+                player.tell("Invalid ID.")
+                return minqlx.RET_STOP_ALL
         elif len(msg) != 2:
             return minqlx.RET_USAGE
 
@@ -457,7 +462,7 @@ class race(minqlx.Plugin):
 
         # respawn player so he can't cheat by touching the start flag then !goto finish
         minqlx.player_spawn(player.id)
-        minqlx.set_position(player.id, p.position())
+        minqlx.set_position(player.id, target_player.position())
 
         if self.game.map.lower() == "kraglejump":
             # some stages need haste and some don't, so 60 is a compromise...
