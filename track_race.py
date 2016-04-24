@@ -43,6 +43,14 @@ class track_race(minqlx.Plugin):
             self.enabled = True
             self.map_name = self.game.map.lower()
         elif stats["TYPE"] == "PLAYER_STATS":
+            try:
+                if int(stats["DATA"]["STEAM_ID"]) in self.plugins['race'].goto:
+                    return
+            except KeyError:
+                self.logger.error("Race plugin is not loaded.")
+                return
+            except AttributeError:
+                self.logger.warning("You are an old versions of race plugin.")
             self.update_pb(stats)
 
     @minqlx.thread
