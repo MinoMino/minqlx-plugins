@@ -45,6 +45,8 @@ class race(minqlx.Plugin):
         self.add_hook("map", self.handle_map)
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("server_command", self.handle_server_command)
+        self.add_hook("stats", self.handle_stats)
+        self.add_hook("player_spawn", self.handle_player_spawn)
         self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
@@ -61,6 +63,9 @@ class race(minqlx.Plugin):
 
         self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
+
+        # Set of players which have used !goto and haven't killed themselves/left/specced.
+        self.goto = set()
 
         self.maps = []
         self.old_maps = []
@@ -134,6 +139,22 @@ class race(minqlx.Plugin):
         """Stops server printing powerup messages."""
         if _RE_POWERUPS.fullmatch(cmd):
             return minqlx.RET_STOP_EVENT
+
+    def handle_stats(self, stats):
+        """Resets a player's score if they used goto."""
+        if stats["TYPE"] == "PLAYER_RACECOMPLETE":
+            steam_id = int(stats["DATA"]["STEAM_ID"])
+            if steam_id in self.goto:
+                player = self.player(steam_id)
+                player.score = 2147483647
+                player.tell("^6Your time does not count because you used !goto.")
+
+    def handle_player_spawn(self, player):
+        """Removes player from goto set when they spawn."""
+        try:
+            self.goto.remove(player.steam_id)
+        except KeyError:
+            return
 
     def cmd_disabled(self, player, msg, channel):
         """Disables !slap and !slay."""
@@ -436,7 +457,8 @@ class race(minqlx.Plugin):
         channel.reply("Most recent maps(by first record date): ^3{}".format(maps))
 
     def cmd_goto(self, player, msg, channel):
-        """Go to a player's location."""
+        """Go to a player's location.
+        Player needs to kill themselves/rejoin for a time to count."""
         map_name = self.game.map.lower()
         if map_name in GOTO_DISABLED:
             player.tell("!goto is disabled on {}".format(map_name))
@@ -463,6 +485,8 @@ class race(minqlx.Plugin):
         # respawn player so he can't cheat by touching the start flag then !goto finish
         minqlx.player_spawn(player.id)
         minqlx.set_position(player.id, target_player.position())
+        self.goto.add(player.steam_id)
+        player.tell("^6Your time won't count, unless you kill yourself")
 
         if self.game.map.lower() == "kraglejump":
             # some stages need haste and some don't, so 60 is a compromise...
