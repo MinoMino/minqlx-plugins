@@ -47,6 +47,7 @@ class race(minqlx.Plugin):
         self.add_hook("server_command", self.handle_server_command)
         self.add_hook("stats", self.handle_stats)
         self.add_hook("player_spawn", self.handle_player_spawn)
+        self.add_hook("player_disconnect", self.handle_player_disconnect)
         self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
@@ -151,6 +152,13 @@ class race(minqlx.Plugin):
 
     def handle_player_spawn(self, player):
         """Removes player from goto set when they spawn."""
+        try:
+            self.goto.remove(player.steam_id)
+        except KeyError:
+            return
+
+    def handle_player_disconnect(self, player, reason):
+        """Removes player from goto set when they disconnect"""
         try:
             self.goto.remove(player.steam_id)
         except KeyError:
