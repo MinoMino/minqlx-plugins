@@ -45,10 +45,10 @@ class spec_delay(minqlx.Plugin):
     @minqlx.delay(15)
     def allow_join(self, player):
         """Allows the player to join after 15 seconds."""
-        if player.steam_id in self.spec_delays:
+        try:
             self.spec_delays.remove(player.steam_id)
-            try:
-                player.center_print("^6You can join now")
-            except AttributeError:
-                return
-
+            player.center_print("^6You can join now")
+        except KeyError:
+            return
+        except AttributeError:
+            return
