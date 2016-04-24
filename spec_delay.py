@@ -42,9 +42,9 @@ class spec_delay(minqlx.Plugin):
             player.tell("^6You must wait 15 seconds before joining after spectating")
             return minqlx.RET_STOP_EVENT
 
-    @minqlx.delay(15)
+    @minqlx.delay(15.1)
     def allow_join(self, player):
-        """Allows the player to join after 15 seconds."""
+        """Allows the player to join after 15.1 seconds."""
         try:
             self.spec_delays.remove(player.steam_id)
             player.center_print("^6You can join now")
