@@ -79,8 +79,7 @@ class race(minqlx.Plugin):
 
     def handle_map(self, map_name, factory):
         """Brands map title and updates list of race maps on map change.
-        Also sets starting weapons to only mg and gauntlet if map should
-        not have weapons.
+        Also sets correct starting weapons for the map.
         """
         map_name = map_name.lower()
         self.brand_map(map_name)
