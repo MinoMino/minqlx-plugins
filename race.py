@@ -65,8 +65,8 @@ class race(minqlx.Plugin):
         self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
-        # Set of players which have used !goto and haven't killed themselves/left/specced.
-        self.goto = set()
+        # dict of players which have used !goto. {steam_id: score}
+        self.goto = {}
 
         self.maps = []
         self.old_maps = []
@@ -142,25 +142,25 @@ class race(minqlx.Plugin):
             return minqlx.RET_STOP_EVENT
 
     def handle_stats(self, stats):
-        """Resets a player's score if they used goto."""
+        """Resets a player's score if they used !goto."""
         if stats["TYPE"] == "PLAYER_RACECOMPLETE":
             steam_id = int(stats["DATA"]["STEAM_ID"])
             if steam_id in self.goto:
                 player = self.player(steam_id)
-                player.score = 2147483647
+                player.score = self.goto[steam_id]
                 player.tell("^6Your time does not count because you used !goto.")
 
     def handle_player_spawn(self, player):
-        """Removes player from goto set when they spawn."""
+        """Removes player from goto dict when they spawn."""
         try:
-            self.goto.remove(player.steam_id)
+            del self.goto[player.steam_id]
         except KeyError:
             return
 
     def handle_player_disconnect(self, player, reason):
-        """Removes player from goto set when they disconnect"""
+        """Removes player from goto dict when they disconnect"""
         try:
-            self.goto.remove(player.steam_id)
+            del self.goto[player.steam_id]
         except KeyError:
             return
 
@@ -493,7 +493,9 @@ class race(minqlx.Plugin):
         # respawn player so he can't cheat by touching the start flag then !goto finish
         minqlx.player_spawn(player.id)
         minqlx.set_position(player.id, target_player.position())
-        self.goto.add(player.steam_id)
+
+        # add player to goto dict
+        self.goto[player.steam_id] = player.score
         player.tell("^6Your time won't count, unless you kill yourself")
 
         if self.game.map.lower() == "kraglejump":
