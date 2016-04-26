@@ -32,7 +32,7 @@ NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lick
               "df_qsnrun", "df_handbreaker4", "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown",
               "df_extremepkr", "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild",
               "hangtime", "poptart", "blockworld")
-PLASMA_ONLY = ("think1", "xproject")
+PLASMA_ONLY = ("think1", "xproject", "plasmax")
 GRENADE_ONLY = ("grenadorade")
 
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
@@ -100,6 +100,12 @@ class race(minqlx.Plugin):
                 self.set_cvar("g_infiniteAmmo", "0")
             elif map_name in PLASMA_ONLY:
                 self.set_cvar("g_startingWeapons", "131")
+                self.set_cvar("g_infiniteAmmo", "1")
+            elif map_name == "rocketx":
+                self.set_cvar("g_startingWeapons", "17")
+                self.set_cvar("g_infiniteAmmo", "1")
+            elif map_name == "bfgx":
+                self.set_cvar("g_startingWeapons", "257")
                 self.set_cvar("g_infiniteAmmo", "1")
             else:
                 self.set_cvar("g_startingWeapons", "147")
