@@ -342,19 +342,17 @@ class race(minqlx.Plugin):
     @minqlx.thread
     def all(self, map_name, weapons, channel):
         records = self.get_records(map_name, weapons)
-        times = {}
+        times = []
         for p in self.players():
             rank, time = records.pb(p.steam_id)
             if rank:
-                times[rank] = "^7{} ^2{}".format(p, race.time_string(time))
+                times.append(" ^3{}. ^7{} ^2{}".format(rank, p, race.time_string(time)))
 
         if not weapons:
             map_name += "^2(strafe)"
         if times:
-            times_list = []
-            for rank, time in sorted(times.items()):
-                times_list.append(" ^3{}. {}".format(rank, time))
-            self.output_times(map_name, times_list, channel)
+            times.sort()
+            self.output_times(map_name, times, channel)
         else:
             channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
 
