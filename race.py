@@ -11,6 +11,7 @@ import minqlx
 import random
 import re
 import requests
+from operator import itemgetter
 
 PARAMS = ({}, {"weapons": "false"}, {"physics": "classic"}, {"physics": "classic", "weapons": "false"})
 OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
@@ -346,12 +347,15 @@ class race(minqlx.Plugin):
         for p in self.players():
             rank, time = records.pb(p.steam_id)
             if rank:
-                times.append(" ^3{}. ^7{} ^2{}".format(rank, p, race.time_string(time)))
+                times.append({"name": p.name, "rank": rank, "time": race.time_string(time)})
 
         if not weapons:
             map_name += "^2(strafe)"
         if times:
-            self.output_times(map_name, sorted(times), channel)
+            times_list = []
+            for time in sorted(times, key=itemgetter("rank")):
+                times_list.append(" ^3{rank}. ^7{name} ^2{time}".format(**time))
+            self.output_times(map_name, times_list, channel)
         else:
             channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
 
