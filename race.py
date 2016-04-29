@@ -351,8 +351,7 @@ class race(minqlx.Plugin):
         if not weapons:
             map_name += "^2(strafe)"
         if times:
-            times.sort()
-            self.output_times(map_name, times, channel)
+            self.output_times(map_name, sorted(times), channel)
         else:
             channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
 
