@@ -11,6 +11,7 @@ import minqlx
 import random
 import re
 import requests
+from operator import itemgetter
 
 PARAMS = ({}, {"weapons": "false"}, {"physics": "classic"}, {"physics": "classic", "weapons": "false"})
 OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
@@ -32,7 +33,7 @@ NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lick
               "df_qsnrun", "df_handbreaker4", "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown",
               "df_extremepkr", "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild",
               "hangtime", "poptart", "blockworld")
-PLASMA_ONLY = ("think1", "xproject")
+PLASMA_ONLY = ("think1", "xproject", "plasmax")
 GRENADE_ONLY = ("grenadorade")
 
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
@@ -65,8 +66,8 @@ class race(minqlx.Plugin):
         self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
-        # Set of players which have used !goto and haven't killed themselves/left/specced.
-        self.goto = set()
+        # dict of players which have used !goto. {steam_id: score}
+        self.goto = {}
 
         self.maps = []
         self.old_maps = []
@@ -79,8 +80,7 @@ class race(minqlx.Plugin):
 
     def handle_map(self, map_name, factory):
         """Brands map title and updates list of race maps on map change.
-        Also sets starting weapons to only mg and gauntlet if map should
-        not have weapons.
+        Also sets correct starting weapons for the map.
         """
         map_name = map_name.lower()
         self.brand_map(map_name)
@@ -100,6 +100,12 @@ class race(minqlx.Plugin):
                 self.set_cvar("g_infiniteAmmo", "0")
             elif map_name in PLASMA_ONLY:
                 self.set_cvar("g_startingWeapons", "131")
+                self.set_cvar("g_infiniteAmmo", "1")
+            elif map_name == "rocketx":
+                self.set_cvar("g_startingWeapons", "17")
+                self.set_cvar("g_infiniteAmmo", "1")
+            elif map_name == "bfgx":
+                self.set_cvar("g_startingWeapons", "257")
                 self.set_cvar("g_infiniteAmmo", "1")
             else:
                 self.set_cvar("g_startingWeapons", "147")
@@ -142,25 +148,25 @@ class race(minqlx.Plugin):
             return minqlx.RET_STOP_EVENT
 
     def handle_stats(self, stats):
-        """Resets a player's score if they used goto."""
+        """Resets a player's score if they used !goto."""
         if stats["TYPE"] == "PLAYER_RACECOMPLETE":
             steam_id = int(stats["DATA"]["STEAM_ID"])
             if steam_id in self.goto:
                 player = self.player(steam_id)
-                player.score = 2147483647
+                player.score = self.goto[steam_id]
                 player.tell("^6Your time does not count because you used !goto.")
 
     def handle_player_spawn(self, player):
-        """Removes player from goto set when they spawn."""
+        """Removes player from goto dict when they spawn."""
         try:
-            self.goto.remove(player.steam_id)
+            del self.goto[player.steam_id]
         except KeyError:
             return
 
     def handle_player_disconnect(self, player, reason):
-        """Removes player from goto set when they disconnect"""
+        """Removes player from goto dict when they disconnect"""
         try:
-            self.goto.remove(player.steam_id)
+            del self.goto[player.steam_id]
         except KeyError:
             return
 
@@ -337,18 +343,18 @@ class race(minqlx.Plugin):
     @minqlx.thread
     def all(self, map_name, weapons, channel):
         records = self.get_records(map_name, weapons)
-        times = {}
+        times = []
         for p in self.players():
             rank, time = records.pb(p.steam_id)
             if rank:
-                times[rank] = "^7{} ^2{}".format(p, race.time_string(time))
+                times.append({"name": p.name, "rank": rank, "time": race.time_string(time)})
 
         if not weapons:
             map_name += "^2(strafe)"
         if times:
             times_list = []
-            for rank, time in sorted(times.items()):
-                times_list.append(" ^3{}. {}".format(rank, time))
+            for time in sorted(times, key=itemgetter("rank")):
+                times_list.append(" ^3{rank}. ^7{name} ^2{time}".format(**time))
             self.output_times(map_name, times_list, channel)
         else:
             channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
@@ -493,7 +499,9 @@ class race(minqlx.Plugin):
         # respawn player so he can't cheat by touching the start flag then !goto finish
         minqlx.player_spawn(player.id)
         minqlx.set_position(player.id, target_player.position())
-        self.goto.add(player.steam_id)
+
+        # add player to goto dict
+        self.goto[player.steam_id] = player.score
         player.tell("^6Your time won't count, unless you kill yourself")
 
         if self.game.map.lower() == "kraglejump":
