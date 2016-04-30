@@ -23,7 +23,6 @@ class track_race(minqlx.Plugin):
         super().__init__()
         self.add_hook("map", self.handle_map)
         self.add_hook("stats", self.handle_stats)
-        self.add_command("posttimes", self.cmd_posttimes, 5)
 
         # QLRace.com API key.
         self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
@@ -125,12 +124,3 @@ class track_race(minqlx.Plugin):
         payload["date"] = str(datetime.utcnow())
         record = json.dumps(payload)
         self.db.lpush(RECORDS_KEY, record)
-
-    @minqlx.thread
-    def cmd_posttimes(self, player, msg, channel):
-        """Posts records in `minqlx:race_records`."""
-        if self.db.llen(RECORDS_KEY) != 0:
-            payload = json.loads(self.db.rpop(RECORDS_KEY))
-            self.post_data(payload)
-        else:
-            channel.reply("No times in minqlx:race_records")
