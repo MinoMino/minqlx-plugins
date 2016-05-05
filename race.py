@@ -111,8 +111,6 @@ class race(minqlx.Plugin):
             elif map_name == "runstolfer":
                 self.set_cvar("g_startingWeapons", "19")
                 self.set_cvar("g_infiniteAmmo", "1")
-                # since there's no other maps with rl starting weapon and non infinite ammo i can set this here
-                self.set_cvar("g_startingAmmo_rl", "15")
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
