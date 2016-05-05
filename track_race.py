@@ -27,15 +27,19 @@ class track_race(minqlx.Plugin):
         # QLRace.com API key.
         self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
         self.mode = self.get_cvar("qlx_raceMode", int)
-        self.enabled = False
-        self.map_name = ""
+        self.map_name = self.game.map.lower()
+        self.enabled = self.check_race_mode()
 
-    def handle_map(self, map_name, factory):
+    def check_race_mode(self):
         """Checks whether the current game mode is race."""
         if self.game.type_short == "race" and self.mode in (0, 2):
-            self.enabled = True
+            return True
         else:
-            self.enabled = False
+            return False
+
+    def handle_map(self, map_name, factory):
+        """Checks race mode on map change."""
+        self.enabled = self.check_race_mode()
 
     def handle_stats(self, stats):
         """Gets ZMQ stats."""
@@ -114,7 +118,7 @@ class track_race(minqlx.Plugin):
             self.msg("^2Error, connecting to qlrace.com")
 
     def push_db(self, payload):
-        """Pushes record to redis list
+        """Pushes record to redis list.
         :param payload: record data
         """
         payload["date"] = str(datetime.utcnow())
