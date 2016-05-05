@@ -22,17 +22,18 @@ HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps
          "cursed_temple", "skacharohuth", "randommap", "just_jump_3", "criclejump", "eatme")
 
 GAUNTLET_ONLY = ("k4n", "ndql")
-NO_WEAPONS = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells", "df_lickcells2",
-              "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil", "df_lickfast",
-              "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2", "df_lickhuarstyle",
-              "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived", "df_lickrevived2",
-              "df_licksux", "df_licktards", "df_licktunnel", "df_palmslane", "df_enz12", "df_ghostcheerslick",
-              "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick", "df_ghostcheerextended", "cpm_1", "cpm_2",
-              "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8", "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04",
-              "vanilla_05", "vanilla_06", "vanilla_07", "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity",
-              "df_qsnrun", "df_handbreaker4", "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown",
-              "df_extremepkr", "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild",
-              "hangtime", "poptart", "blockworld")
+GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
+                   "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil",
+                   "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
+                   "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
+                   "df_lickrevived2", "df_licksux", "df_licktards", "df_licktunnel", "df_palmslane", "df_enz12",
+                   "df_ghostcheerslick", "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick",
+                   "df_ghostcheerextended", "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8",
+                   "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
+                   "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
+                   "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
+                   "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild", "hangtime",
+                   "poptart", "blockworld", "raveroll")
 PLASMA_ONLY = ("think1", "xproject", "plasmax")
 GRENADE_ONLY = ("grenadorade")
 
@@ -86,7 +87,7 @@ class race(minqlx.Plugin):
         self.brand_map(map_name)
 
         if factory in ("qlrace_turbo", "qlrace_classic"):
-            if map_name in NO_WEAPONS:
+            if map_name in GAUNTLET_AND_MG:
                 self.set_cvar("g_startingWeapons", "3")
                 if map_name == "poptart":
                     self.set_cvar("g_infiniteAmmo", "1")
@@ -107,6 +108,11 @@ class race(minqlx.Plugin):
             elif map_name == "bfgx":
                 self.set_cvar("g_startingWeapons", "257")
                 self.set_cvar("g_infiniteAmmo", "1")
+            elif map_name == "runstolfer":
+                self.set_cvar("g_startingWeapons", "19")
+                self.set_cvar("g_infiniteAmmo", "1")
+                # since there's no other maps with rl starting weapon and non infinite ammo i can set this here
+                self.set_cvar("g_startingAmmo_rl", "15")
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
