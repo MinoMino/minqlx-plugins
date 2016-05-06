@@ -33,9 +33,10 @@ GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df
                    "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
                    "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
                    "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild", "hangtime",
-                   "poptart", "blockworld", "raveroll")
-PLASMA_ONLY = ("think1", "xproject", "plasmax")
-GRENADE_ONLY = ("grenadorade")
+                   "poptart", "blockworld", "raveroll", "ingus", "pea_impostor")
+PLASMA = ("think1", "xproject", "plasmax")
+ROCKET = ("runstolfer", "charon", "charon_bw")
+GRENADE = ("grenadorade")
 
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
 
@@ -93,14 +94,17 @@ class race(minqlx.Plugin):
                     self.set_cvar("g_infiniteAmmo", "1")
                 else:
                     self.set_cvar("g_infiniteAmmo", "0")
-            elif map_name in GRENADE_ONLY:
+            elif map_name in GRENADE:
                 self.set_cvar("g_startingWeapons", "9")
                 self.set_cvar("g_infiniteAmmo", "1")
             elif map_name in GAUNTLET_ONLY:
                 self.set_cvar("g_startingWeapons", "1")
                 self.set_cvar("g_infiniteAmmo", "0")
-            elif map_name in PLASMA_ONLY:
+            elif map_name in PLASMA:
                 self.set_cvar("g_startingWeapons", "131")
+                self.set_cvar("g_infiniteAmmo", "1")
+            elif map_name in ROCKET:
+                self.set_cvar("g_startingWeapons", "19")
                 self.set_cvar("g_infiniteAmmo", "1")
             elif map_name == "rocketx":
                 self.set_cvar("g_startingWeapons", "17")
@@ -108,8 +112,8 @@ class race(minqlx.Plugin):
             elif map_name == "bfgx":
                 self.set_cvar("g_startingWeapons", "257")
                 self.set_cvar("g_infiniteAmmo", "1")
-            elif map_name == "runstolfer":
-                self.set_cvar("g_startingWeapons", "19")
+            elif map_name == "nmn":
+                self.set_cvar("g_startingWeapons", "16")
                 self.set_cvar("g_infiniteAmmo", "1")
             else:
                 self.set_cvar("g_startingWeapons", "147")
