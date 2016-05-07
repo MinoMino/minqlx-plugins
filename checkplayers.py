@@ -13,6 +13,7 @@ TODO: Check if there is no banned/silenced etc players instead of returing empty
 import minqlx
 import minqlx.database
 import operator
+import re
 
 PLAYER_KEY = "minqlx:players:{}"
 
@@ -104,7 +105,8 @@ class checkplayers(minqlx.Plugin):
     def player_name(self, steam_id):
         """Returns the latest name a player has used."""
         try:
-            name = self.clean_text(self.db.lindex(PLAYER_KEY.format(steam_id), 0))
+            name = self.db.lindex(PLAYER_KEY.format(steam_id), 0)
+            name = re.sub(r"\^[0-9]", "", name)  # remove colour tags
         except KeyError:
             name = steam_id
         return name
