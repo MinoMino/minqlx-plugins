@@ -106,6 +106,8 @@ class checkplayers(minqlx.Plugin):
         """Returns the latest name a player has used."""
         try:
             name = self.db.lindex(PLAYER_KEY.format(steam_id), 0)
+            if not name:
+                raise KeyError
             name = re.sub(r"\^[0-9]", "", name)  # remove colour tags
         except KeyError:
             name = steam_id
