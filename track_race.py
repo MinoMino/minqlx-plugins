@@ -10,6 +10,7 @@ Tracks race records and posts them to QLRace.com.
 import minqlx
 import minqlx.database
 import json
+import re
 import requests
 from datetime import datetime
 
@@ -63,7 +64,7 @@ class track_race(minqlx.Plugin):
 
         mode = self.get_mode(stats["DATA"]["WEAPONS"])
         player_id = int(stats["DATA"]["STEAM_ID"])
-        name = self.clean_text(stats["DATA"]["NAME"])
+        name = re.sub(r"\^[0-9]", "", stats["DATA"]["NAME"])
         match_guid = stats["DATA"]["MATCH_GUID"]
         payload = {"map": self.map_name, "mode": mode, "player_id": player_id, "name": name,
                    "time": time, "match_guid": match_guid}
