@@ -16,7 +16,7 @@ from operator import itemgetter
 PARAMS = ({}, {"weapons": "false"}, {"physics": "classic"}, {"physics": "classic", "weapons": "false"})
 OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
 
-GOTO_DISABLED = ("nqdl", "bounce", "df_coldrun")
+GOTO_DISABLED = ("ndql", "bounce", "df_coldrun")
 HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna",
          "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
          "cursed_temple", "skacharohuth", "randommap", "just_jump_3", "criclejump", "eatme")
