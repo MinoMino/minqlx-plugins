@@ -16,10 +16,10 @@ from operator import itemgetter
 PARAMS = ({}, {"weapons": "false"}, {"physics": "classic"}, {"physics": "classic", "weapons": "false"})
 OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
 
-GOTO_DISABLED = ("ndql", "bounce", "df_coldrun")
-HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna",
-         "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
-         "cursed_temple", "skacharohuth", "randommap", "just_jump_3", "criclejump", "eatme")
+GOTO_DISABLED = ("ndql", "bounce", "df_coldrun", "wernerjump")
+HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna", "insane1", "bounce",
+         "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump", "df_verihard",
+         "cursed_temple", "skacharohuth", "randommap", "just_jump_2", "just_jump_3", "criclejump", "eatme", "wernerjump")
 
 GAUNTLET_ONLY = ("k4n", "ndql")
 GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
