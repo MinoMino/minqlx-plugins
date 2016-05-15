@@ -509,7 +509,7 @@ class race(minqlx.Plugin):
             player.team = "free"
 
         minqlx.player_spawn(player.id)  # respawn player so he can't cheat
-        minqlx.set_position(player.id, target_player.position())
+        minqlx.set_position(player.id, target_player.state.position)
 
         if not self.goto[player.steam_id]:
             player.tell("^6Your time won't count, unless you kill yourself.")
@@ -524,7 +524,7 @@ class race(minqlx.Plugin):
         """Saves current position."""
         if player.team != "spectator":
             # add player to savepos dict
-            self.savepos[player.steam_id] = player.position()
+            self.savepos[player.steam_id] = player.state.position
             player.tell("^6Position saved. Your time won't count if you use !loadpos, unless you kill yourself.")
         else:
             player.tell("Can't save position as spectator.")
