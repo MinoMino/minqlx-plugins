@@ -511,8 +511,9 @@ class race(minqlx.Plugin):
         minqlx.player_spawn(player.id)  # respawn player so he can't cheat
         minqlx.set_position(player.id, target_player.position())
 
+        if not self.goto[player.steam_id]:
+            player.tell("^6Your time won't count, unless you kill yourself.")
         self.goto[player.steam_id] = player.score
-        player.tell("^6Your time won't count, unless you kill yourself.")
 
         if self.game.map.lower() in HASTE:
             player.powerups(haste=999)
@@ -524,7 +525,7 @@ class race(minqlx.Plugin):
         if player.team != "spectator":
             # add player to savepos dict
             self.savepos[player.steam_id] = player.position()
-            player.tell("^6Position saved.\nYour time won't count if you use !loadpos, unless you kill yourself.")
+            player.tell("^6Position saved. Your time won't count if you use !loadpos, unless you kill yourself.")
         else:
             player.tell("Can't save position as spectator.")
         return minqlx.RET_STOP_ALL
@@ -536,8 +537,9 @@ class race(minqlx.Plugin):
                 minqlx.player_spawn(player.id)  # respawn player so he can't cheat
                 minqlx.set_position(player.id, self.savepos[player.steam_id])
 
+                if not self.goto[player.steam_id]:
+                    player.tell("^6Your time won't count, unless you kill yourself.")
                 self.goto[player.steam_id] = player.score
-                player.tell("^6Your time won't count, unless you kill yourself.")
 
                 if self.game.map.lower() in HASTE:
                     player.powerups(haste=999)
@@ -552,7 +554,7 @@ class race(minqlx.Plugin):
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
         channel.reply("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent "
-                      "!goto !savpos !loadpos")
+                      "!goto !savepos !loadpos")
 
     def output_times(self, map_name, times, channel):
         """Outputs times to the channel. Will split lines
