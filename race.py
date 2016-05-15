@@ -34,7 +34,7 @@ GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df
                    "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
                    "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
                    "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild", "hangtime",
-                   "poptart", "blockworld", "raveroll", "ingus", "pea_impostor", "northrun", "timelock2")
+                   "poptart", "blockworld", "raveroll", "ingus", "pea_impostor", "northrun", "timelock2", "climbworld")
 PLASMA = ("think1", "xproject", "plasmax")
 ROCKET = ("runstolfer", "charon", "charon_bw")
 GRENADE = ("grenadorade")
@@ -97,7 +97,7 @@ class race(minqlx.Plugin):
         if factory in ("qlrace_turbo", "qlrace_classic"):
             if map_name in GAUNTLET_AND_MG:
                 self.set_cvar("g_startingWeapons", "3")
-                if map_name == "poptart":
+                if map_name in ("poptart", "climbworld"):
                     self.set_cvar("g_infiniteAmmo", "1")
                 else:
                     self.set_cvar("g_infiniteAmmo", "0")
