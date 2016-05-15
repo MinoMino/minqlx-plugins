@@ -71,6 +71,7 @@ class race(minqlx.Plugin):
         self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
+        self.move_player = {}  # Queued !goto/!loadto positions
         self.goto = {}  # Players which have used !goto/!loadpos. {steam_id: score}
         self.savepos = {}  # Saved player positions. {steam_id: player.state.position}
 
@@ -90,6 +91,7 @@ class race(minqlx.Plugin):
         map_name = map_name.lower()
         self.brand_map(map_name)
         self.savepos = {}
+        self.move_player = {}
 
         if factory in ("qlrace_turbo", "qlrace_classic"):
             if map_name in GAUNTLET_AND_MG:
@@ -168,7 +170,16 @@ class race(minqlx.Plugin):
                 player.tell("^7Your time does not count because you used ^6!goto ^7or ^6!loadpos.")
 
     def handle_player_spawn(self, player):
-        """Removes player from goto dict when they spawn."""
+        """Move player to position if they used !goto/!loadpos, otherwise removes
+        player from goto dict."""
+        if player.steam_id in self.move_player:
+            if player.steam_id not in self.goto:
+                player.tell("^6Your time will not count, unless you kill yourself.")
+            self.goto[player.steam_id] = player.score
+            minqlx.set_position(player.id, self.move_player[player.steam_id])
+            del self.move_player[player.steam_id]
+            return
+
         try:
             del self.goto[player.steam_id]
         except KeyError:
@@ -177,6 +188,7 @@ class race(minqlx.Plugin):
     def handle_player_disconnect(self, player, reason):
         """Removes player from goto and savepos dicts when they disconnect"""
         try:
+            del self.move_player[player.steam_id]
             del self.goto[player.steam_id]
             del self.savepos[player.steam_id]
         except KeyError:
@@ -508,21 +520,8 @@ class race(minqlx.Plugin):
         if player.team == "spectator":
             player.team = "free"
 
+        self.move_player[player.steam_id] = target_player.state.position
         minqlx.player_spawn(player.id)  # respawn player so he can't cheat
-        self.move_player(player, target_player.state.position)
-
-    @minqlx.delay(0.1)
-    def move_player(self, player, position):
-        minqlx.set_position(player.id, position)
-
-        if not self.goto[player.steam_id]:
-            player.tell("^6Your time won't count, unless you kill yourself.")
-        self.goto[player.steam_id] = player.score
-
-        if self.game.map.lower() in HASTE:
-            player.powerups(haste=999)
-        elif self.game.map.lower() == "kraglejump":
-            player.powerups(haste=60)  # some stages need haste and some don't, so 60 is a compromise...
 
     def cmd_savepos(self, player, msg, channel):
         """Saves current position."""
@@ -538,8 +537,8 @@ class race(minqlx.Plugin):
         """Loads saved position."""
         if player.team != "spectator":
             if player.steam_id in self.savepos:
+                self.move_player[player.steam_id] = self.savepos[player.steam_id]
                 minqlx.player_spawn(player.id)  # respawn player so he can't cheat
-                self.move_player(player, self.savepos[player.steam_id])
             else:
                 player.tell("^1You have to save your position first.")
         else:
@@ -550,6 +549,7 @@ class race(minqlx.Plugin):
         """Outputs list of race commands."""
         channel.reply("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent "
                       "!goto !savepos !loadpos")
+        return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
         """Outputs times to the channel. Will split lines
