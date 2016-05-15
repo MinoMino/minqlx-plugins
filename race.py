@@ -182,6 +182,12 @@ class race(minqlx.Plugin):
 
             minqlx.set_position(player.id, self.move_player[player.steam_id])
             del self.move_player[player.steam_id]
+
+            if self.game.map.lower() in HASTE:
+                player.powerups(haste=999)
+            elif self.game.map.lower() == "kraglejump":
+                player.powerups(haste=60)  # some stages need haste and some don't, so 60 is a compromise...
+
             return
 
         try:
