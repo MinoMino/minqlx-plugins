@@ -28,8 +28,13 @@ class track_race(minqlx.Plugin):
         # QLRace.com API key.
         self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
         self.mode = self.get_cvar("qlx_raceMode", int)
-        self.map_name = self.game.map.lower()
-        self.enabled = self.check_race_mode()
+
+        try:
+            self.map_name = self.game.map.lower()
+            self.enabled = self.check_race_mode()
+        except minqlx.NonexistentGameError:
+            self.map_name = ""
+            self.enabled = False
 
     def check_race_mode(self):
         """Checks whether the current game mode is race."""
