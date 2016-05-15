@@ -172,6 +172,8 @@ class race(minqlx.Plugin):
     def handle_player_spawn(self, player):
         """Move player to position if they used !goto/!loadpos, otherwise removes
         player from goto dict."""
+        if player.team == "free":
+            player.is_alive = True
         if player.steam_id in self.move_player and player.is_alive:
             if player.steam_id not in self.goto:
                 player.tell("^6Your time will not count, unless you kill yourself.")
@@ -527,7 +529,7 @@ class race(minqlx.Plugin):
             player.team = "free"
         else:
             self.move_player[player.steam_id] = target_player.state.position
-            player.slay()
+            minqlx.player_spawn(player.id)  # respawn player so he can't cheat
 
     def cmd_savepos(self, player, msg, channel):
         """Saves current position."""
@@ -544,7 +546,7 @@ class race(minqlx.Plugin):
         if player.team != "spectator":
             if player.steam_id in self.savepos:
                 self.move_player[player.steam_id] = self.savepos[player.steam_id]
-                player.slay()
+                minqlx.player_spawn(player.id)  # respawn player so he can't cheat
             else:
                 player.tell("^1You have to save your position first.")
         else:
