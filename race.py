@@ -86,7 +86,8 @@ class race(minqlx.Plugin):
 
     def handle_map(self, map_name, factory):
         """Brands map title and updates list of race maps on map change.
-        Also sets correct starting weapons for the map and clears savepos dict.
+        Also sets correct starting weapons for the map and clears savepos
+        and move_player dicts.
         """
         map_name = map_name.lower()
         self.brand_map(map_name)
@@ -521,7 +522,7 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         if player.team == "spectator":
-            if player.steam_id in self.plugins['spec_delay'].spec_delays:
+            if 'spec_delay' in self.plugins and player.steam_id in self.plugins['spec_delay'].spec_delays:
                 player.tell("^6You must wait 15 seconds before joining after spectating")
                 return minqlx.RET_STOP_ALL
 
