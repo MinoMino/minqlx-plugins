@@ -71,7 +71,7 @@ class race(minqlx.Plugin):
         self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
-        self.move_player = {}  # Queued !goto/!loadto positions
+        self.move_player = {}  # Queued !goto/!loadto positions. {steam_id: position}
         self.goto = {}  # Players which have used !goto/!loadpos. {steam_id: score}
         self.savepos = {}  # Saved player positions. {steam_id: player.state.position}
 
