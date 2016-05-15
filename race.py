@@ -172,7 +172,7 @@ class race(minqlx.Plugin):
     def handle_player_spawn(self, player):
         """Move player to position if they used !goto/!loadpos, otherwise removes
         player from goto dict."""
-        if player.steam_id in self.move_player:
+        if player.steam_id in self.move_player and player.is_alive:
             if player.steam_id not in self.goto:
                 player.tell("^6Your time will not count, unless you kill yourself.")
                 self.goto[player.steam_id] = player.score
