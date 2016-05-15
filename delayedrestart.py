@@ -36,7 +36,7 @@ class delayedrestart(minqlx.Plugin):
         """Quits server if no one is playing otherwise server will quit
         the next time no one is playing."""
         if self.amount_playing() == 0:
-            channel.reply("restarting server")
+            channel.reply("Restarting server in 30 seconds if nobody joins.")
             self.quit()
         else:
             player.tell("Server will restart when no one is playing.")
