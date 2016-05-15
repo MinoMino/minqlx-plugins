@@ -509,7 +509,11 @@ class race(minqlx.Plugin):
             player.team = "free"
 
         minqlx.player_spawn(player.id)  # respawn player so he can't cheat
-        minqlx.set_position(player.id, target_player.state.position)
+        self.move_player(player, target_player.state.position)
+
+    @minqlx.delay(0.1)
+    def move_player(self, player, position):
+        minqlx.set_position(player.id, position)
 
         if not self.goto[player.steam_id]:
             player.tell("^6Your time won't count, unless you kill yourself.")
@@ -535,16 +539,7 @@ class race(minqlx.Plugin):
         if player.team != "spectator":
             if player.steam_id in self.savepos:
                 minqlx.player_spawn(player.id)  # respawn player so he can't cheat
-                minqlx.set_position(player.id, self.savepos[player.steam_id])
-
-                if not self.goto[player.steam_id]:
-                    player.tell("^6Your time won't count, unless you kill yourself.")
-                self.goto[player.steam_id] = player.score
-
-                if self.game.map.lower() in HASTE:
-                    player.powerups(haste=999)
-                elif self.game.map.lower() == "kraglejump":
-                    player.powerups(haste=60)  # some stages need haste and some don't, so 60 is a compromise...
+                self.move_player(player, self.savepos[player.steam_id])
             else:
                 player.tell("^1You have to save your position first.")
         else:
