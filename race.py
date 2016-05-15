@@ -175,7 +175,8 @@ class race(minqlx.Plugin):
         if player.steam_id in self.move_player:
             if player.steam_id not in self.goto:
                 player.tell("^6Your time will not count, unless you kill yourself.")
-            self.goto[player.steam_id] = player.score
+                self.goto[player.steam_id] = player.score
+
             minqlx.set_position(player.id, self.move_player[player.steam_id])
             del self.move_player[player.steam_id]
             return
@@ -518,10 +519,15 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         if player.team == "spectator":
-            player.team = "free"
+            if player.steam_id in self.plugins['spec_delay'].spec_delays:
+                player.tell("^6You must wait 15 seconds before joining after spectating")
+                return minqlx.RET_STOP_ALL
 
-        self.move_player[player.steam_id] = target_player.state.position
-        minqlx.player_spawn(player.id)  # respawn player so he can't cheat
+            self.move_player[player.steam_id] = target_player.state.position
+            player.team = "free"
+        else:
+            self.move_player[player.steam_id] = target_player.state.position
+            minqlx.player_spawn(player.id)  # respawn player so he can't cheat
 
     def cmd_savepos(self, player, msg, channel):
         """Saves current position."""
