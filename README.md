@@ -98,3 +98,23 @@ like you usually do with race.
 and thus not have the client download them automatically.
   - `qlx_workshopReferences`: A comma-separated list of workshop IDs for items you want to force the client to download.
   Use this for custom resources, such as sounds packs and whatnot.
+
+## kanzo's plugins
+- **race**: Adds commands such as !top, !pb, !all etc.
+  - `qlx_raceMode`: 0 for turbo, 2 for classic.
+    - Default: `0`
+  - `qlx_raceBrand`: What you want to appear before map name, example: QLRace.com - actf01
+    - Default: `QLRace.com`
+- **track_race**: Tracks race times and POSTs them to QLRace.com.
+  - `qlx_raceKey`: QLRace.com API Key.
+- **spec_delay**: Adds 8 seconds delay when going to from the free team to spectator and back to free.
+- **banvote**: Adds !banvote command to ban people from voting.
+- **cleverbot**: Responds to !chat using cleverbot.io API.
+  - `qlx_cleverbotUser`: cleverbot.io API User.
+  - `qlx_cleverbotKey`: cleverbot.io API Key.
+  - `qlx_cleverbotNick`: cleverbot.io bot nick.
+    - Default: `Cleverbot`
+  - `qlx_cleverbotChance`: Chance that cleverbot responds to chat. Float between 0 and 1.
+    - Default: `0`
+- **servers**: Adds !servers command which shows info for a server.
+  - `qlx_servers`: List of servers. Example: `108.61.190.53:27960, 108.61.190.53:27961, il.qlrace.com:27960`

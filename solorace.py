@@ -23,6 +23,7 @@ a minimum of two players on a server, like you usually do.
 
 import minqlx
 
+
 class solorace(minqlx.Plugin):
     def __init__(self):
         super().__init__()
@@ -32,9 +33,9 @@ class solorace(minqlx.Plugin):
 
     def handle_team_switch(self, player, old_team, new_team):
         if (minqlx.GAMETYPES_SHORT[self.get_cvar("g_gametype", int)] == "race" and old_team == "free" and
-            self.game.state == "in_progress" and not self.teams()["free"]):
+                self.game.state == "in_progress" and not self.teams()["free"]):
             minqlx.console_command("map_restart")
-    
+
     def handle_player_disconnect(self, player, reason):
         if len(self.teams()["free"]) == 1 and player.team == "free":
             minqlx.console_command("map_restart")
@@ -42,6 +43,9 @@ class solorace(minqlx.Plugin):
     def handle_new_game(self):
         if minqlx.GAMETYPES_SHORT[self.get_cvar("g_gametype", int)] == "race":
             self.set_cvar("g_doWarmup", "0")
+            self.set_cvar("g_warmup", "0")
+            self.set_cvar("g_allowVoteMidGame", "1")
+            self.set_cvar("timelimit", "0")
             minqlx.allow_single_player(True)
         else:
             self.set_cvar("g_doWarmup", "1")
