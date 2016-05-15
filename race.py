@@ -34,7 +34,8 @@ GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df
                    "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
                    "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
                    "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild", "hangtime",
-                   "poptart", "blockworld", "raveroll", "ingus", "pea_impostor", "northrun", "timelock2", "climbworld")
+                   "poptart", "blockworld", "raveroll", "ingus", "pea_impostor", "northrun", "timelock2", "climbworld",
+                   "snorjumpb1")
 PLASMA = ("think1", "xproject", "plasmax")
 ROCKET = ("runstolfer", "charon", "charon_bw")
 GRENADE = ("grenadorade")
