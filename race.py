@@ -17,9 +17,10 @@ PARAMS = ({}, {"weapons": "false"}, {"physics": "classic"}, {"physics": "classic
 OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
 
 GOTO_DISABLED = ("ndql", "bounce", "df_coldrun", "wernerjump")
-HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna", "insane1", "bounce",
-         "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump", "df_verihard",
-         "cursed_temple", "skacharohuth", "randommap", "just_jump_2", "just_jump_3", "criclejump", "eatme", "wernerjump")
+HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna", "insane1",
+         "bounce", "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
+         "df_verihard", "cursed_temple", "skacharohuth", "randommap", "just_jump_2", "just_jump_3", "criclejump",
+         "eatme", "wernerjump")
 
 GAUNTLET_ONLY = ("k4n", "ndql")
 GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
@@ -63,13 +64,16 @@ class race(minqlx.Plugin):
         self.add_command("randommap", self.cmd_random_map)
         self.add_command("recent", self.cmd_recent, usage="[amount]")
         self.add_command(("goto", "tp"), self.cmd_goto, usage="<id>")
+        self.add_command("savepos", self.cmd_savepos)
+        self.add_command("loadpos", self.cmd_loadpos)
         self.add_command(("commands", "cmds", "help"), self.cmd_commands, priority=minqlx.PRI_HIGH)
 
         self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
         self.set_cvar_once("qlx_raceBrand", "QLRace.com")
 
-        # dict of players which have used !goto. {steam_id: score}
-        self.goto = {}
+        self.move_player = {}  # Queued !goto/!loadto positions. {steam_id: position}
+        self.goto = {}  # Players which have used !goto/!loadpos. {steam_id: score}
+        self.savepos = {}  # Saved player positions. {steam_id: player.state.position}
 
         self.maps = []
         self.old_maps = []
@@ -82,10 +86,13 @@ class race(minqlx.Plugin):
 
     def handle_map(self, map_name, factory):
         """Brands map title and updates list of race maps on map change.
-        Also sets correct starting weapons for the map.
+        Also sets correct starting weapons for the map and clears savepos
+        and move_player dicts.
         """
         map_name = map_name.lower()
         self.brand_map(map_name)
+        self.savepos = {}
+        self.move_player = {}
 
         if factory in ("qlrace_turbo", "qlrace_classic"):
             if map_name in GAUNTLET_AND_MG:
@@ -141,14 +148,13 @@ class race(minqlx.Plugin):
 
     def handle_vote_called(self, player, vote, args):
         """Cancels the vote when a duplicated map is voted for."""
-        if vote.lower() == "map":
-            if len(args) > 0:
-                disabled_maps = ("q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
-                                 "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2", "wintersedge")
-                map_name = args.split()[0]
-                if map_name.lower() in disabled_maps:
-                    player.tell("^3{} ^2is disabled(duplicate map).".format(map_name))
-                    return minqlx.RET_STOP_ALL
+        if vote.lower() == "map" and len(args) > 0:
+            disabled_maps = ("q3w2", "q3w3", "q3w5", "q3w7", "q3wcp1", "q3wcp14", "q3wcp17", "q3wcp18",
+                             "q3wcp22", "q3wcp23", "q3wcp5", "q3wcp9", "q3wxs1", "q3wxs2", "wintersedge")
+            map_name = args.split()[0]
+            if map_name.lower() in disabled_maps:
+                player.tell("^3{} ^2is disabled(duplicate map).".format(map_name))
+                return minqlx.RET_STOP_ALL
 
     def handle_server_command(self, player, cmd):
         """Stops server printing powerup messages."""
@@ -156,25 +162,39 @@ class race(minqlx.Plugin):
             return minqlx.RET_STOP_EVENT
 
     def handle_stats(self, stats):
-        """Resets a player's score if they used !goto."""
+        """Resets a player's score if they used !goto or !loadpos."""
         if stats["TYPE"] == "PLAYER_RACECOMPLETE":
             steam_id = int(stats["DATA"]["STEAM_ID"])
             if steam_id in self.goto:
                 player = self.player(steam_id)
                 player.score = self.goto[steam_id]
-                player.tell("^6Your time does not count because you used !goto.")
+                player.tell("^7Your time does not count because you used ^6!goto ^7or ^6!loadpos.")
 
     def handle_player_spawn(self, player):
-        """Removes player from goto dict when they spawn."""
+        """Move player to position if they used !goto/!loadpos, otherwise removes
+        player from goto dict."""
+        if player.team == "free":
+            player.is_alive = True
+        if player.steam_id in self.move_player and player.is_alive:
+            if player.steam_id not in self.goto:
+                player.tell("^6Your time will not count, unless you kill yourself.")
+                self.goto[player.steam_id] = player.score
+
+            minqlx.set_position(player.id, self.move_player[player.steam_id])
+            del self.move_player[player.steam_id]
+            return
+
         try:
             del self.goto[player.steam_id]
         except KeyError:
             return
 
     def handle_player_disconnect(self, player, reason):
-        """Removes player from goto dict when they disconnect"""
+        """Removes player from goto and savepos dicts when they disconnect"""
         try:
+            del self.move_player[player.steam_id]
             del self.goto[player.steam_id]
+            del self.savepos[player.steam_id]
         except KeyError:
             return
 
@@ -502,30 +522,47 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         if player.team == "spectator":
+            if 'spec_delay' in self.plugins and player.steam_id in self.plugins['spec_delay'].spec_delays:
+                player.tell("^6You must wait 15 seconds before joining after spectating")
+                return minqlx.RET_STOP_ALL
+
+            self.move_player[player.steam_id] = target_player.state.position
             player.team = "free"
+        else:
+            self.move_player[player.steam_id] = target_player.state.position
+            minqlx.player_spawn(player.id)  # respawn player so he can't cheat
 
-        # respawn player so he can't cheat by touching the start flag then !goto finish
-        minqlx.player_spawn(player.id)
-        minqlx.set_position(player.id, target_player.position())
+    def cmd_savepos(self, player, msg, channel):
+        """Saves current position."""
+        if player.team != "spectator":
+            # add player to savepos dict
+            self.savepos[player.steam_id] = player.state.position
+            player.tell("^6Position saved. Your time won't count if you use !loadpos, unless you kill yourself.")
+        else:
+            player.tell("Can't save position as spectator.")
+        return minqlx.RET_STOP_ALL
 
-        # add player to goto dict
-        self.goto[player.steam_id] = player.score
-        player.tell("^6Your time won't count, unless you kill yourself")
-
-        if self.game.map.lower() == "kraglejump":
-            # some stages need haste and some don't, so 60 is a compromise...
-            player.powerups(haste=60)
-        elif self.game.map.lower() in HASTE:
-            player.powerups(haste=999)
+    def cmd_loadpos(self, player, msg, channel):
+        """Loads saved position."""
+        if player.team != "spectator":
+            if player.steam_id in self.savepos:
+                self.move_player[player.steam_id] = self.savepos[player.steam_id]
+                minqlx.player_spawn(player.id)  # respawn player so he can't cheat
+            else:
+                player.tell("^1You have to save your position first.")
+        else:
+            player.tell("Can't load position as spectator.")
+        return minqlx.RET_STOP_ALL
 
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
-        channel.reply(
-            "Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent !goto")
+        channel.reply("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent "
+                      "!goto !savepos !loadpos")
+        return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
-        """Outputs times to the channel. Will split
-        lines so that each record is not on 2 separate lines.
+        """Outputs times to the channel. Will split lines
+        so that each record is on one line only.
         :param map_name: Map name
         :param times: List of map times
         :param channel: Channel to reply to
