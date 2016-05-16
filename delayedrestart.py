@@ -24,20 +24,23 @@ class delayedrestart(minqlx.Plugin):
         """Quits server when no one playing after a player moves to spectator."""
         if self.restart and self.amount_playing() == 0:
             self.msg("Restarting server in 30 seconds if nobody joins.")
-            self.quit()
+            self.check_quit()
 
     def handle_player_disconnect(self, player, reason):
         """Quits server when no one playing after a player disconnects."""
         if self.restart and self.amount_playing() <= 1 and player.team != "spectator":
             self.msg("Restarting server in 30 seconds if nobody joins.")
-            self.quit()
+            self.check_quit()
 
     def cmd_delayedrestart(self, player, msg, channel):
         """Quits server if no one is playing otherwise server will quit
         the next time no one is playing."""
-        if self.amount_playing() == 0:
+        if len(self.players()) == 0:
+            channel.reply("Restarting server.")
+            minqlx.console_command("quit")
+        elif self.amount_playing() == 0:
             channel.reply("Restarting server in 30 seconds if nobody joins.")
-            self.quit()
+            self.check_quit()
         else:
             player.tell("Server will restart when no one is playing.")
             self.restart = True
@@ -47,13 +50,15 @@ class delayedrestart(minqlx.Plugin):
         return len(self.teams()["free"]) + len(self.teams()["red"]) + len(self.teams()["blue"])
 
     @minqlx.delay(20)
-    def quit(self):
-        """Quits server after 30 second delay if no one is playing."""
-        if self.amount_playing() != 0:
-            self.restart = True
+    def check_quit(self):
+        """Quits server after 30 second delay if no one is playing.
+        If someone joins the game """
+        if self.amount_playing() > 0:
+            self.check_quit()
         else:
             self.msg("Restarting server in 10 seconds.")
 
-            def restart():
+            @minqlx.delay(10)
+            def quit():
                 minqlx.console_command("quit")
-            restart()
+            quit()
