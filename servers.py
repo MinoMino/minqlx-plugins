@@ -11,7 +11,14 @@ sudo python3.5 -m pip install python-valve
 
 import minqlx
 import socket
-import valve.source.a2s as a2s
+
+try:
+    import valve.source.a2s as a2s
+except ImportError:
+    minqlx.CHAT_CHANNEL.reply("^1Error: ^7The ^4python-valve ^7python library isn't installed.")
+    minqlx.CHAT_CHANNEL.reply(
+        "Run the following on your server to install: ^3sudo python3.5 -m pip install python-valve")
+    raise ImportError
 
 
 class servers(minqlx.Plugin):
