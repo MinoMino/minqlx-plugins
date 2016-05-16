@@ -83,7 +83,7 @@ class checkplayers(minqlx.Plugin):
         if not self.get_cvar("qlx_leaverBan", bool):
             player.tell("Leaver ban is not enabled.")
         else:
-            player.tell(self.leavers("ban"))
+            player.tell(self.leavers("warn"))
 
     def leavers(self, action):
         output = "{} | {} | {} | {} | {}\n".format("Name".center(24), "Steam ID".center(17), "Left", "Completed",
