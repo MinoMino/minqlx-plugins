@@ -4,7 +4,7 @@
 # (at your option) any later version.
 
 """
-Adds !delayedrestart which will restart(quit + supervisor spawns new process) when
+Adds !delayedrestart which will restart(quit + supervisor spawns new process) server when
 no one is playing.
 """
 
