@@ -16,23 +16,26 @@ class delayedrestart(minqlx.Plugin):
         super().__init__()
         self.add_hook("team_switch", self.handle_team_switch)
         self.add_hook("player_disconnect", self.handle_player_disconnect)
-        self.add_command("delayedrestart", self.cmd_delayedrestart, 5)
+        self.add_command("delayedrestart", self.cmd_delayed_restart, 5)
 
         self.restart = False
+        self.checking = False
 
     def handle_team_switch(self, player, old_team, new_team):
         """Quits server when no one is playing after a player moves to spectator."""
         if self.restart and self.amount_playing() == 0:
             self.msg("Restarting server in 30 seconds if nobody joins.")
+            self.checking = True
             self.check_quit()
 
     def handle_player_disconnect(self, player, reason):
         """Quits server when no one is playing after a player disconnects."""
         if self.restart and self.amount_playing() <= 1 and player.team != "spectator":
             self.msg("Restarting server in 30 seconds if nobody joins.")
+            self.checking = True
             self.check_quit()
 
-    def cmd_delayedrestart(self, player, msg, channel):
+    def cmd_delayed_restart(self, player, msg, channel):
         """Quits server if server is empty. If server is not empty
         but no one is playing a quit is scheduled in 30 seconds. Otherwise
         server will quit when people leave/spectate."""
@@ -41,6 +44,7 @@ class delayedrestart(minqlx.Plugin):
             minqlx.console_command("quit")
         elif self.amount_playing() == 0:
             channel.reply("Restarting server in 30 seconds if nobody joins.")
+            self.checking = True
             self.check_quit()
         else:
             player.tell("Server will restart when no one is playing.")
@@ -53,10 +57,14 @@ class delayedrestart(minqlx.Plugin):
     @minqlx.delay(20)
     def check_quit(self):
         """Quits server after 30 second delay if no one is playing.
-        If someone joins the game within 20 seconds then
-        it will recursively call itself."""
+        If someone joins the game within 20 seconds then the server
+        won't be restarted until people leave/spectate."""
+        if not self.checking:
+            return
+
         if self.amount_playing() > 0:
-            self.check_quit()
+            self.restart = True
+            self.checking = False
         else:
             self.msg("Restarting server in 10 seconds.")
 
