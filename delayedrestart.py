@@ -59,6 +59,6 @@ class delayedrestart(minqlx.Plugin):
             self.msg("Restarting server in 10 seconds.")
 
             @minqlx.delay(10)
-            def quit():
+            def quit_server():
                 minqlx.console_command("quit")
-            quit()
+            quit_server()
