@@ -21,20 +21,21 @@ class delayedrestart(minqlx.Plugin):
         self.restart = False
 
     def handle_team_switch(self, player, old_team, new_team):
-        """Quits server when no one playing after a player moves to spectator."""
+        """Quits server when no one is playing after a player moves to spectator."""
         if self.restart and self.amount_playing() == 0:
             self.msg("Restarting server in 30 seconds if nobody joins.")
             self.check_quit()
 
     def handle_player_disconnect(self, player, reason):
-        """Quits server when no one playing after a player disconnects."""
+        """Quits server when no one is playing after a player disconnects."""
         if self.restart and self.amount_playing() <= 1 and player.team != "spectator":
             self.msg("Restarting server in 30 seconds if nobody joins.")
             self.check_quit()
 
     def cmd_delayedrestart(self, player, msg, channel):
-        """Quits server if no one is playing otherwise server will quit
-        the next time no one is playing."""
+        """Quits server if server is empty. If server is not empty
+        but no one is playing a quit is scheduled in 30 seconds. Otherwise
+        server will quit when people leave/spectate."""
         if len(self.players()) == 0:
             channel.reply("Restarting server.")
             minqlx.console_command("quit")
@@ -46,13 +47,14 @@ class delayedrestart(minqlx.Plugin):
             self.restart = True
 
     def amount_playing(self):
-        """Returns the amount of players which are not spectating."""
+        """Returns the amount of players which are playing."""
         return len(self.teams()["free"]) + len(self.teams()["red"]) + len(self.teams()["blue"])
 
     @minqlx.delay(20)
     def check_quit(self):
         """Quits server after 30 second delay if no one is playing.
-        If someone joins the game """
+        If someone joins the game within 20 seconds then
+        it will recursively call itself."""
         if self.amount_playing() > 0:
             self.check_quit()
         else:
