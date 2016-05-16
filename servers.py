@@ -43,7 +43,6 @@ class servers(minqlx.Plugin):
     def get_servers(self, servers, channel):
         """Gets and outputs info for all servers in `qlx_servers`."""
         channel.reply("{:^22} | {:^63} | {}\n".format("IP", "sv_hostname", "Players"))
-        output = []
         for server in servers:
             hostname, player_count = self.get_server_info(server)
             if player_count[0].isdigit():
