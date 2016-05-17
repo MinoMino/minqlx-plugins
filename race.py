@@ -53,6 +53,7 @@ class race(minqlx.Plugin):
         self.add_hook("stats", self.handle_stats)
         self.add_hook("player_spawn", self.handle_player_spawn)
         self.add_hook("player_disconnect", self.handle_player_disconnect)
+        self.add_hook("client_command", self.handle_client_command)
         self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
@@ -194,7 +195,6 @@ class race(minqlx.Plugin):
                 player.powerups(haste=999)
             elif self.game.map.lower() == "kraglejump":
                 player.powerups(haste=60)  # some stages need haste and some don't, so 60 is a compromise...
-
             return
 
         try:
@@ -210,6 +210,11 @@ class race(minqlx.Plugin):
             del self.savepos[player.steam_id]
         except KeyError:
             return
+
+    def handle_client_command(self, player, cmd):
+        if cmd == "kill" and player.team == "free":
+            minqlx.player_spawn(player.id)
+            return minqlx.RET_STOP_EVENT
 
     def cmd_disabled(self, player, msg, channel):
         """Disables !slap and !slay."""
