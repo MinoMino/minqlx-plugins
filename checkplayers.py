@@ -104,7 +104,7 @@ class checkplayers(minqlx.Plugin):
             return
 
         output = ["^5{:^31} ^7| ^5{:^17} ^7| ^5{:^19} ^7| ^5{}".format("Name", "Steam ID", "Expires", "Reason")]
-        for p in sorted(players, key=itemgetter("expires"), reverse=True):
+        for p in sorted(players, key=itemgetter("expires")):
             output.append("{name:31} | {steam_id:17} | {expires:19} | {reason}".format(**p))
         tell_large_output(player, output)
 
