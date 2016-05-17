@@ -6,15 +6,19 @@
 
 """
 BETA
-TODO: DOC
-TODO: Check if there is no banned/silenced etc players instead of returing empty table.
+
+!permissions: shows all players with permissions
+!silenced: shows all silenced players
+!banned: shows all banned players
+!leaverbanned: shows all players which are banned for leaving
+!leaverwarned: shows all players which are warned for leaving
 """
 
 import minqlx
 import minqlx.database
-from operator import itemgetter
 import re
 import time
+from operator import itemgetter
 
 PLAYER_KEY = "minqlx:players:{}"
 
@@ -32,6 +36,7 @@ class checkplayers(minqlx.Plugin):
 
     @minqlx.thread
     def cmd_permissions(self, player, msg, channel):
+        """Outputs all players with permissions."""
         players = []
         for key in self.db.scan_iter("minqlx:players:*:permission"):
             steam_id = key.split(":")[2]
@@ -39,7 +44,7 @@ class checkplayers(minqlx.Plugin):
             name = self.player_name(steam_id)
             players.append(dict(name=name, steam_id=steam_id, permission=permission))
 
-        output = ["^5Owner: ^2{} Name: ^7{}".format(minqlx.owner(), self.player_name(minqlx.owner())),
+        output = ["^3Owner: ^7{} ^3Name: ^7{}".format(minqlx.owner(), self.player_name(minqlx.owner())),
                   "{:^24} | {:^17} | {}".format("Name", "Steam ID", "Permission")]
         for p in sorted(players, key=itemgetter("permission"), reverse=True):
             output.append("{name:24} | {steam_id:17} | {permission}".format(**p))
@@ -47,48 +52,76 @@ class checkplayers(minqlx.Plugin):
 
     @minqlx.thread
     def cmd_silenced(self, player, msg, channel):
-        output = ["{:^24} | {:^17} | {:^19} | {}".format("Name", "Steam ID", "Expires", "Reason")]
-
-        for key in self.db.scan_iter("minqlx:players:*:silences"):
-            steam_id = key.split(":")[2]
-            silenced = self.plugins["silence"].is_silenced(steam_id)
-            if silenced:
-                expires, score, reason = silenced
-                name = self.player_name(steam_id)
-                output.append("{:24} | {:17} | {} | {}".format(name, steam_id, expires, reason))
-        tell_large_output(player, output)
+        """Outputs all silenced players."""
+        if "silence" in self.plugins:
+            output = self.bans("silence")
+            if output:
+                tell_large_output(player, output)
+            else:
+                player.tell("There is no silenced players.")
+        else:
+            player.tell("silence plugin is not loaded!")
 
     @minqlx.thread
     def cmd_banned(self, player, msg, channel):
-        output = ["{:^24} | {:^17} | {:^19} | {}".format("Name", "Steam ID", "Expires", "Reason")]
+        """Outputs all banned players."""
+        if "ban" in self.plugins:
+            output = self.bans("ban")
+            if output:
+                tell_large_output(player, output)
+            else:
+                player.tell("There is no banned players.")
+        else:
+            player.tell("silence plugin is not loaded!")
 
-        for key in self.db.scan_iter("minqlx:players:*:bans"):
+    def bans(self, ban_type):
+        """Returns a table of all banned or silenced players.
+        :param ban_type: ban or silence"""
+        output = ["^5{:^24} | {:^17} | {:^19} | {}".format("Name", "Steam ID", "Expires", "Reason")]
+        for key in self.db.scan_iter("minqlx:players:*:{}s".format(ban_type)):
             steam_id = key.split(":")[2]
-            banned = self.plugins["ban"].is_banned(steam_id)
+
+            if ban_type == "ban":
+                banned = self.plugins["ban"].is_banned(steam_id)
+            else:
+                banned = self.plugins["silence"].is_silenced(steam_id)
+
             if banned:
-                expires, reason = banned
+                if ban_type == "ban":
+                    expires, reason = banned
+                else:
+                    expires, _, reason = banned
                 name = self.player_name(steam_id)
                 output.append("{:24} | {:17} | {} | {}".format(name, steam_id, expires, reason))
-        tell_large_output(player, output)
+
+        if len(output) > 1:
+            return output
 
     @minqlx.thread
     def cmd_leaver_banned(self, player, msg, channel):
+        """Outputs all players which are banned for leaving."""
         if not self.get_cvar("qlx_leaverBan", bool):
             player.tell("Leaver ban is not enabled.")
         else:
             output = self.leavers("ban")
-            tell_large_output(player, output)
+            if output:
+                tell_large_output(player, output)
+            else:
+                player.tell("There is no players banned for leaving.")
 
     @minqlx.thread
     def cmd_leaver_warned(self, player, msg, channel):
+        """Outputs all players which are warned for leaving."""
         if not self.get_cvar("qlx_leaverBan", bool):
             player.tell("Leaver ban is not enabled.")
         else:
             player.tell("!leaverwarned is not implemented yet")
 
     def leavers(self, action):
+        """Returns a table of all leaver banned/warned players.
+        :param action: warn or ban
+        """
         players = []
-
         for key in self.db.scan_iter("minqlx:players:*:games_left"):
             steam_id = key.split(":")[2]
             status = self.plugins["ban"].leave_status(steam_id)
@@ -102,11 +135,12 @@ class checkplayers(minqlx.Plugin):
                     completed = 0
 
                 players.append(dict(name=name, steam_id=steam_id, left=left, completed=completed, ratio=ratio))
+        if len(players) == 0:
+            return
 
         output = ["^5{:^24} | {:^17} | {} | {} | {}".format("Name", "Steam ID", "Left", "Completed", "Ratio")]
         for p in sorted(players, key=itemgetter("ratio", "left"), reverse=True):
             output.append("{name:24} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio:>3.2}".format(**p))
-
         return output
 
     def player_name(self, steam_id):
