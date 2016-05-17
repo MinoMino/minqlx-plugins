@@ -52,7 +52,7 @@ class checkplayers(minqlx.Plugin):
 
             output = ["^5Owner: ^7{} ^5Name: ^7{}".format(minqlx.owner(), self.player_name(minqlx.owner())),
                       "^5{:^31} ^7| ^5{:^17} ^7| ^5{}".format("Name", "Steam ID", "Permission")]
-            for p in sorted(players, key=itemgetter("permission"), reverse=True):
+            for p in sorted(players, key=itemgetter("permission")):
                 output.append("{name:31} | {steam_id:17} | {permission}".format(**p))
             tell_large_output(player, output)
 
@@ -79,7 +79,7 @@ class checkplayers(minqlx.Plugin):
         :param player: player to tell to
         :param ban_type: ban or silence
         """
-        output = ["^5{:^31} ^7| ^5{:^17} ^7| ^5{:^19} ^7| ^5{}".format("Name", "Steam ID", "Expires", "Reason")]
+        players = []
         for key in self.db.scan_iter("minqlx:players:*:{}s".format(ban_type)):
             steam_id = key.split(":")[2]
 
@@ -94,15 +94,19 @@ class checkplayers(minqlx.Plugin):
                 else:
                     expires, _, reason = banned
                 name = self.player_name(steam_id)
-                output.append("{:31} | {:17} | {} | {}".format(name, steam_id, expires, reason))
+                players.append(dict(name=name, steam_id=steam_id, expires=expires, reason=reason))
 
-        if len(output) > 1:
-            tell_large_output(player, output)
-        else:
+        if not players:
             if ban_type == "ban":
                 player.tell("There is no banned players.")
             else:
                 player.tell("There is no silenced players.")
+            return
+
+        output = ["^5{:^31} ^7| ^5{:^17} ^7| ^5{:^19} ^7| ^5{}".format("Name", "Steam ID", "Expires", "Reason")]
+        for p in sorted(players, key=itemgetter("expires"), reverse=True):
+            output.append("{name:31} | {steam_id:17} | {expires:19} | {reason:}".format(**p))
+        tell_large_output(player, output)
 
     def cmd_leaver_banned(self, player, msg, channel):
         if not self.get_cvar("qlx_leaverBan", bool):
@@ -140,7 +144,7 @@ class checkplayers(minqlx.Plugin):
 
                 players.append(dict(name=name, steam_id=steam_id, left=left, completed=completed, ratio=ratio))
 
-        if len(players) == 0:
+        if not players:
             if action == "ban":
                 player.tell("There is no players banned for leaving.")
             else:
@@ -151,7 +155,6 @@ class checkplayers(minqlx.Plugin):
                   .format("Name", "Steam ID", "Left", "Completed", "Ratio")]
         for p in sorted(players, key=itemgetter("ratio", "left"), reverse=True):
             output.append("{name:31} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio}".format(**p))
-
         tell_large_output(player, output)
 
     def player_name(self, steam_id):
