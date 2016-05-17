@@ -37,12 +37,12 @@ class checkplayers(minqlx.Plugin):
             steam_id = key.split(":")[2]
             permission = self.db[key]
             name = self.player_name(steam_id)
-            players.append({"name": name, "steam_id": steam_id, "permission": permission})
+            players.append(dict(name=name, steam_id=steam_id, permission=permission))
 
         output = ["^5Owner: ^2{} Name: ^7{}".format(minqlx.owner(), self.player_name(minqlx.owner())),
-                  "{:^24} | {:^17} | {}\n".format("Name", "Steam ID", "Permission")]
+                  "{:^24} | {:^17} | {}".format("Name", "Steam ID", "Permission")]
         for p in sorted(players, key=itemgetter("permission"), reverse=True):
-            output.append("{name:24} | {steam_id:17} | {permission}\n".format(**p))
+            output.append("{name:24} | {steam_id:17} | {permission}".format(**p))
         tell_large_output(player, output)
 
     @minqlx.thread
@@ -68,7 +68,7 @@ class checkplayers(minqlx.Plugin):
             if banned:
                 expires, reason = banned
                 name = self.player_name(steam_id)
-                output.append("{:24} | {:17} | {} | {}\n".format(name, steam_id, expires, reason))
+                output.append("{:24} | {:17} | {} | {}".format(name, steam_id, expires, reason))
         tell_large_output(player, output)
 
     @minqlx.thread
@@ -87,8 +87,7 @@ class checkplayers(minqlx.Plugin):
             player.tell("!leaverwarned is not implemented yet")
 
     def leavers(self, action):
-        output = ["^5{:^24} | {:^17} | {} | {} | {}"
-                  .format("Name", "Steam ID", "Left", "Completed", "Ratio")]
+        players = []
 
         for key in self.db.scan_iter("minqlx:players:*:games_left"):
             steam_id = key.split(":")[2]
@@ -101,8 +100,13 @@ class checkplayers(minqlx.Plugin):
                     completed = self.db[PLAYER_KEY.format(steam_id) + ":games_completed"]
                 except KeyError:
                     completed = 0
-                output.append("{:24} | {:17} | ^1{:4}^7 | ^2{:9} ^7| {:>3.2}"
-                              .format(name, steam_id, left, completed, ratio))
+
+                players.append(dict(name=name, steam_id=steam_id, left=left, completed=completed, ratio=ratio))
+
+        output = ["^5{:^24} | {:^17} | {} | {} | {}".format("Name", "Steam ID", "Left", "Completed", "Ratio")]
+        for p in sorted(players, key=itemgetter("ratio", "left"), reverse=True):
+            output.append("{name:24} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio:>3.2}".format(**p))
+
         return output
 
     def player_name(self, steam_id):
