@@ -44,8 +44,8 @@ class checkplayers(minqlx.Plugin):
             name = self.player_name(steam_id)
             players.append(dict(name=name, steam_id=steam_id, permission=permission))
 
-        output = ["^3Owner: ^7{} ^3Name: ^7{}".format(minqlx.owner(), self.player_name(minqlx.owner())),
-                  "{:^24} | {:^17} | {}".format("Name", "Steam ID", "Permission")]
+        output = ["^5Owner: ^7{} ^5Name: ^7{}".format(minqlx.owner(), self.player_name(minqlx.owner())),
+                  "^5{:^24} ^7| ^5{:^17} ^7| ^5{}".format("Name", "Steam ID", "Permission")]
         for p in sorted(players, key=itemgetter("permission"), reverse=True):
             output.append("{name:24} | {steam_id:17} | {permission}".format(**p))
         tell_large_output(player, output)
@@ -77,7 +77,7 @@ class checkplayers(minqlx.Plugin):
     def bans(self, ban_type):
         """Returns a table of all banned or silenced players.
         :param ban_type: ban or silence"""
-        output = ["^5{:^24} | {:^17} | {:^19} | {}".format("Name", "Steam ID", "Expires", "Reason")]
+        output = ["^5{:^24} ^7| ^5{:^17} ^7| ^5{:^19} ^7| ^5{}".format("Name", "Steam ID", "Expires", "Reason")]
         for key in self.db.scan_iter("minqlx:players:*:{}s".format(ban_type)):
             steam_id = key.split(":")[2]
 
@@ -138,7 +138,8 @@ class checkplayers(minqlx.Plugin):
         if len(players) == 0:
             return
 
-        output = ["^5{:^24} | {:^17} | {} | {} | {}".format("Name", "Steam ID", "Left", "Completed", "Ratio")]
+        output = ["^5{:^24} ^7| ^5{:^17} ^7| ^5{} ^7| ^5{} ^7| ^5{}"
+                  .format("Name", "Steam ID", "Left", "Completed", "Ratio")]
         for p in sorted(players, key=itemgetter("ratio", "left"), reverse=True):
             output.append("{name:24} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio:>3.2}".format(**p))
         return output
