@@ -60,10 +60,9 @@ class delayedrestart(minqlx.Plugin):
 
         time.sleep(20)
         if self.amount_playing() > 0:
+            self.checking = False
             self.restart = True
         else:
             self.msg("Restarting server in 10 seconds.")
             time.sleep(10)
             minqlx.console_command("quit")
-
-        self.checking = False
