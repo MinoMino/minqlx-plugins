@@ -7,7 +7,7 @@
 """
 BETA
 
-!permissions: shows all players with permissions
+!permissions: shows all players with any permission level.
 !silenced: shows all silenced players
 !banned: shows all banned players
 !leaverbanned: shows all players which are banned for leaving
@@ -36,7 +36,7 @@ class checkplayers(minqlx.Plugin):
 
     @minqlx.thread
     def cmd_permissions(self, player, msg, channel):
-        """Outputs all players with permissions."""
+        """Outputs all players with any permission level."""
         players = []
         for key in self.db.scan_iter("minqlx:players:*:permission"):
             steam_id = key.split(":")[2]
@@ -45,10 +45,14 @@ class checkplayers(minqlx.Plugin):
             players.append(dict(name=name, steam_id=steam_id, permission=permission))
 
         output = ["^5Owner: ^7{} ^5Name: ^7{}".format(minqlx.owner(), self.player_name(minqlx.owner())),
-                  "^5{:^24} ^7| ^5{:^17} ^7| ^5{}".format("Name", "Steam ID", "Permission")]
+                  "^5{:^31} ^7| ^5{:^17} ^7| ^5{}".format("Name", "Steam ID", "Permission")]
         for p in sorted(players, key=itemgetter("permission"), reverse=True):
-            output.append("{name:24} | {steam_id:17} | {permission}".format(**p))
-        tell_large_output(player, output)
+            output.append("{name:31} | {steam_id:17} | {permission}".format(**p))
+
+        if len(output) > 1:
+            tell_large_output(player, output)
+        else:
+            player.tell("There is no players with any permission level.")
 
     @minqlx.thread
     def cmd_silenced(self, player, msg, channel):
@@ -77,7 +81,7 @@ class checkplayers(minqlx.Plugin):
     def bans(self, ban_type):
         """Returns a table of all banned or silenced players.
         :param ban_type: ban or silence"""
-        output = ["^5{:^24} ^7| ^5{:^17} ^7| ^5{:^19} ^7| ^5{}".format("Name", "Steam ID", "Expires", "Reason")]
+        output = ["^5{:^31} ^7| ^5{:^17} ^7| ^5{:^19} ^7| ^5{}".format("Name", "Steam ID", "Expires", "Reason")]
         for key in self.db.scan_iter("minqlx:players:*:{}s".format(ban_type)):
             steam_id = key.split(":")[2]
 
@@ -92,7 +96,7 @@ class checkplayers(minqlx.Plugin):
                 else:
                     expires, _, reason = banned
                 name = self.player_name(steam_id)
-                output.append("{:24} | {:17} | {} | {}".format(name, steam_id, expires, reason))
+                output.append("{:31} | {:17} | {} | {}".format(name, steam_id, expires, reason))
 
         if len(output) > 1:
             return output
