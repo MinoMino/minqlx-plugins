@@ -54,17 +54,18 @@ class servers(minqlx.Plugin):
     @minqlx.thread
     def get_servers(self, servers, channel):
         """Gets and outputs info for all servers in `qlx_servers`."""
-        output = ["^5{:^22} | {:^63} | {}".format("IP", "sv_hostname", "Players")]
+        output = ["^5{:^22} ^7| ^5{:^63} ^7| ^5{}".format("IP", "sv_hostname", "Players")]
         for server in servers:
-            hostname, player_count = self.get_server_info(server)
-            if player_count[0].isdigit():
-                players = [int(n) for n in player_count.split("/")]
+            hostname, players = self.get_server_info(server)
+            if players:
                 if players[0] >= players[1]:
-                    player_count = "^3{}".format(player_count)
+                    players = "^3{}/{}".format(players[0], players[1])
                 else:
-                    player_count = "^2{}".format(player_count)
+                    players = "^2{}/{}".format(players[0], players[1])
+            else:
+                players = "^1..."
 
-            output.append("{:22} | {:63} | {}".format(server, hostname, player_count))
+            output.append("{:22} | {:63} | {}".format(server, hostname, players))
         reply_large_output(channel, output)
 
     @staticmethod
@@ -76,13 +77,13 @@ class servers(minqlx.Plugin):
             address[1] = int(address[1])
             server = a2s.ServerQuerier(address, 1)  # 1 second timeout
             info = server.get_info()
-            return info['server_name'], "{player_count}/{max_players}".format(**info)
+            return info['server_name'], [info["player_count"], info["max_players"]]
         except ValueError:
-            return "Error: Invalid port", "^1..."
+            return "Error: Invalid port", []
         except socket.gaierror:
-            return "Error: Invalid/nonexistent address", "^1..."
+            return "Error: Invalid/nonexistent address", []
         except a2s.NoResponseError:
-            return "Error: Timed out", "^1..."
+            return "Error: Timed out", []
 
 
 def reply_large_output(channel, output):
