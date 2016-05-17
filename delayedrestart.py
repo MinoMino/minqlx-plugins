@@ -9,6 +9,7 @@ no one is playing.
 """
 
 import minqlx
+import time
 
 
 class delayedrestart(minqlx.Plugin):
@@ -36,8 +37,10 @@ class delayedrestart(minqlx.Plugin):
         but no one is playing a quit is scheduled in 30 seconds. Otherwise
         server will quit when people leave/spectate."""
         if len(self.players()) == 0:
-            self.quit_server()
+            channel.reply("Restarting server now.")
+            minqlx.console_command("quit")
         elif self.amount_playing() == 0:
+            channel.reply("Server will restart in 30 seconds if nobody joins.")
             self.check_quit()
         else:
             player.tell("Server will restart when no one is playing.")
@@ -47,26 +50,20 @@ class delayedrestart(minqlx.Plugin):
         """Returns the amount of players which are playing."""
         return len(self.teams()["free"]) + len(self.teams()["red"]) + len(self.teams()["blue"])
 
+    @minqlx.thread
     def check_quit(self):
         """Quits server in 30 seconds if no one is playing.
         If someone joins the game within 20 seconds then the server
         won't be restarted until people leave/spectate."""
+        self.msg("Server will restart in 30 seconds if nobody joins.")
         self.checking = True
 
-        @minqlx.delay(20)
-        def check():
-            if self.amount_playing() > 0:
-                self.restart = True
-            else:
-                self.quit_server()
-            self.checking = False
-
-        check()
-
-    def quit_server(self):
-        """Quits server after 10 seconds."""
-        self.msg("Restarting server in 10 seconds.")
-
-        @minqlx.delay(10)
-        def quit_server():
+        time.sleep(20)
+        if self.amount_playing() > 0:
+            self.restart = True
+        else:
+            self.msg("Restarting server in 10 seconds.")
+            time.sleep(10)
             minqlx.console_command("quit")
+
+        self.checking = False
