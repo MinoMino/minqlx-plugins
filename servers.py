@@ -10,6 +10,7 @@ sudo python3.5 -m pip install python-valve
 """
 
 import minqlx
+import time
 import socket
 import valve.source.a2s as a2s
 
@@ -46,7 +47,7 @@ class servers(minqlx.Plugin):
     @minqlx.thread
     def get_servers(self, servers, channel):
         """Gets and outputs info for all servers in `qlx_servers`."""
-        channel.reply("{:^22} | {:^63} | {}\n".format("IP", "sv_hostname", "Players"))
+        output = ["{:^22} | {:^63} | {}\n".format("IP", "sv_hostname", "Players")]
         for server in servers:
             hostname, player_count = self.get_server_info(server)
             if player_count[0].isdigit():
@@ -55,7 +56,9 @@ class servers(minqlx.Plugin):
                     player_count = "^3{}".format(player_count)
                 else:
                     player_count = "^2{}".format(player_count)
-            channel.reply("{:22} | {:63} | {}".format(server, hostname, player_count))
+
+            output.append("{:22} | {:63} | {}".format(server, hostname, player_count))
+        reply_large_output(channel, output)
 
     @staticmethod
     def get_server_info(server):
@@ -73,3 +76,12 @@ class servers(minqlx.Plugin):
             return "Error: Invalid/nonexistent address", "^1..."
         except a2s.NoResponseError:
             return "Error: Timed out", "^1..."
+
+
+def reply_large_output(channel, output):
+    """Tells large output in small portions, as not to disconnected the player."""
+    for count, line in enumerate(output, start=1):
+        if count % 30 == 0:  # decrease if someone getting disconnected
+            time.sleep(0.4)  # increase if changing previous line does not help
+            channel.reply(output[0])
+        channel.reply(line)
