@@ -14,6 +14,7 @@ import minqlx
 import minqlx.database
 import operator
 import re
+import time
 
 PLAYER_KEY = "minqlx:players:{}"
 
@@ -76,18 +77,20 @@ class checkplayers(minqlx.Plugin):
         if not self.get_cvar("qlx_leaverBan", bool):
             player.tell("Leaver ban is not enabled.")
         else:
-            player.tell(self.leavers("ban"))
+            output = self.leavers("ban")
+            self.print_large_output(player, output)
 
     @minqlx.thread
     def cmd_leaver_warned(self, player, msg, channel):
         if not self.get_cvar("qlx_leaverBan", bool):
             player.tell("Leaver ban is not enabled.")
         else:
-            player.tell(self.leavers("warn"))
+            player.tell("!leaverwarned is not implemented yet")
 
     def leavers(self, action):
-        output = "{} | {} | {} | {} | {}\n".format("Name".center(24), "Steam ID".center(17), "Left", "Completed",
-                                                   "Ratio")
+        output = []
+        output.append("^5{} | {} | {} | {} | {}\n".format("Name".center(24), "Steam ID".center(17), "Left", "Completed",
+                                                   "Ratio"))
         for key in self.db.scan_iter("minqlx:players:*:games_left"):
             steam_id = key.split(":")[2]
             status = self.plugins["ban"].leave_status(steam_id)
@@ -99,7 +102,7 @@ class checkplayers(minqlx.Plugin):
                     completed = self.db[PLAYER_KEY.format(steam_id) + ":games_completed"]
                 except KeyError:
                     completed = 0
-                output += "{:24} | {:17} | {:4} | {:9} | {}\n".format(name, steam_id, left, completed, ratio)
+                output.append("{:24} | {:17} | ^1{:4}^7 | ^2{:9} ^7| {:3.2}\n".format(name, steam_id, left, completed, ratio))
         return output
 
     def player_name(self, steam_id):
@@ -112,3 +115,13 @@ class checkplayers(minqlx.Plugin):
         except KeyError:
             name = steam_id
         return name
+
+    def print_large_output(self, player, output):
+        """Print out large output by a small portions using different player.tell() methods"""
+        count = 1
+        for line in output:
+            if count % 30 == 0: # change 30 to a smaller value, if someone getting disconnected
+                time.sleep(0.4) # change 0.4 to a bigger value, if changing previous line does not help
+                player.tell(output[0])
+            player.tell(line)
+            count = count + 1
