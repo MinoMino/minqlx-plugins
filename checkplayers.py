@@ -115,7 +115,11 @@ class checkplayers(minqlx.Plugin):
         if not self.get_cvar("qlx_leaverBan", bool):
             player.tell("Leaver ban is not enabled.")
         else:
-            player.tell("!leaverwarned is not implemented yet")
+            output = self.leavers("warn")
+            if output:
+                tell_large_output(player, output)
+            else:
+                player.tell("There is no players warned for leaving.")
 
     def leavers(self, action):
         """Returns a table of all leaver banned/warned players.
@@ -127,6 +131,7 @@ class checkplayers(minqlx.Plugin):
             status = self.plugins["ban"].leave_status(steam_id)
             if status and status[0] == action:
                 action, ratio = status
+                ratio = str(ratio)[:4]  # truncate float instead of rounding.
                 name = self.player_name(steam_id)
                 left = self.db[key]
                 try:
@@ -138,10 +143,10 @@ class checkplayers(minqlx.Plugin):
         if len(players) == 0:
             return
 
-        output = ["^5{:^24} ^7| ^5{:^17} ^7| ^5{} ^7| ^5{} ^7| ^5{}"
+        output = ["^5{:^31} ^7| ^5{:^17} ^7| ^5{} ^7| ^5{} ^7| ^5{}"
                   .format("Name", "Steam ID", "Left", "Completed", "Ratio")]
         for p in sorted(players, key=itemgetter("ratio", "left"), reverse=True):
-            output.append("{name:24} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio:>3.2}".format(**p))
+            output.append("{name:31} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio}".format(**p))
         return output
 
     def player_name(self, steam_id):
