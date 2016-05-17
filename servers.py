@@ -11,7 +11,14 @@ sudo python3.5 -m pip install python-valve
 
 import minqlx
 import socket
-import valve.source.a2s as a2s
+
+try:
+    import valve.source.a2s as a2s
+except ImportError:
+    minqlx.CHAT_CHANNEL.reply("^1Error: ^7The ^4python-valve ^7python library isn't installed.")
+    minqlx.CHAT_CHANNEL.reply(
+        "Run the following on your server to install: ^3sudo python3.5 -m pip install python-valve")
+    raise ImportError
 
 
 class servers(minqlx.Plugin):
@@ -32,6 +39,10 @@ class servers(minqlx.Plugin):
             self.logger.warning("qlx_servers is not set")
             player.tell("qlx_servers is not set")
             return minqlx.RET_STOP_ALL
+        elif any(s == '' for s in servers):
+            self.logger.warning("qlx_servers has an invalid server(empty string). Most likely due to trailing comma.")
+            player.tell("qlx_servers has an invalid server(empty string). Most likely due to trailing comma.")
+            return minqlx.RET_STOP_ALL
 
         if not self.get_cvar("qlx_serversShowInChat", bool) and not isinstance(player, minqlx.AbstractDummyPlayer):
             self.get_servers(servers, minqlx.TellChannel(player))
@@ -42,18 +53,16 @@ class servers(minqlx.Plugin):
     @minqlx.thread
     def get_servers(self, servers, channel):
         """Gets and outputs info for all servers in `qlx_servers`."""
-        output = "{:^25} | {:^40} | {}\n".format("IP", "sv_hostname", "Player Count")
+        channel.reply("{:^22} | {:^63} | {}\n".format("IP", "sv_hostname", "Players"))
         for server in servers:
             hostname, player_count = self.get_server_info(server)
             if player_count[0].isdigit():
                 players = [int(n) for n in player_count.split("/")]
-                if players[0] == players[1]:
+                if players[0] >= players[1]:
                     player_count = "^3{}".format(player_count)
                 else:
                     player_count = "^2{}".format(player_count)
-            output += "{:25} | {:40} | {}^7\n".format(server, hostname, player_count)
-
-        channel.reply(output)
+            channel.reply("{:22} | {:63} | {}".format(server, hostname, player_count))
 
     @staticmethod
     def get_server_info(server):
@@ -62,7 +71,7 @@ class servers(minqlx.Plugin):
         address = (server.split(":") + [27960])[:2]
         try:
             address[1] = int(address[1])
-            server = a2s.ServerQuerier(address)
+            server = a2s.ServerQuerier(address, 1)  # 1 second timeout
             info = server.get_info()
             return info['server_name'], "{player_count}/{max_players}".format(**info)
         except ValueError:
