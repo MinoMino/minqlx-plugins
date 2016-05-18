@@ -212,6 +212,7 @@ class race(minqlx.Plugin):
             return
 
     def handle_client_command(self, player, cmd):
+        """Spawn player right away if they use /kill."""
         if cmd == "kill" and player.team == "free":
             minqlx.player_spawn(player.id)
             return minqlx.RET_STOP_EVENT
