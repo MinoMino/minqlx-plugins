@@ -138,12 +138,16 @@ class race(minqlx.Plugin):
                     self.set_cvar("g_velocity_gl", "700")
                 else:
                     self.set_cvar("g_velocity_gl", "800")
-
-            if self.get_cvar("qlx_raceMode", int) == 2:
+            elif self.get_cvar("qlx_raceMode", int) == 2:
                 if map_name == "dontlookdown":
                     self.set_cvar("pmove_RampJump", "1")
                 else:
                     self.set_cvar("pmove_RampJump", "0")
+
+            if map_name == "puzzlemap":
+                minqlx.load_plugin("puzzlemap")
+            else:
+                minqlx.unload_plugin("puzzlemap")
 
             if map_name == "walkathon":
                 self.set_cvar("g_respawn_delay_min", "1000")
