@@ -16,7 +16,7 @@ from operator import itemgetter
 PARAMS = ({}, {"weapons": "false"}, {"physics": "classic"}, {"physics": "classic", "weapons": "false"})
 OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
 
-GOTO_DISABLED = ("ndql", "bounce", "df_coldrun", "wernerjump")
+GOTO_DISABLED = ("ndql", "bounce", "df_coldrun", "wernerjump", "puzzlemap")
 HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps", "funjumpsmap", "df_luna", "insane1",
          "bounce", "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
          "df_verihard", "cursed_temple", "skacharohuth", "randommap", "just_jump_2", "just_jump_3", "criclejump",
@@ -35,7 +35,7 @@ GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df
                    "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
                    "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild", "hangtime",
                    "poptart", "blockworld", "raveroll", "ingus", "pea_impostor", "northrun", "timelock2", "climbworld",
-                   "snorjumpb1", "marvin", "caep4", "drtrixiipro", "timelock4")
+                   "snorjumpb1", "marvin", "caep4", "drtrixiipro", "timelock4", "puzzlemap")
 PLASMA = ("think1", "xproject", "plasmax")
 ROCKET = ("runstolfer", "charon", "charon_bw")
 GRENADE = ("grenadorade")
