@@ -35,7 +35,7 @@ GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df
                    "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
                    "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild", "hangtime",
                    "poptart", "blockworld", "raveroll", "ingus", "pea_impostor", "northrun", "timelock2", "climbworld",
-                   "snorjumpb1", "marvin", "caep4", "drtrixiipro", "timelock4", "puzzlemap")
+                   "snorjumpb1", "marvin", "caep4", "drtrixiipro", "timelock4")
 PLASMA = ("think1", "xproject", "plasmax")
 ROCKET = ("runstolfer", "charon", "charon_bw")
 GRENADE = ("grenadorade")
@@ -145,6 +145,8 @@ class race(minqlx.Plugin):
                     self.set_cvar("pmove_RampJump", "0")
 
             if map_name == "puzzlemap":
+                self.set_cvar("g_infiniteAmmo", "1")
+                self.set_cvar("g_startingWeapons", "3")
                 minqlx.load_plugin("puzzlemap")
             else:
                 minqlx.unload_plugin("puzzlemap")
