@@ -51,7 +51,7 @@ class checkplayers(minqlx.Plugin):
                 return
 
             output = ["^5Owner: ^7{} ^5Name: ^7{}".format(minqlx.owner(), self.player_name(minqlx.owner())),
-                      "^5{:^31} ^7| ^5{:^17} ^7| ^5{}".format("Name", "Steam ID", "Permission")]
+                      "^5{:^31} | {:^17} | {}".format("Name", "Steam ID", "Permission")]
             for p in sorted(players, key=itemgetter("permission")):
                 output.append("{name:31} | {steam_id:17} | {permission}".format(**p))
             tell_large_output(player, output)
@@ -103,7 +103,7 @@ class checkplayers(minqlx.Plugin):
                 player.tell("There is no silenced players.")
             return
 
-        output = ["^5{:^31} ^7| ^5{:^17} ^7| ^5{:^19} ^7| ^5{}".format("Name", "Steam ID", "Expires", "Reason")]
+        output = ["^5{:^31} | {:^17} | {:^19} | {}".format("Name", "Steam ID", "Expires", "Reason")]
         for p in sorted(players, key=itemgetter("expires")):
             output.append("{name:31} | {steam_id:17} | {expires:19} | {reason}".format(**p))
         tell_large_output(player, output)
@@ -151,7 +151,7 @@ class checkplayers(minqlx.Plugin):
                 player.tell("There is no players warned for leaving.")
             return
 
-        output = ["^5{:^31} ^7| ^5{:^17} ^7| ^5{} ^7| ^5{} ^7| ^5{}"
+        output = ["^5{:^31} | {:^17} | {} | {} | {}"
                   .format("Name", "Steam ID", "Left", "Completed", "Ratio")]
         for p in sorted(players, key=itemgetter("ratio", "left"), reverse=True):
             output.append("{name:31} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio}".format(**p))
