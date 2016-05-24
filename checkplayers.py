@@ -52,7 +52,7 @@ class checkplayers(minqlx.Plugin):
 
             output = ["^5Owner: ^7{} ^5Name: ^7{}".format(minqlx.owner(), self.player_name(minqlx.owner())),
                       "^5{:^31} | {:^17} | {}".format("Name", "Steam ID", "Permission")]
-            for p in sorted(players, key=itemgetter("permission")):
+            for p in sorted(players, key=itemgetter("permission"), reverse=True):
                 output.append("{name:31} | {steam_id:17} | {permission}".format(**p))
             tell_large_output(player, output)
 
