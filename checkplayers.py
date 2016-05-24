@@ -37,10 +37,11 @@ class checkplayers(minqlx.Plugin):
     def cmd_permissions(self, player, msg, channel):
         """Outputs all players with any permission level.
         cmd_permission is not threaded so return minqlx.RET_STOP_ALL works."""
+
         @minqlx.thread
         def permissions():
             players = []
-            for key in self.db.scan_iter("minqlx:players:*:permission"):
+            for key in self.db.scan_iter("minqlx:players:765*:permission"):
                 steam_id = key.split(":")[2]
                 permission = self.db[key]
                 name = self.player_name(steam_id)
@@ -54,7 +55,7 @@ class checkplayers(minqlx.Plugin):
                       "^5{:^31} | {:^17} | {}".format("Name", "Steam ID", "Permission")]
             for p in sorted(players, key=itemgetter("permission"), reverse=True):
                 output.append("{name:31} | {steam_id:17} | {permission}".format(**p))
-            tell_large_output(player, output)
+            tell_large_output(player, output, 30)
 
         permissions()
         return minqlx.RET_STOP_ALL
@@ -80,7 +81,7 @@ class checkplayers(minqlx.Plugin):
         :param ban_type: ban or silence
         """
         players = []
-        for key in self.db.scan_iter("minqlx:players:*:{}s".format(ban_type)):
+        for key in self.db.scan_iter("minqlx:players:765*:{}s".format(ban_type)):
             steam_id = key.split(":")[2]
 
             if ban_type == "ban":
@@ -106,7 +107,7 @@ class checkplayers(minqlx.Plugin):
         output = ["^5{:^31} | {:^17} | {:^19} | {}".format("Name", "Steam ID", "Expires", "Reason")]
         for p in sorted(players, key=itemgetter("expires")):
             output.append("{name:31} | {steam_id:17} | {expires:19} | {reason}".format(**p))
-        tell_large_output(player, output)
+        tell_large_output(player, output, 30)
 
     def cmd_leaver_banned(self, player, msg, channel):
         if not self.get_cvar("qlx_leaverBan", bool):
@@ -129,7 +130,7 @@ class checkplayers(minqlx.Plugin):
         :param action: warn or ban
         """
         players = []
-        for key in self.db.scan_iter("minqlx:players:*:games_left"):
+        for key in self.db.scan_iter("minqlx:players:765*:games_left"):
             steam_id = key.split(":")[2]
             status = self.plugins["ban"].leave_status(steam_id)
             if status and status[0] == action:
@@ -155,7 +156,7 @@ class checkplayers(minqlx.Plugin):
                   .format("Name", "Steam ID", "Left", "Completed", "Ratio")]
         for p in sorted(players, key=itemgetter("ratio", "left"), reverse=True):
             output.append("{name:31} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio}".format(**p))
-        tell_large_output(player, output)
+        tell_large_output(player, output, 30)
 
     def player_name(self, steam_id):
         """Returns the latest name a player has used."""
@@ -169,10 +170,13 @@ class checkplayers(minqlx.Plugin):
         return name
 
 
-def tell_large_output(player, output):
-    """Tells large output in small portions, as not to disconnected the player."""
+def tell_large_output(player, output, max_amount):
+    """Tells large output in small portions, as not to disconnected the player.
+    :param player: Player to tell to
+    :param output: Output to send to player
+    :param max_amount: Max amount of lines to send at once."""
     for count, line in enumerate(output, start=1):
-        if count % 30 == 0:  # decrease if someone getting disconnected
+        if count % max_amount == 0:
             time.sleep(0.4)  # increase if changing previous line does not help
             player.tell(output[0])
         player.tell(line)
