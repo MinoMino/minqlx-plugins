@@ -183,7 +183,7 @@ def tell_player(player, output):
     and delay. This is to stop the bot from getting disconnected
     from QuakeNet due to flooding."""
     if isinstance(player, minqlx.AbstractDummyPlayer):
-        tell_large_output(player, output, max_amount=1, delay=1.2)
+        tell_large_output(player, output, max_amount=1, delay=2)
     else:
         tell_large_output(player, output)
 
