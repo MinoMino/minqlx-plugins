@@ -96,7 +96,7 @@ class servers(minqlx.Plugin):
 def reply_large_output(channel, output, max_amount=28, delay=0.4):
     """Replies with large output in small portions, as not to disconnected the player.
     :param channel: Channel to reply to.
-    :param output: Output to send to player.
+    :param output: Output to send to channel.
     :param max_amount: Max amount of lines to send at once.
     :param delay: Time to sleep between large inputs.
     """

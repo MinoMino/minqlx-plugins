@@ -103,9 +103,9 @@ class cleverbot(minqlx.Plugin):
     @minqlx.thread
     def post_data(self, path, text='', channel=None):
         """POSTs data to cleverbot.io
-        :param path: API path, either ask or create
-        :param text: Text to query the the bot with
-        :param channel: Channel to reply to(usually chat)
+        :param path: API path, either ask or create.
+        :param text: Text to query the the bot with.
+        :param channel: Channel to reply to(usually chat).
         """
         user = self.get_cvar("qlx_cleverbotUser")
         key = self.get_cvar("qlx_cleverbotKey")
@@ -128,8 +128,8 @@ class cleverbot(minqlx.Plugin):
     def callback(self, response, channel=None):
         """Responds to chat with the response from the bot.
         Called after data has been POSTed.
-        :param response: JSON data from cleverbot.io
-        :param channel: Channel to reply to
+        :param response: JSON data from cleverbot.io.
+        :param channel: Channel to reply to.
         """
         nick = self.get_cvar("qlx_cleverbotNick")
         if "response" in response:
