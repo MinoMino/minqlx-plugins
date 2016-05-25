@@ -188,7 +188,7 @@ def tell_player(player, output):
         tell_large_output(player, output)
 
 
-def tell_large_output(player, output, max_amount=28, delay=0.4):
+def tell_large_output(player, output, max_amount=25, delay=0.4):
     """Tells large output in small portions, as not to disconnected the player.
     :param player: Player to tell to.
     :param output: Output to send to player.

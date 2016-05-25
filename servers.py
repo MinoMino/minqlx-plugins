@@ -94,7 +94,7 @@ class servers(minqlx.Plugin):
             return "Error: Timed out", []
 
 
-def reply_large_output(channel, output, max_amount=28, delay=0.4):
+def reply_large_output(channel, output, max_amount=26, delay=0.4):
     """Replies with large output in small portions, as not to disconnected the player.
     :param channel: Channel to reply to.
     :param output: Output to send to channel.
