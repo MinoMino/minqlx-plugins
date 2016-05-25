@@ -2,9 +2,9 @@
 This is my plugins I have developed for [minqlx](https://github.com/MinoMino/minqlx).
 If you're looking for the QLRace plugins they are [here](https://github.com/QLRace/minqlx-plugins).
 
-If you have any questions/issues with these plugins, you can contact me(kanzo) on irc at
+If you have any suggestions or issues/problems with these plugins, you can contact me(kanzo) on irc at
 [#minqlbot on Quakenet](http://webchat.quakenet.org/?channels=minqlbot).
-Alternatively you can open an issue on this repository.
+Alternatively you can open an [issue](https://github.com/cstewart90/minqlx-plugins/issues) on this repository.
 
 ## Plugins
 This is a list of plugins and their cvars. Set the cvars by passing them as a command line argument or using `server.cfg`
