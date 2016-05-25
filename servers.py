@@ -3,6 +3,9 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
+# If you have any suggestions or issues/problems with this plugin you can contact me(kanzo) on irc at #minqlbot
+# or alternatively you can open an issue at https://github.com/cstewart90/minqlx-plugins/issues
+
 """
 Adds !servers command which shows status of servers.
 This plugin depends on python-valve which you can install with
