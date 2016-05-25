@@ -1,11 +1,21 @@
-# Based on x0rnns's checkplayers(https://github.com/x0rnn/minqlx-plugins/blob/master/checkplayers.py)
-# Completely rewritten to use scan_iter instead of keys.
-# http://redis.io/commands/scan
-#
-# LICENSE PREAMBLE GOES HERE
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# If you have any suggestions or issues/problems with this plugin you can contact me(kanzo) on irc at #minqlbot
+# or alternatively you can open an issue at https://github.com/cstewart90/minqlx-plugins/issues
 
 """
 BETA
+
+Based on x0rnns's checkplayers(https://github.com/x0rnn/minqlx-plugins/blob/master/checkplayers.py)
+Completely rewritten to use scan_iter instead of keys, and changed output to be a table.
+
+Why? http://redis.io/commands/SCAN
+"Since these commands allow for incremental iteration, returning only a small number of elements per call,
+they can be used in production without the downside of commands like KEYS or SMEMBERS that may block the
+server for a long time(even several seconds) when called against big collections of keys or elements"
 
 !permissions: shows all players with any permission level.
 !silenced: shows all silenced players
@@ -55,7 +65,7 @@ class checkplayers(minqlx.Plugin):
                       "^5{:^31} | {:^17} | {}".format("Name", "Steam ID", "Permission")]
             for p in sorted(players, key=itemgetter("permission"), reverse=True):
                 output.append("{name:31} | {steam_id:17} | {permission}".format(**p))
-            tell_large_output(player, output)
+            tell_player(player, output)
 
         permissions()
         return minqlx.RET_STOP_ALL
@@ -107,7 +117,7 @@ class checkplayers(minqlx.Plugin):
         output = ["^5{:^31} | {:^17} | {:^19} | {}".format("Name", "Steam ID", "Expires", "Reason")]
         for p in sorted(players, key=itemgetter("expires")):
             output.append("{name:31} | {steam_id:17} | {expires:19} | {reason}".format(**p))
-        tell_large_output(player, output)
+        tell_player(player, output)
 
     def cmd_leaver_banned(self, player, msg, channel):
         if not self.get_cvar("qlx_leaverBan", bool):
@@ -156,7 +166,7 @@ class checkplayers(minqlx.Plugin):
                   .format("Name", "Steam ID", "Left", "Completed", "Ratio")]
         for p in sorted(players, key=itemgetter("ratio", "left"), reverse=True):
             output.append("{name:31} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio}".format(**p))
-        tell_large_output(player, output)
+        tell_player(player, output)
 
     def player_name(self, steam_id):
         """Returns the latest name a player has used."""
@@ -170,6 +180,16 @@ class checkplayers(minqlx.Plugin):
         return name
 
 
+def tell_player(player, output):
+    """If player is DummyPlayer(IRC) then decrease max_amount
+    and delay. This is to stop the bot from getting disconnected
+    from QuakeNet due to flooding."""
+    if isinstance(player, minqlx.AbstractDummyPlayer):
+        tell_large_output(player, output, max_amount=1, delay=1.2)
+    else:
+        tell_large_output(player, output)
+
+
 def tell_large_output(player, output, max_amount=28, delay=0.4):
     """Tells large output in small portions, as not to disconnected the player.
     :param player: Player to tell to
@@ -179,6 +199,5 @@ def tell_large_output(player, output, max_amount=28, delay=0.4):
     """
     for count, line in enumerate(output, start=1):
         if count % max_amount == 0:
-            time.sleep(delay)  # increase if changing previous line does not help
-            player.tell(output[0])
+            time.sleep(delay)
         player.tell(line)
