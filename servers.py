@@ -48,11 +48,12 @@ class servers(minqlx.Plugin):
             player.tell("qlx_servers has an invalid server(empty string). Most likely due to trailing comma.")
             return minqlx.RET_STOP_ALL
 
-        if not self.get_cvar("qlx_serversShowInChat", bool) and not isinstance(player, minqlx.AbstractDummyPlayer):
-            self.get_servers(servers, minqlx.TellChannel(player), irc=True)
+        irc = isinstance(player, minqlx.AbstractDummyPlayer)
+        if not self.get_cvar("qlx_serversShowInChat", bool) and not irc:
+            self.get_servers(servers, minqlx.TellChannel(player))
             return minqlx.RET_STOP_ALL
 
-        self.get_servers(servers, channel)
+        self.get_servers(servers, channel, irc=irc)
 
     @minqlx.thread
     def get_servers(self, servers, channel, irc=False):
