@@ -1,9 +1,9 @@
-# minqlx-plugins
+# kanzo's minqlx-plugins
 This is my plugins I have developed for [minqlx](https://github.com/MinoMino/minqlx).
 If you're looking for the QLRace plugins they are [here](https://github.com/QLRace/minqlx-plugins).
 
-If you have any questions/issues with these plugins, you can contact via irc at
-[#minqlbot on Quakenet](http://webchat.quakenet.org/?channels=minqlbot), my nick is kanzo.
+If you have any questions/issues with these plugins, you can contact me(kanzo) on irc at
+[#minqlbot on Quakenet](http://webchat.quakenet.org/?channels=minqlbot).
 Alternatively you can open an issue on this repository.
 
 ## Plugins
@@ -11,6 +11,7 @@ This is a list of plugins and their cvars. Set the cvars by passing them as a co
 like you would with any other QLDS cvar.
 
 - **banvote**: Adds !banvote command to ban people from voting.
+- **checkplayers**: Shows all banned/silenced/leaverwarned/leaverbanned players.
 - **cleverbot**: Responds to !chat using cleverbot.io API.
   - `qlx_cleverbotUser`: cleverbot.io API User.
   - `qlx_cleverbotKey`: cleverbot.io API Key.
