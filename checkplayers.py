@@ -85,8 +85,8 @@ class checkplayers(minqlx.Plugin):
     @minqlx.thread
     def bans(self, player, ban_type):
         """Outputs all banned/silenced players.
-        :param player: player to tell to
-        :param ban_type: ban or silence
+        :param player: Player to tell to.
+        :param ban_type: ban or silence.
         """
         players = []
         for key in self.db.scan_iter("minqlx:players:765*:{}s".format(ban_type)):
@@ -134,8 +134,8 @@ class checkplayers(minqlx.Plugin):
     @minqlx.thread
     def leavers(self, player, action):
         """Outputs all leaver banned/warned players.
-        :param player: Player to tell to
-        :param action: warn or ban
+        :param player: Player to tell to.
+        :param action: warn or ban.
         """
         players = []
         for key in self.db.scan_iter("minqlx:players:765*:games_left"):
@@ -190,8 +190,8 @@ def tell_player(player, output):
 
 def tell_large_output(player, output, max_amount=28, delay=0.4):
     """Tells large output in small portions, as not to disconnected the player.
-    :param player: Player to tell to
-    :param output: Output to send to player
+    :param player: Player to tell to.
+    :param output: Output to send to player.
     :param max_amount: Max amount of lines to send at once.
     :param delay: Time to sleep between large inputs.
     """

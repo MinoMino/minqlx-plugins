@@ -93,14 +93,14 @@ class servers(minqlx.Plugin):
             return "Error: Timed out", []
 
 
-def reply_large_output(player, output, max_amount=28, delay=0.4):
+def reply_large_output(channel, output, max_amount=28, delay=0.4):
     """Replies with large output in small portions, as not to disconnected the player.
-    :param player: Player to tell to
-    :param output: Output to send to player
+    :param channel: Channel to reply to.
+    :param output: Output to send to channel.
     :param max_amount: Max amount of lines to send at once.
     :param delay: Time to sleep between large inputs.
     """
     for count, line in enumerate(output, start=1):
         if count % max_amount == 0:
             time.sleep(delay)
-        player.tell(line)
+        channel.reply(line)
