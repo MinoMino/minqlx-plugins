@@ -69,7 +69,7 @@ class banvote(minqlx.Plugin):
 
     def get_player(self, ident, channel):
         """Gets name and id a of player.
-        :param ident: Client or Steam ID
+        :param ident: Client or Steam ID.
         :param channel: Channel to reply to.
         """
         try:
