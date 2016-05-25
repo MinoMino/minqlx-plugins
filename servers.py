@@ -3,6 +3,9 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
+# If you have any suggestions or issues/problems with this plugin you can contact me(kanzo) on irc at #minqlbot
+# or alternatively you can open an issue at https://github.com/cstewart90/minqlx-plugins/issues
+
 """
 Adds !servers command which shows status of servers.
 This plugin depends on python-valve which you can install with
@@ -46,13 +49,13 @@ class servers(minqlx.Plugin):
             return minqlx.RET_STOP_ALL
 
         if not self.get_cvar("qlx_serversShowInChat", bool) and not isinstance(player, minqlx.AbstractDummyPlayer):
-            self.get_servers(servers, minqlx.TellChannel(player))
+            self.get_servers(servers, minqlx.TellChannel(player), irc=True)
             return minqlx.RET_STOP_ALL
 
         self.get_servers(servers, channel)
 
     @minqlx.thread
-    def get_servers(self, servers, channel):
+    def get_servers(self, servers, channel, irc=False):
         """Gets and outputs info for all servers in `qlx_servers`."""
         output = ["^5{:^21} | {:^63} | {}".format("IP", "sv_hostname", "Players")]
         for server in servers:
@@ -66,7 +69,11 @@ class servers(minqlx.Plugin):
                 players = "^1..."
 
             output.append("{:21} | {:63} | {}".format(server, hostname, players))
-        reply_large_output(channel, output)
+
+        if irc:
+            reply_large_output(channel, output, max_amount=1, delay=1.2)
+        else:
+            reply_large_output(channel, output)
 
     @staticmethod
     def get_server_info(server):
@@ -86,10 +93,14 @@ class servers(minqlx.Plugin):
             return "Error: Timed out", []
 
 
-def reply_large_output(channel, output):
-    """Tells large output in small portions, as not to disconnected the player."""
+def reply_large_output(player, output, max_amount=28, delay=0.4):
+    """Replies with large output in small portions, as not to disconnected the player.
+    :param player: Player to tell to
+    :param output: Output to send to player
+    :param max_amount: Max amount of lines to send at once.
+    :param delay: Time to sleep between large inputs.
+    """
     for count, line in enumerate(output, start=1):
-        if count % 30 == 0:  # decrease if someone getting disconnected
-            time.sleep(0.4)  # increase if changing previous line does not help
-            channel.reply(output[0])
-        channel.reply(line)
+        if count % max_amount == 0:
+            time.sleep(delay)
+        player.tell(line)
