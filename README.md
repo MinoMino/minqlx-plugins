@@ -109,6 +109,7 @@ and thus not have the client download them automatically.
   - `qlx_raceKey`: QLRace.com API Key.
 - **spec_delay**: Adds 8 seconds delay when going to from the free team to spectator and back to free.
 - **banvote**: Adds !banvote command to ban people from voting.
+- **checkplayers**: Shows all banned/silenced/leaverwarned/leaverbanned players.
 - **cleverbot**: Responds to !chat using cleverbot.io API.
   - `qlx_cleverbotUser`: cleverbot.io API User.
   - `qlx_cleverbotKey`: cleverbot.io API Key.
