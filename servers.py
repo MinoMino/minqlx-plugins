@@ -72,7 +72,7 @@ class servers(minqlx.Plugin):
             output.append("{:22} | {:62} | {}".format(server, hostname, players))
 
         if irc:
-            reply_large_output(channel, output, max_amount=1, delay=1.2)
+            reply_large_output(channel, output, max_amount=1, delay=2)
         else:
             reply_large_output(channel, output)
 
