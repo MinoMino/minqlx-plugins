@@ -11,6 +11,7 @@ import minqlx
 import random
 import re
 import requests
+import time
 from operator import itemgetter
 
 PARAMS = ({}, {"weapons": "false"}, {"physics": "classic"}, {"physics": "classic", "weapons": "false"})
@@ -68,6 +69,7 @@ class race(minqlx.Plugin):
         self.add_command(("goto", "tp"), self.cmd_goto, usage="<id>")
         self.add_command("savepos", self.cmd_savepos)
         self.add_command("loadpos", self.cmd_loadpos)
+        self.add_command("maps", self.cmd_maps, priority=minqlx.PRI_HIGH)
         self.add_command(("commands", "cmds", "help"), self.cmd_commands, priority=minqlx.PRI_HIGH)
 
         self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
@@ -579,10 +581,21 @@ class race(minqlx.Plugin):
             player.tell("Can't load position as spectator.")
         return minqlx.RET_STOP_ALL
 
+    def cmd_maps(self, player, msg, channel):
+        @minqlx.thread
+        def maps():
+            player.tell("List of maps:")
+            for count, map_name in enumerate(self.maps, start=1):
+                if count % 26 == 0:
+                    time.sleep(0.4)
+                player.tell(map_name)
+        maps()
+        return minqlx.RET_STOP_ALL
+
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
         channel.reply("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent "
-                      "!goto !savepos !loadpos")
+                      "!goto !savepos !loadpos !maps")
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
