@@ -7,8 +7,6 @@
 # or alternatively you can open an issue at https://github.com/cstewart90/minqlx-plugins/issues
 
 """
-BETA
-
 Based on x0rnns's checkplayers(https://github.com/x0rnn/minqlx-plugins/blob/master/checkplayers.py)
 Completely rewritten to use scan_iter instead of keys, and changed output to be a table.
 
