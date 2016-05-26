@@ -77,10 +77,8 @@ class checkplayers(minqlx.Plugin):
                     banned = self.plugins["silence"].is_silenced(steam_id)
 
                 if banned:
-                    if ban_type == "ban":
-                        expires, reason = banned
-                    else:
-                        expires, _, reason = banned
+                    expires = banned[0]
+                    reason = banned[-1]
                     name = self.player_name(steam_id)
                     players.append(dict(name=name, steam_id=steam_id, expires=str(expires), reason=reason))
 
@@ -109,8 +107,7 @@ class checkplayers(minqlx.Plugin):
                 steam_id = key.split(":")[2]
                 status = self.plugins["ban"].leave_status(steam_id)
                 if status and status[0] == action:
-                    _, ratio = status
-                    ratio = str(ratio)[:4]  # truncate float instead of rounding.
+                    ratio = str(status[1])[:4]  # truncate float instead of rounding.
                     name = self.player_name(steam_id)
                     left = self.db[key]
                     try:
