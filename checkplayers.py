@@ -123,7 +123,7 @@ class checkplayers(minqlx.Plugin):
             if players:
                 output = ["^5{:^31} | {:^17} | {} | {} | {}"
                           .format("Name", "Steam ID", "Left", "Completed", "Ratio")]
-                for p in sorted(players, key=itemgetter("ratio", "left"), reverse=True):
+                for p in sorted(players, key=itemgetter("ratio", "completed"), reverse=True):
                     output.append("{name:31} | {steam_id:17} | ^1{left:4} ^7| ^2{completed:9} ^7| {ratio}".format(**p))
                 checkplayers.callback(player, command, output)
             else:
