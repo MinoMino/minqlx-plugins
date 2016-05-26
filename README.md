@@ -1,4 +1,4 @@
-# kanzo's minqlx-plugins
+# kanzo's minqlx-plugins [![CodeClimate](https://codeclimate.com/github/cstewart90/minqlx-plugins/badges/gpa.svg)](https://codeclimate.com/github/cstewart90/minqlx-plugins)
 This is my plugins I have developed for [minqlx](https://github.com/MinoMino/minqlx).
 If you're looking for the QLRace plugins they are [here](https://github.com/QLRace/minqlx-plugins).
 
