@@ -351,7 +351,7 @@ class race(minqlx.Plugin):
 
     @minqlx.thread
     def old_top(self, map_name, command, amount, channel):  #
-        if "s" in command:
+        if command[1].lower() == "s":
             weapons = False
             mode = self.get_cvar("qlx_raceMode", int) + 1
         else:
@@ -464,7 +464,7 @@ class race(minqlx.Plugin):
         elif len(msg) > 2:
             return
 
-        if "s" in msg[0].lower():
+        if msg[0][1].lower() == "s":
             mode = self.get_cvar("qlx_raceMode", int) + 1
             strafe = "strafe "
         else:
@@ -656,7 +656,7 @@ class race(minqlx.Plugin):
         if not map_name:
             channel.reply("^2No map found for ^3{}. ^2If this is wrong, ^6!updatemaps".format(map_prefix))
             return minqlx.RET_STOP_EVENT
-        weapons = False if "s" in command.lower() else True
+        weapons = False if command[1].lower() == "s" else True
         return map_name, weapons
 
     def get_records(self, map_name, weapons):
