@@ -9,6 +9,7 @@
 """
 Based on x0rnns's checkplayers(https://github.com/x0rnn/minqlx-plugins/blob/master/checkplayers.py)
 Completely rewritten to use scan_iter instead of keys, and changed output to be a table.
+Also fixes IRC flooding and player getting disconnected with large outputs.
 
 Why? http://redis.io/commands/SCAN
 "Since these commands allow for incremental iteration, returning only a small number of elements per call,
