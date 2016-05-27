@@ -351,7 +351,7 @@ class race(minqlx.Plugin):
 
     @minqlx.thread
     def old_top(self, map_name, command, amount, channel):  #
-        if command[1].lower() == "s":
+        if "s" in command.lower():
             weapons = False
             mode = self.get_cvar("qlx_raceMode", int) + 1
         else:
