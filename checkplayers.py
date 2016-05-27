@@ -9,17 +9,18 @@
 """
 Based on x0rnns's checkplayers(https://github.com/x0rnn/minqlx-plugins/blob/master/checkplayers.py)
 Completely rewritten to use scan_iter instead of keys, and changed output to be a table.
+Also fixes IRC flooding and player getting disconnected with large outputs.
 
 Why? http://redis.io/commands/SCAN
 "Since these commands allow for incremental iteration, returning only a small number of elements per call,
 they can be used in production without the downside of commands like KEYS or SMEMBERS that may block the
 server for a long time(even several seconds) when called against big collections of keys or elements"
 
-!permissions: shows all players with any permission level.
-!silenced: shows all silenced players
-!banned: shows all banned players
-!leaverbanned: shows all players which are banned for leaving
-!leaverwarned: shows all players which are warned for leaving
+!permissions   - Shows all players with any permission level.
+!banned        - Shows all banned players.
+!silenced      - Shows all silenced players.
+!leaverbanned  - Shows all players which are banned for leaving.
+!leaverwarned  - Shows all players which are warned for leaving.
 """
 
 import minqlx
@@ -157,7 +158,7 @@ class checkplayers(minqlx.Plugin):
                 tell_large_output(player, output)
         else:
             if command == "permissions":
-                player.tell("There is no players with any permissions level.")
+                player.tell("There is no players with any permissions.")
             else:
                 player.tell("There is no {} players.".format(command))
 
