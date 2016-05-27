@@ -10,6 +10,12 @@
 Adds !servers command which shows status of servers.
 This plugin depends on python-valve which you can install with
 sudo python3.5 -m pip install python-valve
+
+!servers - Show status of servers.
+
+Cvars and their default values:
+qlx_servers ""            - List of servers to be shown. Example: "108.61.190.53:27960, il.qlrace.com:27961"
+qlx_serversShowInChat "0" - Whether to output to chat. If it is 0 it only tells the player who used !servers.
 """
 
 import minqlx

@@ -10,6 +10,16 @@
 You can talk to cleverbot using !chat and it will respond.
 The bot can also respond to chat randomly if you set `qlx_cleverbotChance`.
 Uses https://cleverbot.io API.
+
+!chat             - Chat to cleverbot!
+!create <nick>    - Create a bot.
+!chance [chance]  - Set chance that bot responds to chat. If you just do !chance it will output current chance.
+
+Cvars and their default values:
+qlx_cleverbotUser ""          - cleverbot.io API user.
+qlx_cleverbotKey ""           - cleverbot.io API key.
+qlx_cleverbotNick "Cleverbot" - Bot nick.
+qlx_cleverbotChance "0"       - Chance to respond to chat(0-1), 0.1 would be 10% of the time.
 """
 
 import minqlx
@@ -23,7 +33,7 @@ class cleverbot(minqlx.Plugin):
         self.add_hook("chat", self.handle_chat)
         self.add_command("create", self.cmd_create, 2, usage="<nick>")
         self.add_command("chat", self.cmd_chat, usage="<some text>")
-        self.add_command("chance", self.cmd_chance, 2, usage="<chance>")
+        self.add_command("chance", self.cmd_chance, 2, usage="[chance]")
 
         # Get an API key at cleverbot.io
         self.set_cvar_once("qlx_cleverbotUser", "")

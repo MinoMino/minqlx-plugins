@@ -15,11 +15,11 @@ Why? http://redis.io/commands/SCAN
 they can be used in production without the downside of commands like KEYS or SMEMBERS that may block the
 server for a long time(even several seconds) when called against big collections of keys or elements"
 
-!permissions: Shows all players with any permission level.
-!banned: Shows all banned players.
-!silenced: Shows all silenced players.
-!leaverbanned: Shows all players which are banned for leaving.
-!leaverwarned: Shows all players which are warned for leaving.
+!permissions   - Shows all players with any permission level.
+!banned        - Shows all banned players.
+!silenced      - Shows all silenced players.
+!leaverbanned  - Shows all players which are banned for leaving.
+!leaverwarned  - Shows all players which are warned for leaving.
 """
 
 import minqlx
