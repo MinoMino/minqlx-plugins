@@ -236,6 +236,17 @@ class race(minqlx.Plugin):
 
     def cmd_pb(self, player, msg, channel):
         """Outputs the player's personal best time for a map."""
+        @minqlx.thread
+        def pb(map_name):
+            records = self.get_records(map_name, weapons)
+            rank, time = records.pb(player.steam_id)
+            if not weapons:
+                map_name += "^2(strafe)"
+            if rank:
+                channel.reply(records.output(player, rank, time))
+            else:
+                channel.reply("^2No time found for ^7{} ^2on ^3{}".format(player, map_name))
+
         if len(msg) == 1:
             map_prefix = self.game.map.lower()
         elif len(msg) == 2:
@@ -244,23 +255,27 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
-        self.pb(map_name, weapons, player, channel)
-
-    @minqlx.thread
-    def pb(self, map_name, weapons, player, channel):
-        records = self.get_records(map_name, weapons)
-        rank, time = records.pb(player.steam_id)
-        if not weapons:
-            map_name += "^2(strafe)"
-        if rank:
-            channel.reply(records.output(player, rank, time))
-        else:
-            channel.reply("^2No time found for ^7{} ^2on ^3{}".format(player, map_name))
+        pb(map_name)
 
     def cmd_rank(self, player, msg, channel):
         """Outputs the x rank time for a map. Default rank
         if none is given is 1.
         """
+        @minqlx.thread
+        def get_rank(map_name):
+            records = self.get_records(map_name, weapons)
+            name, actual_rank, time = records.rank(rank)
+            if not weapons:
+                map_name += "^2(strafe)"
+            if time:
+                if actual_rank != rank:
+                    tied = True
+                else:
+                    tied = False
+                channel.reply(records.output(name, rank, time, tied))
+            else:
+                channel.reply("^2No rank ^3{} ^2time found on ^3{}".format(rank, map_name))
+
         if len(msg) == 1:
             rank = 1
             map_prefix = self.game.map.lower()
@@ -278,22 +293,7 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
-        self.rank(map_name, weapons, rank, channel)
-
-    @minqlx.thread
-    def rank(self, map_name, weapons, rank, channel):
-        records = self.get_records(map_name, weapons)
-        name, actual_rank, time = records.rank(rank)
-        if not weapons:
-            map_name += "^2(strafe)"
-        if time:
-            if actual_rank != rank:
-                tied = True
-            else:
-                tied = False
-            channel.reply(records.output(name, rank, time, tied))
-        else:
-            channel.reply("^2No rank ^3{} ^2time found on ^3{}".format(rank, map_name))
+        get_rank(map_name)
 
     def cmd_top(self, player, msg, channel):
         """Outputs top x amount of times for a map. Default amount
@@ -319,7 +319,7 @@ class race(minqlx.Plugin):
             channel.reply("^2Please use value <=20")
             return
 
-        if "!o" in msg[0] or msg[0].startswith("o"):
+        if msg[0][1].lower() == "o":
             map_name = self.map_prefix(map_prefix, old=True)
             if map_name not in self.old_maps:
                 channel.reply("^3{} ^2has no times on ql.leeto.fi".format(map_prefix))
@@ -385,6 +385,25 @@ class race(minqlx.Plugin):
         """Outputs the ranks and times of everyone on
         the server for a map.
         """
+        @minqlx.thread
+        def get_all(map_name):
+            records = self.get_records(map_name, weapons)
+            times = []
+            for p in self.players():
+                rank, time = records.pb(p.steam_id)
+                if rank:
+                    times.append({"name": p.name, "rank": rank, "time": race.time_string(time)})
+
+            if not weapons:
+                map_name += "^2(strafe)"
+            if times:
+                times_list = []
+                for time in sorted(times, key=itemgetter("rank")):
+                    times_list.append(" ^3{rank}. ^7{name} ^2{time}".format(**time))
+                self.output_times(map_name, times_list, channel)
+            else:
+                channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
+
         if len(msg) == 1:
             map_prefix = self.game.map
         elif len(msg) == 2:
@@ -393,29 +412,24 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
 
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
-        self.all(map_name, weapons, channel)
-
-    @minqlx.thread
-    def all(self, map_name, weapons, channel):
-        records = self.get_records(map_name, weapons)
-        times = []
-        for p in self.players():
-            rank, time = records.pb(p.steam_id)
-            if rank:
-                times.append({"name": p.name, "rank": rank, "time": race.time_string(time)})
-
-        if not weapons:
-            map_name += "^2(strafe)"
-        if times:
-            times_list = []
-            for time in sorted(times, key=itemgetter("rank")):
-                times_list.append(" ^3{rank}. ^7{name} ^2{time}".format(**time))
-            self.output_times(map_name, times_list, channel)
-        else:
-            channel.reply("^2No times were found for anyone on ^3{} ^2:(".format(map_name))
+        get_all(map_name)
 
     def cmd_ranktime(self, player, msg, channel):
         """Outputs which rank a time would be."""
+        @minqlx.thread
+        def ranktime(map_name):
+            records = self.get_records(map_name, weapons)
+            rank = records.rank_from_time(time)
+            last_rank = records.last_rank + 1
+            if not rank:
+                rank = last_rank
+
+            if not weapons:
+                map_name += "^2(strafe)"
+
+            channel.reply("^3{} ^2would be rank ^3{} ^2of ^3{} ^2on ^3{}"
+                          .format(race.time_string(time), rank, last_rank, map_name))
+
         if len(msg) == 1 and player.score != 2147483647 and player.score != 0:
             time = player.score
             map_prefix = self.game.map
@@ -430,24 +444,30 @@ class race(minqlx.Plugin):
             return
 
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
-        self.ranktime(map_name, weapons, time, channel)
-
-    @minqlx.thread
-    def ranktime(self, map_name, weapons, time, channel):
-        records = self.get_records(map_name, weapons)
-        rank = records.rank_from_time(time)
-        last_rank = records.last_rank + 1
-        if not rank:
-            rank = last_rank
-
-        if not weapons:
-            map_name += "^2(strafe)"
-
-        channel.reply("^3{} ^2would be rank ^3{} ^2of ^3{} ^2on ^3{}".format(race.time_string(time), rank,
-                                                                             last_rank, map_name))
+        ranktime(map_name)
 
     def cmd_avg(self, player, msg, channel):
         """Outputs a player average rank."""
+        @minqlx.thread
+        def avg():
+            """API Doc: https://qlrace.com/apidoc/1.0/records/player.html"""
+            try:
+                data = requests.get("https://qlrace.com/api/player/{}".format(player.steam_id),
+                                    params=PARAMS[mode]).json()
+            except requests.exceptions.RequestException as e:
+                self.logger.error(e)
+                return
+
+            name = data["name"]
+            total_maps = len(data["records"])
+            if name is not None and total_maps > 0:
+                avg = data["average"]
+                medals = data["medals"]
+                channel.reply("^7{} ^2average {}rank: ^3{:.2f}^2({} maps) ^71st: ^3{} ^72nd: ^3{} ^73rd: ^3{}"
+                              .format(player, strafe, avg, total_maps, medals[0], medals[1], medals[2]))
+            else:
+                channel.reply("^7{} ^2has no {}records :(".format(player, strafe))
+
         if len(msg) == 2:
             try:
                 i = int(msg[1])
@@ -470,27 +490,7 @@ class race(minqlx.Plugin):
         else:
             mode = self.get_cvar("qlx_raceMode", int)
             strafe = ""
-
-        self.avg(player, mode, strafe, channel)
-
-    @minqlx.thread
-    def avg(self, player, mode, strafe, channel):
-        """API Doc: https://qlrace.com/apidoc/1.0/records/player.html"""
-        try:
-            data = requests.get("https://qlrace.com/api/player/{}".format(player.steam_id), params=PARAMS[mode]).json()
-        except requests.exceptions.RequestException as e:
-            self.logger.error(e)
-            return
-
-        name = data["name"]
-        total_maps = len(data["records"])
-        if name is not None and total_maps > 0:
-            avg = data["average"]
-            medals = data["medals"]
-            channel.reply("^7{} ^2average {}rank: ^3{:.2f}^2({} maps) ^71st: ^3{} ^72nd: ^3{} ^73rd: ^3{}"
-                          .format(player, strafe, avg, total_maps, medals[0], medals[1], medals[2]))
-        else:
-            channel.reply("^7{} ^2has no {}records :(".format(player, strafe))
+        avg()
 
     def cmd_random_map(self, player, msg, channel):
         """Callvotes a random map."""
@@ -499,6 +499,18 @@ class race(minqlx.Plugin):
 
     def cmd_recent(self, player, msg, channel):
         """Outputs the most recent maps from QLRace.com"""
+        @minqlx.thread
+        def recent():
+            """API Doc: https://qlrace.com/apidoc/1.0/Maps/maps.html"""
+            try:
+                data = requests.get("https://qlrace.com/api/maps?sort=recent").json()
+            except requests.exceptions.RequestException as e:
+                self.logger.error(e)
+                return
+
+            maps = '^7, ^3'.join(data["maps"][:amount])
+            channel.reply("Most recent maps(by first record date): ^3{}".format(maps))
+
         amount = 10
         if len(msg) == 2:
             try:
@@ -510,20 +522,7 @@ class race(minqlx.Plugin):
                 return minqlx.RET_STOP_ALL
         elif len(msg) > 2:
             return minqlx.RET_USAGE
-
-        self.recent(channel, amount)
-
-    @minqlx.thread
-    def recent(self, channel, amount):
-        """API Doc: https://qlrace.com/apidoc/1.0/Maps/maps.html"""
-        try:
-            data = requests.get("https://qlrace.com/api/maps?sort=recent").json()
-        except requests.exceptions.RequestException as e:
-            self.logger.error(e)
-            return
-
-        maps = '^7, ^3'.join(data["maps"][:amount])
-        channel.reply("Most recent maps(by first record date): ^3{}".format(maps))
+        recent()
 
     def cmd_goto(self, player, msg, channel):
         """Go to a player's location.
