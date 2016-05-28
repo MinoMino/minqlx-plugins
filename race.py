@@ -36,8 +36,8 @@ GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df
                    "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
                    "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild", "hangtime",
                    "poptart", "blockworld", "raveroll", "ingus", "pea_impostor", "northrun", "timelock2", "climbworld",
-                   "snorjumpb1", "marvin", "caep4", "drtrixiipro", "timelock4")
-PLASMA = ("think1", "xproject", "plasmax", "sl1k_tetris_easy")
+                   "snorjumpb1", "marvin", "caep4", "drtrixiipro", "timelock4", "sl1k_tetris_easy")
+PLASMA = ("think1", "xproject", "plasmax")
 ROCKET = ("runstolfer", "charon", "charon_bw")
 GRENADE = ("grenadorade")
 
