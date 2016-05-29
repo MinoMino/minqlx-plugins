@@ -7,7 +7,7 @@
 # or alternatively you can open an issue at https://github.com/cstewart90/minqlx-plugins/issues
 
 """
-Based on x0rnns's checkplayers(https://github.com/x0rnn/minqlx-plugins/blob/master/checkplayers.py)
+Based on x0rnns's checkplayers(https://github.com/x0rnn/minqlx-plugins/blob/master/checkplayers.py).
 Completely rewritten to use scan_iter instead of keys, and changed output to be a table.
 Also fixes IRC flooding and player getting disconnected with large outputs.
 
@@ -128,7 +128,7 @@ class checkplayers(minqlx.Plugin):
                 checkplayers.callback(player, command, [])
 
         if not self.get_cvar("qlx_leaverBan", bool):
-            player.tell("Leaver ban is not enabled.")
+            player.tell("Leaver ban is not enabled(qlx_leaverBan).")
         else:
             command = msg[0][1:].lower()
             action = "ban" if command == "leaverbanned" else "warn"
