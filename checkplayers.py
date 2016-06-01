@@ -159,7 +159,7 @@ class checkplayers(minqlx.Plugin):
                 tell_large_output(player, output)
         else:
             if command == "permissions":
-                player.tell("There is no players with any permissions.")
+                player.tell("There is no players with > 1 permission level.")
             else:
                 player.tell("There is no {} players.".format(command))
 
