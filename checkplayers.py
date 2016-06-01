@@ -50,7 +50,7 @@ class checkplayers(minqlx.Plugin):
             for key in self.db.scan_iter("minqlx:players:765*:permission"):
                 steam_id = key.split(":")[2]
                 permission = int(self.db[key])
-                if permission > 1:
+                if permission >= 1:
                     name = self.player_name(steam_id)
                     players.append(dict(name=name, steam_id=steam_id, permission=permission))
 
