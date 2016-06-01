@@ -16,7 +16,7 @@ Why? http://redis.io/commands/SCAN
 they can be used in production without the downside of commands like KEYS or SMEMBERS that may block the
 server for a long time(even several seconds) when called against big collections of keys or elements"
 
-!permissions   - Shows all players with > 1 permission level.
+!permissions   - Shows all players with >= 1 permission level.
 !banned        - Shows all banned players.
 !silenced      - Shows all silenced players.
 !leaverbanned  - Shows all players which are banned for leaving.
@@ -42,7 +42,7 @@ class checkplayers(minqlx.Plugin):
         self.add_command(("leaverbanned", "leaverwarned"), self.cmd_leavers, 4)
 
     def cmd_permissions(self, player, msg, channel):
-        """Outputs all players with > 1 permission level.
+        """Outputs all players with >= 1 permission level.
         cmd_permission is not threaded so return minqlx.RET_STOP_ALL works."""
         @minqlx.thread
         def permissions():
@@ -159,7 +159,7 @@ class checkplayers(minqlx.Plugin):
                 tell_large_output(player, output)
         else:
             if command == "permissions":
-                player.tell("There is no players with > 1 permission level.")
+                player.tell("There is no players with >= 1 permission level.")
             else:
                 player.tell("There is no {} players.".format(command))
 
