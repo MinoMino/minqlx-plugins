@@ -180,6 +180,7 @@ class race(minqlx.Plugin):
                 return minqlx.RET_STOP_ALL
             elif map_name.lower() == "kozmini7":
                 player.tell("^3kozmini7 ^2is disabled for now(until it is updated).")
+                return minqlx.RET_STOP_ALL
 
     def handle_server_command(self, player, cmd):
         """Stops server printing powerup messages."""
