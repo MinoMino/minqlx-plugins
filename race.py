@@ -96,6 +96,7 @@ class race(minqlx.Plugin):
         """
         map_name = map_name.lower()
         self.brand_map(map_name)
+        self.get_maps()
         self.savepos = {}
         self.move_player = {}
 
@@ -164,8 +165,6 @@ class race(minqlx.Plugin):
             else:
                 self.set_cvar("g_respawn_delay_min", "10")
                 self.set_cvar("g_respawn_delay_max", "10")
-
-        self.get_maps()
 
     def handle_vote_called(self, player, vote, args):
         """Cancels the vote when a duplicated map is voted for."""
