@@ -157,7 +157,10 @@ class race(minqlx.Plugin):
                 self.set_cvar("g_startingWeapons", "3")
                 minqlx.load_plugin("puzzlemap")
             else:
-                minqlx.unload_plugin("puzzlemap")
+                try:
+                    minqlx.unload_plugin("puzzlemap")
+                except minqlx.PluginUnloadError:
+                    pass
 
             if map_name == "walkathon":
                 self.set_cvar("g_respawn_delay_min", "1000")
