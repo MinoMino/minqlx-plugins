@@ -178,6 +178,8 @@ class race(minqlx.Plugin):
             if map_name.lower() in disabled_maps:
                 player.tell("^3{} ^2is disabled(duplicate map).".format(map_name))
                 return minqlx.RET_STOP_ALL
+            elif map_name.lower() == "kozmini7":
+                player.tell("^3kozmini7 ^2is disabled for now(until it is updated).")
 
     def handle_server_command(self, player, cmd):
         """Stops server printing powerup messages."""
