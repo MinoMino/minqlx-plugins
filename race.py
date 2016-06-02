@@ -38,7 +38,8 @@ GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df
                    "poptart", "blockworld", "raveroll", "ingus", "pea_impostor", "northrun", "timelock2", "climbworld",
                    "snorjumpb1", "marvin", "caep4", "drtrixiipro", "timelock4", "sl1k_tetris_easy", "wraiths")
 PLASMA = ("think1", "xproject", "plasmax")
-ROCKET = ("runstolfer", "charon", "charon_bw")
+ROCKET = ("runstolfer", "charon", "charon_bw", "kozmini1", "kozmini2", "kozmini3", "kozmini4", "kozmini5", "kozmini6",
+          "kozmini7", "kozmini8")
 GRENADE = ("grenadorade")
 
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
