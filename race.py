@@ -198,8 +198,11 @@ class race(minqlx.Plugin):
         map_name = self.game.map.lower()
         if player.team == "free":
             player.is_alive = True
+
             if map_name == "wsm":
-                player.powerups(quad=99999)
+                player.powerups(quad=999999)
+            elif map_name in HASTE:
+                player.powerups(haste=999999)
         if player.steam_id in self.move_player and player.is_alive:
             if player.steam_id not in self.goto:
                 player.tell("^6Your time will not count, unless you kill yourself.")
@@ -208,9 +211,7 @@ class race(minqlx.Plugin):
             minqlx.set_position(player.id, self.move_player[player.steam_id])
             del self.move_player[player.steam_id]
 
-            if map_name in HASTE:
-                player.powerups(haste=9999)
-            elif map_name == "kraglejump":
+            if map_name == "kraglejump":
                 player.powerups(haste=60)  # some stages need haste and some don't, so 60 is a compromise...
             return
 
