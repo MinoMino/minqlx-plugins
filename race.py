@@ -12,7 +12,6 @@ import random
 import re
 import requests
 import time
-from operator import itemgetter
 
 PARAMS = ({}, {"weapons": "false"}, {"physics": "classic"}, {"physics": "classic", "weapons": "false"})
 OLDTOP_URL = "https://cdn.rawgit.com/QLRace/oldtop/master/oldtop/"
