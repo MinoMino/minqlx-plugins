@@ -70,6 +70,7 @@ class race(minqlx.Plugin):
         self.add_command("savepos", self.cmd_savepos)
         self.add_command("loadpos", self.cmd_loadpos)
         self.add_command("maps", self.cmd_maps, priority=minqlx.PRI_HIGH)
+        self.add_command(("haste", "removehaste"), self.cmd_haste)
         self.add_command(("commands", "cmds", "help"), self.cmd_commands, priority=minqlx.PRI_HIGH)
 
         self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
@@ -596,6 +597,19 @@ class race(minqlx.Plugin):
                     time.sleep(0.4)
                 player.tell(map_name)
         maps()
+        return minqlx.RET_STOP_ALL
+
+    def cmd_haste(self, player, msg, channel):
+        """Gives/removes haste on haste maps."""
+        if player.team == "spectator":
+            player.tell("You cannot use {} as a spectator!".format(msg[0]))
+            return minqlx.RET_STOP_ALL
+
+        if self.game.map.lower() in HASTE:
+            duration = 0 if "remove" in msg[0].lower() else 999999
+            player.powerups(haste=duration)
+        else:
+            player.tell("You cannot use {} on non haste maps.".format(msg[0]))
         return minqlx.RET_STOP_ALL
 
     def cmd_commands(self, player, msg, channel):
