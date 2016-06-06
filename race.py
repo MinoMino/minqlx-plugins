@@ -585,7 +585,7 @@ class race(minqlx.Plugin):
             else:
                 player.tell("^1You have to save your position first.")
         else:
-            player.tell("Can't load position as spectator.")
+            player.tell("^1Can't load position as spectator.")
         return minqlx.RET_STOP_ALL
 
     def cmd_maps(self, player, msg, channel):
@@ -602,20 +602,20 @@ class race(minqlx.Plugin):
     def cmd_haste(self, player, msg, channel):
         """Gives/removes haste on haste maps."""
         if player.team == "spectator":
-            player.tell("You cannot use {} as a spectator!".format(msg[0]))
+            player.tell("^1You cannot use ^3{} ^1as a spectator!".format(msg[0]))
             return minqlx.RET_STOP_ALL
 
         if self.game.map.lower() in HASTE:
             duration = 0 if "remove" in msg[0].lower() else 999999
             player.powerups(haste=duration)
         else:
-            player.tell("You cannot use {} on non haste maps.".format(msg[0]))
+            player.tell("^1You cannot use ^3{} ^1on non haste maps.".format(msg[0]))
         return minqlx.RET_STOP_ALL
 
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
         channel.reply("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent "
-                      "!goto !savepos !loadpos !maps")
+                      "!goto !savepos !loadpos !maps !haste !removehast")
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
