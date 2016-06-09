@@ -241,7 +241,6 @@ class race(minqlx.Plugin):
 
     def cmd_pb(self, player, msg, channel):
         """Outputs the player's personal best time for a map."""
-
         @minqlx.thread
         def pb(map_name):
             records = self.get_records(map_name, weapons)
@@ -267,7 +266,6 @@ class race(minqlx.Plugin):
         """Outputs the x rank time for a map. Default rank
         if none is given is 1.
         """
-
         @minqlx.thread
         def get_rank(map_name):
             records = self.get_records(map_name, weapons)
@@ -305,7 +303,8 @@ class race(minqlx.Plugin):
     def cmd_top(self, player, msg, channel):
         """Outputs top x amount of times for a map. Default amount
         if none is given is 3. Maximum amount is 20.
-        """
+        TODO: More detailed top which uses player.tell. !top vql/classic/pql/turbo.
+        Will probably reimplement everything from scratch."""
         amount = 3
         map_prefix = self.game.map
         if len(msg) == 2:
@@ -392,7 +391,6 @@ class race(minqlx.Plugin):
         """Outputs the ranks and times of everyone on
         the server for a map.
         """
-
         @minqlx.thread
         def get_all(map_name):
             records = self.get_records(map_name, weapons).records
@@ -421,7 +419,6 @@ class race(minqlx.Plugin):
 
     def cmd_ranktime(self, player, msg, channel):
         """Outputs which rank a time would be."""
-
         @minqlx.thread
         def ranktime(map_name):
             records = self.get_records(map_name, weapons)
@@ -454,7 +451,6 @@ class race(minqlx.Plugin):
 
     def cmd_avg(self, player, msg, channel):
         """Outputs a player average rank."""
-
         @minqlx.thread
         def avg():
             """API Doc: https://qlrace.com/apidoc/1.0/records/player.html"""
@@ -506,7 +502,6 @@ class race(minqlx.Plugin):
 
     def cmd_recent(self, player, msg, channel):
         """Outputs the most recent maps from QLRace.com"""
-
         @minqlx.thread
         def recent():
             """API Doc: https://qlrace.com/apidoc/1.0/Maps/maps.html"""
@@ -589,6 +584,7 @@ class race(minqlx.Plugin):
         return minqlx.RET_STOP_ALL
 
     def cmd_maps(self, player, msg, channel):
+        """Tells player list of all maps."""
         @minqlx.thread
         def maps():
             player.tell("List of maps:")
