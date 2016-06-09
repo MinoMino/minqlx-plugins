@@ -24,20 +24,13 @@ HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps
          "snorjumpb1", "snorjump2", "piyojump2")
 
 GAUNTLET_ONLY = ("k4n", "ndql")
-GAUNTLET_AND_MG = ("df_bardoklick", "df_bardoklickrevamped", "df_lickagain", "df_lickape", "df_lickcells",
-                   "df_lickcells2", "df_lickcorp", "df_lickdead", "df_lickdecease", "df_lickdirt", "df_lickevil",
-                   "df_lickfast", "df_lickfudge", "df_lickhossa", "df_lickhq", "df_lickhuar", "df_lickhuar2",
-                   "df_lickhuarstyle", "df_lickice", "df_lickmore", "df_lickmore2", "df_lickpads", "df_lickrevived",
-                   "df_lickrevived2", "df_licksux", "df_licktards", "df_licktunnel", "df_palmslane", "df_enz12",
-                   "df_ghostcheerslick", "df_ghostslickthis", "df_liquidazot", "df_pornstarlambaslick",
-                   "df_ghostcheerextended", "cpm_1", "cpm_2", "cpm_3", "cpm_4", "cpm_5", "cpm_6", "cpm_7", "cpm_8",
-                   "cpm_10", "vanilla_02", "vanilla_03", "vanilla_04", "vanilla_05", "vanilla_06", "vanilla_07",
-                   "vanilla_08", "vanilla_08", "vanilla_10", "df_o3jvelocity", "df_qsnrun", "df_handbreaker4",
-                   "df_piyofunjumps", "df_verihard", "df_luna", "df_etleague", "df_nodown", "df_extremepkr",
-                   "walkathon", "purpletorture", "sodomia", "r7_pyramid", "yellowtorture", "weirdwild", "hangtime",
-                   "poptart", "blockworld", "raveroll", "ingus", "pea_impostor", "northrun", "timelock2", "climbworld",
-                   "snorjumpb1", "marvin", "caep4", "drtrixiipro", "timelock4", "sl1k_tetris_easy", "wraiths")
-PLASMA = ("think1", "xproject", "plasmax")
+GAUNTLET_AND_MG = ("blockworld", "caep4", "climbworld", "df_etleague", "df_extremepkr", "df_handbreaker4", "df_lickape",
+                   "df_lickcells""df_lickcells2", "df_lickfudge", "df_lickhq", "df_lickrevived", "df_lickrevived2",
+                   "df_licksux", "df_nodown", "df_o3jvelocity", "df_palmslane", "df_piyofunjumps", "df_qsnrun",
+                   "df_verihard", "drtrixiipro", "hangtime", "ingus", "marvin", "northrun", "pea_impostor", "poptart",
+                   "purpletorture", "r7_pyramid", "raveroll", "sl1k_tetris_easy", "snorjumpb1", "sodomia", "timelock2",
+                   "timelock4", "vanilla_03", "vanilla_04", "vanilla_07", "vanilla_10", "walkathon", "weirdwild",
+                   "wraiths", "yellowtorture")
 ROCKET = ("runstolfer", "charon", "charon_bw", "kozmini1", "kozmini2", "kozmini3", "kozmini4", "kozmini5", "kozmini6",
           "kozmini7", "kozmini8", "jumpspace")
 GRENADE = ("grenadorade")
@@ -248,6 +241,7 @@ class race(minqlx.Plugin):
 
     def cmd_pb(self, player, msg, channel):
         """Outputs the player's personal best time for a map."""
+
         @minqlx.thread
         def pb(map_name):
             records = self.get_records(map_name, weapons)
@@ -273,6 +267,7 @@ class race(minqlx.Plugin):
         """Outputs the x rank time for a map. Default rank
         if none is given is 1.
         """
+
         @minqlx.thread
         def get_rank(map_name):
             records = self.get_records(map_name, weapons)
@@ -397,6 +392,7 @@ class race(minqlx.Plugin):
         """Outputs the ranks and times of everyone on
         the server for a map.
         """
+
         @minqlx.thread
         def get_all(map_name):
             records = self.get_records(map_name, weapons).records
@@ -425,6 +421,7 @@ class race(minqlx.Plugin):
 
     def cmd_ranktime(self, player, msg, channel):
         """Outputs which rank a time would be."""
+
         @minqlx.thread
         def ranktime(map_name):
             records = self.get_records(map_name, weapons)
@@ -457,6 +454,7 @@ class race(minqlx.Plugin):
 
     def cmd_avg(self, player, msg, channel):
         """Outputs a player average rank."""
+
         @minqlx.thread
         def avg():
             """API Doc: https://qlrace.com/apidoc/1.0/records/player.html"""
@@ -508,6 +506,7 @@ class race(minqlx.Plugin):
 
     def cmd_recent(self, player, msg, channel):
         """Outputs the most recent maps from QLRace.com"""
+
         @minqlx.thread
         def recent():
             """API Doc: https://qlrace.com/apidoc/1.0/Maps/maps.html"""
@@ -597,6 +596,7 @@ class race(minqlx.Plugin):
                 if count % 26 == 0:
                     time.sleep(0.4)
                 player.tell(map_name)
+
         maps()
         return minqlx.RET_STOP_ALL
 
