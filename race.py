@@ -31,6 +31,7 @@ GAUNTLET_AND_MG = ("blockworld", "caep4", "climbworld", "df_etleague", "df_extre
                    "purpletorture", "r7_pyramid", "raveroll", "sl1k_tetris_easy", "snorjumpb1", "sodomia", "timelock2",
                    "timelock4", "vanilla_03", "vanilla_04", "vanilla_07", "vanilla_10", "walkathon", "weirdwild",
                    "wraiths", "yellowtorture")
+PLASMA = ("think1", "xproject", "plasmax")
 ROCKET = ("runstolfer", "charon", "charon_bw", "kozmini1", "kozmini2", "kozmini3", "kozmini4", "kozmini5", "kozmini6",
           "kozmini7", "kozmini8", "jumpspace")
 GRENADE = ("grenadorade")
