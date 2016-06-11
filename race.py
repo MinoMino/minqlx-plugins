@@ -189,7 +189,8 @@ class race(minqlx.Plugin):
                 player.tell("^7Your time does not count because you used ^6!goto ^7or ^6!loadpos.")
 
     def handle_player_spawn(self, player):
-        """Move player to position if they used !goto/!loadpos, otherwise removes
+        """Spawns player instantly and gives quad/haste on some maps. Moves
+        player to position if they used !goto or !loadpos, otherwise removes
         player from goto dict."""
         map_name = self.game.map.lower()
         if player.team == "free":
@@ -204,8 +205,7 @@ class race(minqlx.Plugin):
                 player.tell("^6Your time will not count, unless you kill yourself.")
                 self.goto[player.steam_id] = player.score
 
-            minqlx.set_position(player.id, self.move_player[player.steam_id])
-            del self.move_player[player.steam_id]
+            minqlx.set_position(player.id, self.move_player.pop(player.steam_id))
 
             if map_name == "kraglejump":
                 player.powerups(haste=60)  # some stages need haste and some don't, so 60 is a compromise...
