@@ -217,13 +217,11 @@ class race(minqlx.Plugin):
             return
 
     def handle_player_disconnect(self, player, reason):
-        """Removes player from goto and savepos dicts when they disconnect"""
-        try:
-            del self.move_player[player.steam_id]
-            del self.goto[player.steam_id]
-            del self.savepos[player.steam_id]
-        except KeyError:
-            return
+        """Removes player from goto, savepos and move_player dicts when
+        they disconnect."""
+        self.goto.pop(player.steam_id, None)
+        self.savepos.pop(player.steam_id, None)
+        self.move_player.pop(player.steam_id, None)
 
     def handle_client_command(self, player, cmd):
         """Spawn player right away if they use /kill."""
