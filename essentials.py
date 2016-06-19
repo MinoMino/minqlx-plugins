@@ -50,7 +50,7 @@ class essentials(minqlx.Plugin):
         self.add_command(("unpause", "timein"), self.cmd_unpause, 1)
         self.add_command("slap", self.cmd_slap, 2, usage="<id> [damage]")
         self.add_command("slay", self.cmd_slay, 2, usage="<id>")
-        self.add_command("sounds", self.cmd_enable_sounds, usage="<0/1>")
+        self.add_command("sounds", self.cmd_enable_sounds, usage="<0/1>", client_cmd_perm=0)
         self.add_command("sound", self.cmd_sound, 1, usage="<path>")
         self.add_command("music", self.cmd_music, 1, usage="<path>")
         self.add_command("stopsound", self.cmd_stopsound, 1)
