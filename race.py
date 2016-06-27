@@ -164,6 +164,11 @@ class race(minqlx.Plugin):
                 self.set_cvar("g_respawn_delay_min", "10")
                 self.set_cvar("g_respawn_delay_max", "10")
 
+            if map_name == "pornstarghost3":
+                self.set_cvar("g_maxFlightFuel", "10000")
+            else:
+                self.set_cvar("g_maxFlightFuel", "16000")
+
     def handle_vote_called(self, player, vote, args):
         """Cancels the vote when a duplicated map is voted for."""
         if vote.lower() == "map" and len(args) > 0:
