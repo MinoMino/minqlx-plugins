@@ -393,7 +393,7 @@ class race(minqlx.Plugin):
         @minqlx.thread
         def get_all(map_name):
             records = self.get_records(map_name, weapons).records
-            players = set([p.steam_id for p in self.players()])
+            players = {p.steam_id for p in self.players()}
             times = []
             for record in records:
                 if record["player_id"] in players:
