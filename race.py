@@ -76,7 +76,8 @@ class race(minqlx.Plugin):
         self.move_player = {}  # Queued !goto/!loadto positions. {steam_id: position}
         self.goto = {}  # Players which have used !goto/!loadpos. {steam_id: score}
         self.savepos = {}  # Saved player positions. {steam_id: player.state.position}
-        self.frames = {}  # Number of frames since played used !timer. {steam_id: frames}
+        self.frame = {}  # The frame when player used !timer. {steam_id: frame}
+        self.current_frame = 0  # Number of frames the map has been playing for.
 
         self.maps = []
         self.old_maps = []
@@ -97,6 +98,7 @@ class race(minqlx.Plugin):
         self.get_maps()
         self.savepos = {}
         self.move_player = {}
+        self.current_frame = 0
 
         if factory in ("qlrace_turbo", "qlrace_classic"):
             if map_name in GAUNTLET_AND_MG:
@@ -220,7 +222,7 @@ class race(minqlx.Plugin):
             return
 
         self.goto.pop(player.steam_id, None)
-        self.frames.pop(player.steam_id, None)
+        self.frame.pop(player.steam_id, None)
 
     def handle_player_disconnect(self, player, reason):
         """Removes player from goto, savepos and move_player dicts when
@@ -228,7 +230,7 @@ class race(minqlx.Plugin):
         self.goto.pop(player.steam_id, None)
         self.savepos.pop(player.steam_id, None)
         self.move_player.pop(player.steam_id, None)
-        self.frames.pop(player.steam_id, None)
+        self.frame.pop(player.steam_id, None)
 
     def handle_client_command(self, player, cmd):
         """Spawn player right away if they use /kill."""
@@ -237,10 +239,11 @@ class race(minqlx.Plugin):
             return minqlx.RET_STOP_EVENT
 
     def handle_frame(self):
-        """Center prints timer if player used !timer."""
-        for p in self.frames:
-            self.frames[p] += 1
-            ms = self.frames[p] * 25
+        """Increment current frame and center_print timer if player used !timer."""
+        self.current_frame += 1
+
+        for p in self.frame:
+            ms = (self.current_frame - self.frame[p]) * 25
             self.player(p).center_print(race.time_string(ms))
 
     def cmd_disabled(self, player, msg, channel):
@@ -629,11 +632,11 @@ class race(minqlx.Plugin):
         else:
             if msg[0].startswith("!stop"):
                 try:
-                    del self.frames[player.steam_id]
+                    del self.frame[player.steam_id]
                 except KeyError:
                     player.tell("^1There is no timer started.")
             else:
-                self.frames[player.steam_id] = 0
+                self.frame[player.steam_id] = self.current_frame
         return minqlx.RET_STOP_ALL
 
     def cmd_commands(self, player, msg, channel):
