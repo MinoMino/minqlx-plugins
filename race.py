@@ -76,7 +76,7 @@ class race(minqlx.Plugin):
         self.move_player = {}  # Queued !goto/!loadto positions. {steam_id: position}
         self.goto = {}  # Players which have used !goto/!loadpos. {steam_id: score}
         self.savepos = {}  # Saved player positions. {steam_id: player.state.position}
-        self.frames = {}  # Number of frames since played used !starttimer. {steam_id: frames}
+        self.frames = {}  # Number of frames since played used !timer. {steam_id: frames}
 
         self.maps = []
         self.old_maps = []
@@ -237,7 +237,7 @@ class race(minqlx.Plugin):
             return minqlx.RET_STOP_EVENT
 
     def handle_frame(self):
-        """If player used !startimer, center_print timer."""
+        """Center prints timer if player used !timer."""
         for p in self.frames:
             self.frames[p] += 1
             ms = self.frames[p] * 25
