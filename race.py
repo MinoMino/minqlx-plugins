@@ -241,7 +241,7 @@ class race(minqlx.Plugin):
         for p in self.frames:
             self.frames[p] += 1
             ms = self.frames[p] * 25
-            self.player(p).center_print(self.plugins['race'].time_string(ms))
+            self.player(p).center_print(race.time_string(ms))
 
     def cmd_disabled(self, player, msg, channel):
         """Disables !slap and !slay."""
