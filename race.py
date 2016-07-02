@@ -50,6 +50,7 @@ class race(minqlx.Plugin):
         self.add_hook("player_spawn", self.handle_player_spawn)
         self.add_hook("player_disconnect", self.handle_player_disconnect)
         self.add_hook("client_command", self.handle_client_command)
+        self.add_hook("frame", self.handle_frame)
         self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
         self.add_command("updatemaps", self.cmd_updatemaps)
         self.add_command(("pb", "me", "spb", "sme", "p", "sp"), self.cmd_pb, usage="[map]")
@@ -66,6 +67,7 @@ class race(minqlx.Plugin):
         self.add_command("loadpos", self.cmd_loadpos)
         self.add_command("maps", self.cmd_maps, priority=minqlx.PRI_HIGH)
         self.add_command(("haste", "removehaste"), self.cmd_haste)
+        self.add_command(("timer", "starttimer", "stoptimer"), self.cmd_timer)
         self.add_command(("commands", "cmds", "help"), self.cmd_commands, priority=minqlx.PRI_HIGH)
 
         self.set_cvar_once("qlx_raceMode", "0")  # 0 = Turbo/PQL, 2 = Classic/VQL
@@ -74,6 +76,7 @@ class race(minqlx.Plugin):
         self.move_player = {}  # Queued !goto/!loadto positions. {steam_id: position}
         self.goto = {}  # Players which have used !goto/!loadpos. {steam_id: score}
         self.savepos = {}  # Saved player positions. {steam_id: player.state.position}
+        self.frames = {}  # Number of frames since played used !starttimer. {steam_id: frames}
 
         self.maps = []
         self.old_maps = []
@@ -216,10 +219,8 @@ class race(minqlx.Plugin):
                 player.powerups(haste=60)  # some stages need haste and some don't, so 60 is a compromise...
             return
 
-        try:
-            del self.goto[player.steam_id]
-        except KeyError:
-            return
+        self.goto.pop(player.steam_id, None)
+        self.frames.pop(player.steam_id, None)
 
     def handle_player_disconnect(self, player, reason):
         """Removes player from goto, savepos and move_player dicts when
@@ -227,12 +228,20 @@ class race(minqlx.Plugin):
         self.goto.pop(player.steam_id, None)
         self.savepos.pop(player.steam_id, None)
         self.move_player.pop(player.steam_id, None)
+        self.frames.pop(player.steam_id, None)
 
     def handle_client_command(self, player, cmd):
         """Spawn player right away if they use /kill."""
         if cmd == "kill" and player.team == "free":
             minqlx.player_spawn(player.id)
             return minqlx.RET_STOP_EVENT
+
+    def handle_frame(self):
+        """If player used !startimer, center_print timer."""
+        for p in self.frames:
+            self.frames[p] += 1
+            ms = self.frames[p] * 25
+            self.player(p).center_print(self.plugins['race'].time_string(ms))
 
     def cmd_disabled(self, player, msg, channel):
         """Disables !slap and !slay."""
@@ -613,10 +622,24 @@ class race(minqlx.Plugin):
             player.tell("^1You cannot use ^3{} ^1on non haste maps.".format(msg[0]))
         return minqlx.RET_STOP_ALL
 
+    def cmd_timer(self, player, msg, channel):
+        """Starts/stops personal timer."""
+        if player.team == "spectator":
+            player.tell("^1You need to join the game to use this command.")
+        else:
+            if msg[0].startswith("!stop"):
+                try:
+                    del self.frames[player.steam_id]
+                except KeyError:
+                    player.tell("^1There is no timer started.")
+            else:
+                self.frames[player.steam_id] = 0
+        return minqlx.RET_STOP_ALL
+
     def cmd_commands(self, player, msg, channel):
         """Outputs list of race commands."""
-        channel.reply("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent "
-                      "!goto !savepos !loadpos !maps !haste !removehast")
+        channel.reply("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent")
+        channel.reply("^3!goto !savepos !loadpos !maps !haste !removehaste !timer !stoptimer")
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
