@@ -247,12 +247,18 @@ class race(minqlx.Plugin):
             return minqlx.RET_STOP_EVENT
 
     def handle_frame(self):
-        """Increment current frame and center_print timer if player used !timer."""
+        """Increments current frame and center_prints timer to all
+        player who used !timer. Also removes player from goto dict if
+        they died(death event wasn't getting triggered)."""
         self.current_frame += 1
 
         for p in self.frame:
             ms = (self.current_frame - self.frame[p]) * 25
             self.player(p).center_print(race.time_string(ms))
+
+        for p in self.goto.keys():
+            if self.player(p).health <= 0:
+                del self.goto[p]
 
     def cmd_disabled(self, player, msg, channel):
         """Disables !slap and !slay."""
