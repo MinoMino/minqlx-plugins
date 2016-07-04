@@ -248,17 +248,16 @@ class race(minqlx.Plugin):
 
     def handle_frame(self):
         """Increments current frame and center_prints timer to all
-        player who used !timer. Also removes player from goto dict if
-        they died(death event wasn't getting triggered)."""
+        player who used !timer. Also removes player from goto/frame
+        dicts if they died(death event wasn't getting triggered)."""
         self.current_frame += 1
 
         for p in self.frame:
             ms = (self.current_frame - self.frame[p]) * 25
             self.player(p).center_print(race.time_string(ms))
 
-        for p in self.goto.keys():
-            if self.player(p).health <= 0:
-                del self.goto[p]
+        self.goto = self.remove_dead_players(self.goto)
+        self.frame = self.remove_dead_players(self.frame)
 
     def cmd_disabled(self, player, msg, channel):
         """Disables !slap and !slay."""
@@ -738,6 +737,10 @@ class race(minqlx.Plugin):
         """
         brand_map = "{} - {}".format(self.get_cvar("qlx_raceBrand"), map_name)
         minqlx.set_configstring(3, brand_map)
+
+    def remove_dead_players(self, dict_):
+        """Returns dict with dead players removed."""
+        return {p: score for p, score in dict_ if self.player(p).health > 0}
 
     @staticmethod
     def time_ms(time_string):
