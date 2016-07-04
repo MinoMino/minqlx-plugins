@@ -46,8 +46,8 @@ class race(minqlx.Plugin):
         self.add_hook("map", self.handle_map)
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("server_command", self.handle_server_command)
-        self.add_hook("stats", self.handle_stats)
-        self.add_hook("player_spawn", self.handle_player_spawn, minqlx.PRI_HIGHEST)
+        self.add_hook("stats", self.handle_stats, priority=minqlx.PRI_HIGHEST)
+        self.add_hook("player_spawn", self.handle_player_spawn, priority=minqlx.PRI_HIGHEST)
         self.add_hook("player_disconnect", self.handle_player_disconnect)
         self.add_hook("team_switch", self.handle_team_switch)
         self.add_hook("client_command", self.handle_client_command)
@@ -238,10 +238,12 @@ class race(minqlx.Plugin):
             self.frame.pop(player.steam_id, None)
 
     def handle_client_command(self, player, cmd):
-        """Spawn player right away if they use /kill."""
+        """Spawns player right away if they use /kill and
+        removes them from goto and frame dicts."""
         if cmd == "kill" and player.team == "free":
             minqlx.player_spawn(player.id)
             self.goto.pop(player.steam_id, None)
+            self.frame.pop(player.steam_id, None)
             return minqlx.RET_STOP_EVENT
 
     def handle_frame(self):
