@@ -47,8 +47,9 @@ class race(minqlx.Plugin):
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("server_command", self.handle_server_command)
         self.add_hook("stats", self.handle_stats)
-        self.add_hook("player_spawn", self.handle_player_spawn)
+        self.add_hook("player_spawn", self.handle_player_spawn, minqlx.PRI_HIGHEST)
         self.add_hook("player_disconnect", self.handle_player_disconnect)
+        self.add_hook("team_switch", self.handle_team_switch)
         self.add_hook("client_command", self.handle_client_command)
         self.add_hook("frame", self.handle_frame)
         self.add_command(("slap", "slay"), self.cmd_disabled, priority=minqlx.PRI_HIGH)
@@ -219,10 +220,6 @@ class race(minqlx.Plugin):
 
             if map_name == "kraglejump":
                 player.powerups(haste=60)  # some stages need haste and some don't, so 60 is a compromise...
-            return
-
-        self.goto.pop(player.steam_id, None)
-        self.frame.pop(player.steam_id, None)
 
     def handle_player_disconnect(self, player, reason):
         """Removes player from goto, savepos and move_player dicts when
@@ -232,10 +229,19 @@ class race(minqlx.Plugin):
         self.move_player.pop(player.steam_id, None)
         self.frame.pop(player.steam_id, None)
 
+    def handle_team_switch(self, player, old_team, new_team):
+        """Removes player from goto, move_player and frame dicts when
+        they spectate."""
+        if new_team == "spectator":
+            self.goto.pop(player.steam_id, None)
+            self.move_player.pop(player.steam_id, None)
+            self.frame.pop(player.steam_id, None)
+
     def handle_client_command(self, player, cmd):
         """Spawn player right away if they use /kill."""
         if cmd == "kill" and player.team == "free":
             minqlx.player_spawn(player.id)
+            self.goto.pop(player.steam_id, None)
             return minqlx.RET_STOP_EVENT
 
     def handle_frame(self):
