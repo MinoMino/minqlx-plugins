@@ -259,7 +259,7 @@ class race(minqlx.Plugin):
             self.player(p).center_print(race.time_string(ms))
 
         # makes new dict with dead players removed
-        self.goto = {p: score for p, score in self.goto if self.player(p).health > 0}
+        self.goto = {p: score for p, score in self.goto.items() if self.player(p).health > 0}
 
     def cmd_disabled(self, player, msg, channel):
         """Disables !slap and !slay."""
