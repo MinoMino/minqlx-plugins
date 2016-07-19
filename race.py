@@ -33,7 +33,7 @@ GAUNTLET_AND_MG = ("blockworld", "caep4", "climbworld", "df_etleague", "df_extre
                    "wraiths", "yellowtorture", "run139", "inder_inder", "quartz", "timelock3")
 PLASMA = ("think1", "xproject", "plasmax", "wub_junk")
 ROCKET = ("runstolfer", "charon", "charon_bw", "kozmini1", "kozmini2", "kozmini3", "kozmini4", "kozmini5", "kozmini6",
-          "kozmini7", "kozmini8", "jumpspace")
+          "kozmini7", "kozmini8", "jumpspace", "pgultimate")
 GRENADE = ("grenadorade")
 
 _RE_POWERUPS = re.compile(r'print ".+\^3 got the (Haste|Battle Suit|Quad Damage)!\^7\n"')
