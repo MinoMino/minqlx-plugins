@@ -21,7 +21,7 @@ HASTE = ("df_handbreaker4", "handbreaker4_long", "handbreaker", "df_piyofunjumps
          "bounce", "df_nodown", "df_etleague", "df_extremepkr", "labyrinth", "airmaxjumps", "sarcasmjump", "criclejump",
          "df_verihard", "cursed_temple", "skacharohuth", "randommap", "just_jump_2", "just_jump_3", "criclejump",
          "eatme", "wernerjump", "bloodydave", "tranquil", "et_map2", "et_map3", "et_map4", "et_map5", "zeel_ponpon",
-         "snorjumpb1", "snorjump2", "piyojump2", "woftct", "apex")
+         "snorjumpb1", "snorjump2", "piyojump2", "woftct", "apex", "runkull")
 
 GAUNTLET_ONLY = ("k4n", "ndql", "dfwc_xlarve")
 GAUNTLET_AND_MG = ("blockworld", "caep4", "climbworld", "df_etleague", "df_extremepkr", "df_handbreaker4", "df_lickape",
@@ -136,6 +136,9 @@ class race(minqlx.Plugin):
             elif map_name == "spiderman":
                 self.set_cvar("g_startingWeapons", "515")
                 self.set_cvar("g_infiniteAmmo", "0")
+            elif map_name == "runkull":
+                self.set_cvar("g_startingWeapons", "128")
+                self.set_cvar("g_infiniteAmmo", "1")
             else:
                 self.set_cvar("g_startingWeapons", "147")
                 self.set_cvar("g_infiniteAmmo", "1")
