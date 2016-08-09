@@ -23,7 +23,7 @@ class track_race(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("map", self.handle_map)
-        self.add_hook("stats", self.handle_stats)
+        self.add_hook("stats", self.handle_stats, minqlx.PRI_LOW)
 
         # QLRace.com API key.
         self.set_cvar_once("qlx_raceKey", "api_key_goes_here")
@@ -31,79 +31,61 @@ class track_race(minqlx.Plugin):
 
         try:
             self.map_name = self.game.map.lower()
-            self.enabled = self.check_race_mode()
+            self.enabled = self.valid_mode()
         except minqlx.NonexistentGameError:
             self.map_name = ""
             self.enabled = False
 
-    def check_race_mode(self):
-        """Checks whether the current game mode is race."""
-        if self.game.type_short == "race" and self.mode in (0, 2):
-            return True
-        else:
-            return False
-
     def handle_map(self, map_name, factory):
         """Checks race mode on map change."""
-        self.enabled = self.check_race_mode()
+        self.enabled = self.valid_mode()
 
     def handle_stats(self, stats):
         """Gets ZMQ stats."""
         if stats["TYPE"] == "PLAYER_RACECOMPLETE" and self.mode in (0, 2):
             self.enabled = True
             self.map_name = self.game.map.lower()
-        elif stats["TYPE"] == "PLAYER_STATS":
-            self.update_pb(stats)
+            if stats["DATA"]["WEAPONS_USED"]:
+                player = self.player(int(stats["DATA"]["STEAM_ID"]))
+                if player.score == stats["DATA"]["RACE_TIME"]:
+                    self.post_data(self.get_payload(stats["DATA"], self.mode, player.score))
+        elif stats["TYPE"] == "PLAYER_STATS" and self.enabled:
+            if stats["DATA"]["SCORE"] in (-1, 0, 2147483647):
+                return
 
-    @minqlx.thread
-    def update_pb(self, stats):
-        """Updates a players pb.
-        :param stats: ZMQ PLAYER_STATS
-        """
-        if not self.enabled:
-            return
+            weapons = track_race.weapons_used(stats["DATA"]["WEAPONS"])
+            mode = self.mode if weapons else self.mode + 1
+            self.post_data(self.get_payload(stats["DATA"], mode, stats["DATA"]["SCORE"]))
 
-        time = stats["DATA"]["SCORE"]
-        if time == -1 or time == 2147483647 or time == 0:
-            return
+    def valid_mode(self):
+        """Returns whether the current game type and race mode is valid."""
+        if self.game.type_short == "race" and self.mode in (0, 2):
+            return True
+        else:
+            return False
 
-        mode = self.get_mode(stats["DATA"]["WEAPONS"])
-        player_id = int(stats["DATA"]["STEAM_ID"])
-        name = re.sub(r"\^[0-9]", "", stats["DATA"]["NAME"])
-        match_guid = stats["DATA"]["MATCH_GUID"]
-        payload = {"map": self.map_name, "mode": mode, "player_id": player_id, "name": name,
-                   "time": time, "match_guid": match_guid}
-        record = self.post_data(payload)
-        if record:
-            if mode % 2 != 0:
-                strafe = " ^2(strafe)"
-            else:
-                strafe = ""
-
-            time = self.plugins["race"].time_string(abs(record["time_diff"]))
-            if record["rank"] == 1:
-                time_diff = "^0[^2-{}^0]".format(time)
-                self.msg("^7{} ^2just set a new ^3world record! {}{}".format(name, time_diff, strafe))
-            else:
-                time_diff = "^0[^1+{}^0]".format(time)
-                self.msg(
-                    "^7{} ^2set a new pb and is now rank ^3{} {}{}".format(name, record["rank"], time_diff, strafe))
-
-    def get_mode(self, weapon_stats):
-        """Returns the race mode of a player. 0 or 2 for weapons
-        and 1 or 3 for strafe.
+    @staticmethod
+    def weapons_used(weapon_stats):
+        """Returns whether the player used any knockback weapons.
         :param weapon_stats: ZMQ weapon stats
         """
         knockback_weapons = ("ROCKET", "PLASMA", "GRENADE", "BFG", "PROXMINE")
         for weapon in knockback_weapons:
             if weapon_stats[weapon]["S"] != 0:
-                return self.mode
+                return True
+        return False
 
-        return self.mode + 1
+    def get_payload(self, data, mode, time):
+        """Returns payload to post to QLRace.com."""
+        player_id = int(data["STEAM_ID"])
+        name = re.sub(r"\^[0-9]", "", data["NAME"])
+        return {"map": self.map_name, "mode": mode, "player_id": player_id, "name": name,
+                "time": time, "match_guid": data["MATCH_GUID"], "date": str(datetime.utcnow())}
 
+    @minqlx.thread
     def post_data(self, payload):
         """Posts record to QLRace.com. If there's any records
-        in redis list and qlrace.com is online it will recursively
+        in redis list and QLRace.com is online it will recursively
         call itself until all the records have been posted.
         :param payload: record data
         """
@@ -117,16 +99,25 @@ class track_race(minqlx.Plugin):
                 self.post_data(payload)
 
             if r.status_code == 200:
-                return r.json()
+                self.callback_pb(r.json())
         except requests.exceptions.RequestException as e:
             self.push_db(payload)
             self.logger.error(e)
             self.msg("^2Error, connecting to qlrace.com")
 
     def push_db(self, payload):
-        """Pushes record to redis list.
-        :param payload: record data
-        """
-        payload["date"] = str(datetime.utcnow())
-        record = json.dumps(payload)
-        self.db.lpush(RECORDS_KEY, record)
+        """Pushes payload to redis list."""
+        self.db.lpush(RECORDS_KEY, json.dumps(payload))
+
+    def callback_pb(self, record):
+        """Outputs new pb text to chat."""
+        strafe = " ^2(strafe)" if record["mode"] % 2 != 0 else ""
+
+        time = self.plugins["race"].time_string(abs(record["time_diff"]))
+        if record["rank"] == 1:
+            time_diff = "^0[^2-{}^0]".format(time)
+            self.msg("^7{} ^2just set a new ^3world record! {}{}".format(record["name"], time_diff, strafe))
+        else:
+            time_diff = "^0[^1+{}^0]".format(time)
+            self.msg("^7{} ^2set a new pb and is now rank ^3{} {}{}"
+                     .format(record["name"], record["rank"], time_diff, strafe))
