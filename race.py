@@ -397,7 +397,7 @@ class race(minqlx.Plugin):
                 elif record["rank"] > 1:
                     time_diff = "+{}".format(race.time_string(record["time"] - wr))
 
-                output.append("^2{:>2}. ^7{:30} ^2{:>9} ^1{:>10}"
+                output.append("^3{:>2}. ^7{:30} ^3{:>10} ^1{:>12}"
                               .format(record["rank"], record["name"], race.time_string(record["time"]), time_diff))
             except IndexError:
                 break
@@ -436,7 +436,7 @@ class race(minqlx.Plugin):
                 elif record["rank"] > 1:
                     time_diff = "+{}".format(race.time_string(record["time"] - wr))
 
-                output.append("^2{:>2}. ^7{:30} ^2{:>9} ^1{:>10}"
+                output.append("^3{:>2}. ^7{:30} ^3{:>10} ^1{:>12}"
                               .format(record["rank"], record["name"], race.time_string(record["time"]), time_diff))
             except IndexError:
                 break
