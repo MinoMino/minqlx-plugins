@@ -345,10 +345,10 @@ class race(minqlx.Plugin):
 
     def cmd_top(self, player, msg, channel):
         """Outputs top x amount of times for a map. Default amount
-        if none is given is 3. Maximum amount is 20.
-        TODO: More detailed top. !top vql/classic/pql/turbo.
+        if none is given is 10. Maximum amount is 20.
+        TODO: !top vql/classic/pql/turbo.
         Will probably reimplement everything from scratch."""
-        amount = 3
+        amount = 10
         map_prefix = self.game.map
         if len(msg) == 2:
             try:
@@ -387,16 +387,23 @@ class race(minqlx.Plugin):
             channel.reply("^2No times were found on ^3{}".format(map_name))
             return
 
-        times = []
+        output = ["^3{}".format(map_name)]
         for i in range(amount):
             try:
                 record = records.records[i]
-                times.append(
-                    " ^3{}. ^4{} ^2{}".format(record['rank'], record['name'], race.time_string(record['time'])))
+                if i == 0:
+                    wr = record["time"]
+                    time_diff = ""
+                elif record["rank"] > 1:
+                    time_diff = "+{}".format(race.time_string(record["time"] - wr))
+
+                output.append("^2{:>2}. ^7{:30} ^2{:>9} ^1{:>10}"
+                              .format(record["rank"], record["name"], race.time_string(record["time"]), time_diff))
             except IndexError:
                 break
 
-        self.output_times(map_name, times, channel)
+        for line in output:
+            channel.reply(line)
 
     @minqlx.thread
     def old_top(self, map_name, command, amount, channel):  #
@@ -419,16 +426,23 @@ class race(minqlx.Plugin):
             channel.reply("^2No old times were found on ^3{}".format(map_name))
             return
 
-        times = []
+        output = ["^3{}".format(map_name)]
         for i in range(amount):
             try:
                 record = records[i]
-                times.append(
-                    " ^3{}. ^4{} ^2{}".format(record['rank'], record['name'], race.time_string(record['time'])))
+                if i == 0:
+                    wr = record["time"]
+                    time_diff = ""
+                elif record["rank"] > 1:
+                    time_diff = "+{}".format(race.time_string(record["time"] - wr))
+
+                output.append("^2{:>2}. ^7{:30} ^2{:>9} ^1{:>10}"
+                              .format(record["rank"], record["name"], race.time_string(record["time"]), time_diff))
             except IndexError:
                 break
 
-        self.output_times(map_name, times, channel)
+        for line in output:
+            channel.reply(line)
 
     def cmd_all(self, player, msg, channel):
         """Outputs the ranks and times of everyone on
