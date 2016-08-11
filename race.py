@@ -346,7 +346,7 @@ class race(minqlx.Plugin):
     def cmd_top(self, player, msg, channel):
         """Outputs top x amount of times for a map. Default amount
         if none is given is 3. Maximum amount is 20.
-        TODO: More detailed top which uses player.tell. !top vql/classic/pql/turbo.
+        TODO: More detailed top. !top vql/classic/pql/turbo.
         Will probably reimplement everything from scratch."""
         amount = 3
         map_prefix = self.game.map
