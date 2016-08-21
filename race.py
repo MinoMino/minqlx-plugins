@@ -641,15 +641,14 @@ class race(minqlx.Plugin):
         return minqlx.RET_STOP_ALL
 
     def cmd_maps(self, player, msg, channel):
-        """Tells player list of all maps."""
+        """Tells player all the maps which have a record on QLRace.com.
+        Outputs in 4 columns so you are not spammed with 450+ lines in console."""
         @minqlx.thread
         def maps():
-            player.tell("List of maps:")
-            for count, map_name in enumerate(self.maps, start=1):
-                if count % 26 == 0:
+            for i, (a, b, c, d) in enumerate(zip(maps[::4], maps[1::4], maps[2::4], maps[3::4])):
+                if (i + 1) % 26 == 0:
                     time.sleep(0.4)
-                player.tell(map_name)
-
+                player.tell('{:<23} {:<23} {:<23} {:<}'.format(a, b, c, d))
         maps()
         return minqlx.RET_STOP_ALL
 
