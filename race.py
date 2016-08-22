@@ -687,10 +687,10 @@ class race(minqlx.Plugin):
                 self.frame[player.steam_id] = self.current_frame
         return minqlx.RET_STOP_ALL
 
-    def cmd_commands(self, *_, channel):
+    def cmd_commands(self, *_):
         """Outputs list of race commands."""
-        channel.reply("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent")
-        channel.reply("^3!goto !savepos !loadpos !maps !haste !removehaste !timer !stoptimer")
+        self.msg("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent")
+        self.msg("^3!goto !savepos !loadpos !maps !haste !removehaste !timer !stoptimer")
         return minqlx.RET_STOP_ALL
 
     def output_times(self, map_name, times, channel):
