@@ -117,7 +117,7 @@ class race(minqlx.Plugin):
                 self.set_cvar("g_startingWeapons", "1")
                 self.set_cvar("g_infiniteAmmo", "0")
             elif map_name in PLASMA:
-                self.set_cvar("g_startingWeapons", "131")
+                self.set_cvar("g_startingWfeapons", "131")
                 self.set_cvar("g_infiniteAmmo", "1")
             elif map_name in ROCKET:
                 self.set_cvar("g_startingWeapons", "19")
@@ -645,7 +645,7 @@ class race(minqlx.Plugin):
         Outputs in 4 columns so you are not spammed with 450+ lines in console."""
         @minqlx.thread
         def maps():
-            for i, (a, b, c, d) in enumerate(zip(maps[::4], maps[1::4], maps[2::4], maps[3::4])):
+            for i, (a, b, c, d) in enumerate(zip(self.maps[::4], self.maps[1::4], self.maps[2::4], self.maps[3::4])):
                 if (i + 1) % 26 == 0:
                     time.sleep(0.4)
                 player.tell('{:<23} {:<23} {:<23} {:<}'.format(a, b, c, d))
