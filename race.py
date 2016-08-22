@@ -68,7 +68,7 @@ class race(minqlx.Plugin):
         self.add_command(("goto", "tp"), self.cmd_goto, usage="<id>")
         self.add_command("savepos", self.cmd_savepos)
         self.add_command("loadpos", self.cmd_loadpos)
-        self.add_command("maps", self.cmd_maps, priority=minqlx.PRI_HIGH)
+        self.add_command("maps", self.cmd_maps, usage="[prefix]", priority=minqlx.PRI_HIGH)
         self.add_command(("haste", "removehaste"), self.cmd_haste)
         self.add_command(("timer", "starttimer", "stoptimer"), self.cmd_timer)
         self.add_command(("commands", "cmds", "help"), self.cmd_commands, priority=minqlx.PRI_HIGH)
@@ -117,7 +117,7 @@ class race(minqlx.Plugin):
                 self.set_cvar("g_startingWeapons", "1")
                 self.set_cvar("g_infiniteAmmo", "0")
             elif map_name in PLASMA:
-                self.set_cvar("g_startingWeapons", "131")
+                self.set_cvar("g_startingWfeapons", "131")
                 self.set_cvar("g_infiniteAmmo", "1")
             elif map_name in ROCKET:
                 self.set_cvar("g_startingWeapons", "19")
@@ -641,16 +641,23 @@ class race(minqlx.Plugin):
         return minqlx.RET_STOP_ALL
 
     def cmd_maps(self, player, msg, channel):
-        """Tells player list of all maps."""
+        """Tells player all the maps which have a record on QLRace.com.
+        Outputs in 4 columns so you are not spammed with 450+ lines in console."""
         @minqlx.thread
-        def maps():
-            player.tell("List of maps:")
-            for count, map_name in enumerate(self.maps, start=1):
-                if count % 26 == 0:
+        def output_maps():
+            for i, (a, b, c, d) in enumerate(zip(maps[::4], maps[1::4], maps[2::4], maps[3::4])):
+                if (i + 1) % 26 == 0:
                     time.sleep(0.4)
-                player.tell(map_name)
+                player.tell('{:<23} {:<23} {:<23} {:<}'.format(a, b, c, d))
 
-        maps()
+        if len(msg) <= 1:
+            maps = self.maps
+        else:
+            maps = [x for x in self.maps if x.startswith(msg[1].lower())]
+            if not maps:
+                player.tell("^6There is no maps which match that prefix.")
+                return minqlx.RET_STOP_ALL
+        output_maps()
         return minqlx.RET_STOP_ALL
 
     def cmd_haste(self, player, msg, channel):
