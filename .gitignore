@@ -1,2 +1,6 @@
+minqlx/
+.idea/
 *.pyc
 test.py
+puzzlemap.py
+

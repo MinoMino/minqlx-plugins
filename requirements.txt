@@ -2,3 +2,4 @@ redis
 hiredis
 requests
 pyzmq
+python-valve
