@@ -1,4 +1,5 @@
-# minqlx-plugins
+# minqlx-plugins [![Code Health](https://landscape.io/github/QLRace/minqlx-plugins/master/landscape.svg?style=flat)](https://landscape.io/github/QLRace/minqlx-plugins/master)
+
 This is a collection of plugins for [minqlx](https://github.com/MinoMino/minqlx).
 The Python dependencies are included in requirements.txt. Make sure you do a
 `python3.5 -m pip install -r requirements.txt` first. `pyzmq` and `hiredis` might
