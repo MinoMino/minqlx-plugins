@@ -197,7 +197,7 @@ class race(minqlx.Plugin):
                 player.tell("^3{} ^2is disabled(duplicate map).".format(map_name))
                 return minqlx.RET_STOP_ALL
 
-    def handle_server_command(self, player, cmd):
+    def handle_server_command(self, _, cmd):
         """Stops server printing powerup messages."""
         if _RE_POWERUPS.fullmatch(cmd):
             return minqlx.RET_STOP_EVENT
@@ -235,7 +235,7 @@ class race(minqlx.Plugin):
 
         self.frame.pop(player.steam_id, None)
 
-    def handle_player_disconnect(self, player, reason):
+    def handle_player_disconnect(self, player, _):
         """Removes player from goto, savepos and move_player dicts when
         they disconnect."""
         self.goto.pop(player.steam_id, None)
@@ -243,7 +243,7 @@ class race(minqlx.Plugin):
         self.move_player.pop(player.steam_id, None)
         self.frame.pop(player.steam_id, None)
 
-    def handle_team_switch(self, player, old_team, new_team):
+    def handle_team_switch(self, player, _, new_team):
         """Removes player from goto, move_player and frame dicts when
         they spectate."""
         if new_team == "spectator":
@@ -273,12 +273,12 @@ class race(minqlx.Plugin):
         # makes new dict with dead players removed
         self.goto = {p: score for p, score in self.goto.items() if self.player(p).health > 0}
 
-    def cmd_disabled(self, player, msg, channel):
+    def cmd_disabled(self, player, msg, _):
         """Disables !slap and !slay."""
         player.tell("^6{} ^7is disabled".format(msg[0]))
         return minqlx.RET_STOP_ALL
 
-    def cmd_updatemaps(self, player, msg, channel):
+    def cmd_updatemaps(self, *_):
         """Updates list of race maps"""
         self.get_maps()
 
@@ -305,7 +305,7 @@ class race(minqlx.Plugin):
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
         pb(map_name)
 
-    def cmd_rank(self, player, msg, channel):
+    def cmd_rank(self, _, msg, channel):
         """Outputs the x rank time for a map. Default rank
         if none is given is 1.
         """
@@ -343,7 +343,7 @@ class race(minqlx.Plugin):
         map_name, weapons = self.get_map_name_weapons(map_prefix, msg[0], channel)
         get_rank(map_name)
 
-    def cmd_top(self, player, msg, channel):
+    def cmd_top(self, _, msg, channel):
         """Outputs top x amount of times for a map. Default amount
         if none is given is 10. Maximum amount is 20.
         TODO: !top vql/classic/pql/turbo.
@@ -406,7 +406,7 @@ class race(minqlx.Plugin):
             channel.reply(line)
 
     @minqlx.thread
-    def old_top(self, map_name, command, amount, channel):  #
+    def old_top(self, map_name, command, amount, channel):
         if "s" in command.lower():
             weapons = False
             mode = self.get_cvar("qlx_raceMode", int) + 1
@@ -444,7 +444,7 @@ class race(minqlx.Plugin):
         for line in output:
             channel.reply(line)
 
-    def cmd_all(self, player, msg, channel):
+    def cmd_all(self, _, msg, channel):
         """Outputs the ranks and times of everyone on
         the server for a map.
         """
@@ -552,7 +552,7 @@ class race(minqlx.Plugin):
             strafe = ""
         avg()
 
-    def cmd_random_map(self, player, msg, channel):
+    def cmd_random_map(self, player, *_):
         """Callvotes a random map."""
         map_name = random.choice(self.maps)
         minqlx.client_command(player.id, "cv map {}".format(map_name))
@@ -584,7 +584,7 @@ class race(minqlx.Plugin):
             return minqlx.RET_USAGE
         recent()
 
-    def cmd_goto(self, player, msg, channel):
+    def cmd_goto(self, player, msg, _):
         """Go to a player's location.
         Player needs to kill themselves/rejoin for a time to count."""
         map_name = self.game.map.lower()
@@ -618,7 +618,7 @@ class race(minqlx.Plugin):
             self.move_player[player.steam_id] = target_player.state.position
             minqlx.player_spawn(player.id)  # respawn player so he can't cheat
 
-    def cmd_savepos(self, player, msg, channel):
+    def cmd_savepos(self, player, *_):
         """Saves current position."""
         if player.team != "spectator":
             # add player to savepos dict
@@ -628,7 +628,7 @@ class race(minqlx.Plugin):
             player.tell("Can't save position as spectator.")
         return minqlx.RET_STOP_ALL
 
-    def cmd_loadpos(self, player, msg, channel):
+    def cmd_loadpos(self, player, *_):
         """Loads saved position."""
         if player.team != "spectator":
             if player.steam_id in self.savepos:
@@ -640,7 +640,7 @@ class race(minqlx.Plugin):
             player.tell("^1Can't load position as spectator.")
         return minqlx.RET_STOP_ALL
 
-    def cmd_maps(self, player, msg, channel):
+    def cmd_maps(self, player, msg, _):
         """Tells player all the maps which have a record on QLRace.com.
         Outputs in 4 columns so you are not spammed with 450+ lines in console."""
         @minqlx.thread
@@ -660,7 +660,7 @@ class race(minqlx.Plugin):
         output_maps()
         return minqlx.RET_STOP_ALL
 
-    def cmd_haste(self, player, msg, channel):
+    def cmd_haste(self, player, msg, _):
         """Gives/removes haste on haste maps."""
         if player.team == "spectator":
             player.tell("^1You cannot use ^3{} ^1as a spectator!".format(msg[0]))
@@ -673,7 +673,7 @@ class race(minqlx.Plugin):
             player.tell("^1You cannot use ^3{} ^1on non haste maps.".format(msg[0]))
         return minqlx.RET_STOP_ALL
 
-    def cmd_timer(self, player, msg, channel):
+    def cmd_timer(self, player, msg, _):
         """Starts/stops personal timer."""
         if player.team == "spectator":
             player.tell("^1You need to join the game to use this command.")
@@ -687,7 +687,7 @@ class race(minqlx.Plugin):
                 self.frame[player.steam_id] = self.current_frame
         return minqlx.RET_STOP_ALL
 
-    def cmd_commands(self, player, msg, channel):
+    def cmd_commands(self, *_, channel):
         """Outputs list of race commands."""
         channel.reply("Commands: ^3!(s)pb !(s)rank !(s)top !old(s)top !(s)all !(s)ranktime !(s)avg !randommap !recent")
         channel.reply("^3!goto !savepos !loadpos !maps !haste !removehaste !timer !stoptimer")
