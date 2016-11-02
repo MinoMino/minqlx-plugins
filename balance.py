@@ -60,7 +60,7 @@ class balance(minqlx.Plugin):
         self.in_countdown = False
 
         self.set_cvar_once("qlx_balanceUseLocal", "1")
-        self.set_cvar_once("qlx_balanceUrl", "qlstats.net:8080")
+        self.set_cvar_once("qlx_balanceUrl", "qlstats.net")
         self.set_cvar_once("qlx_balanceAuto", "1")
         self.set_cvar_once("qlx_balanceMinimumSuggestionDiff", "25")
         self.set_cvar_once("qlx_balanceApi", "elo")
