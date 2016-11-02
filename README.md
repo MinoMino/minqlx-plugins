@@ -98,3 +98,6 @@ like you usually do with race.
 and thus not have the client download them automatically.
   - `qlx_workshopReferences`: A comma-separated list of workshop IDs for items you want to force the client to download.
   Use this for custom resources, such as sounds packs and whatnot.
+
+## Contribute
+If you create pull requests, please try to not deviate from the coding style of the plugins (e.g. don't use camelCase variable names and stuff like that), and please create the PR against the develop branch of the repository.
