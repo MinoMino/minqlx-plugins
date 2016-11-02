@@ -31,6 +31,7 @@ class silence(minqlx.Plugin):
         self.add_hook("player_loaded", self.handle_player_loaded)
         self.add_hook("player_disconnect", self.handle_player_disconnect)
         self.add_hook("client_command", self.handle_client_command, priority=minqlx.PRI_HIGH)
+        self.add_hook("userinfo", self.handle_userinfo, priority=minqlx.PRI_HIGH)
         self.add_command("silence", self.cmd_silence, 2, usage="<id> <length> seconds|minutes|hours|days|... [reason]")
         self.add_command("unsilence", self.cmd_unsilence, 2, usage="<id>")
         self.add_command("checksilence", self.cmd_checksilence, usage="<id>")
@@ -75,6 +76,13 @@ class silence(minqlx.Plugin):
                 repeat_command()
 
             return minqlx.RET_STOP_ALL
+
+    def handle_userinfo(self, player, changed):
+        if player.steam_id not in self.silenced:
+            return
+        elif "name" in changed:
+            changed["name"] = player.name.rstrip("^7")
+            return changed
 
     def cmd_silence(self, player, msg, channel):
         """Mutes a player temporarily. A very long period works for all intents and
