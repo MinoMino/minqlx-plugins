@@ -66,6 +66,8 @@ class essentials(minqlx.Plugin):
         self.add_command("blue", self.cmd_blue, 1, usage="<id>")
         self.add_command(("spectate", "spec", "spectator"), self.cmd_spectate, 1, usage="<id>")
         self.add_command("free", self.cmd_free, 1, usage="<id>")
+        self.add_command("lock", self.cmd_lock, 2, usage="<team/all>")
+        self.add_command("unlock", self.cmd_unlock, 2, usage="<team/all>")
         self.add_command("addmod", self.cmd_addmod, 5, usage="<id>")
         self.add_command("addadmin", self.cmd_addadmin, 5, usage="<id>")
         self.add_command("demote", self.cmd_demote, 5, usage="<id>")
@@ -530,6 +532,36 @@ class essentials(minqlx.Plugin):
 
         target_player.put("free")
 
+    def cmd_lock(self, player, msg, channel):
+        """Lock a team/all teams."""
+        if len(msg) < 2:
+            return minqlx.RET_USAGE
+
+        if msg in ("red", "r"):
+            self.lock("red")
+        elif msg in ("blue", "b"):
+            self.lock("blue")
+        elif msg == "all":
+            self.lock("red")
+            self.lock("blue")
+        else:
+            return minqlx.RET_USAGE
+
+    def cmd_unlock(self, player, msg, channel):
+        """Unlock a team/all teams."""
+        if len(msg) < 2:
+            return minqlx.RET_USAGE
+
+        if msg in ("red", "r"):
+            self.unlock("red")
+        elif msg in ("blue", "b"):
+            self.unlock("blue")
+        elif msg == "all":
+            self.unlock("red")
+            self.unlock("blue")
+        else:
+            return minqlx.RET_USAGE
+        
     def cmd_addmod(self, player, msg, channel):
         """Give a player mod status."""
         if len(msg) < 2:
@@ -871,3 +903,4 @@ class essentials(minqlx.Plugin):
             out += ("{0}Map: {1:25} Factories: {2}\n"
                 .format(" " * indent, m, ", ".join(val for val in self.mappool[m])))
         player.tell(out.rstrip("\n"))
+
