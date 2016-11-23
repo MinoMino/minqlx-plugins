@@ -563,7 +563,7 @@ class essentials(minqlx.Plugin):
         target_player.addadmin()
 
     def cmd_demote(self, player, msg, channel):
-        """Remove admin status from someone."""
+        """Remove admin/mod status from someone."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
 
@@ -576,7 +576,7 @@ class essentials(minqlx.Plugin):
             channel.reply("Invalid ID.")
             return
 
-        target_player.demote()
+        target_player.privileges = None
 
     def cmd_mute(self, player, msg, channel):
         """Mute a player."""
