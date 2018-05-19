@@ -123,6 +123,8 @@ class balance(minqlx.Plugin):
 
         attempts = 0
         last_status = 0
+        untracked_sids = []
+
         while attempts < MAX_ATTEMPTS:
             attempts += 1
             url = self.api_url + "+".join([str(sid) for sid in players])
@@ -170,9 +172,11 @@ class balance(minqlx.Plugin):
                     self.ratings[sid][players[sid]] = {"games": -1, "elo": DEFAULT_RATING, "local": False, "time": time.time()}
 
             # Setting ratings for untracked players.
+            if "untracked" in js:
+                untracked_sids = list(map( lambda sid: int(sid), js["untracked"]))
+
             for gt in SUPPORTED_GAMETYPES:
-                for sid in js["untracked"]:
-                  sid = int(sid)
+                for sid in untracked_sids:
                   with self.ratings_lock:
                       if sid not in self.ratings:
                           self.ratings[sid] = {}
