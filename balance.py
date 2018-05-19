@@ -185,19 +185,29 @@ class balance(minqlx.Plugin):
             break
 
         if attempts == MAX_ATTEMPTS:
-            self.handle_ratings_fetched(request_id, last_status)
+            self.handle_ratings_fetched(request_id, last_status, untracked_sids)
             return
 
-        self.handle_ratings_fetched(request_id, requests.codes.ok)
+        self.handle_ratings_fetched(request_id, requests.codes.ok, untracked_sids)
 
     @minqlx.next_frame
-    def handle_ratings_fetched(self, request_id, status_code):
+    def handle_ratings_fetched(self, request_id, status_code, untracked_sids):
         players, callback, channel, args = self.requests[request_id]
         del self.requests[request_id]
         if status_code != requests.codes.ok:
             # TODO: Put a couple of known errors here for more detailed feedback.
             channel.reply("ERROR {}: Failed to fetch ratings.".format(status_code))
         else:
+            if len(untracked_sids):
+                untracked_players = list( map(
+                    lambda player: "^6" + player.name,
+                    filter(
+                        lambda player: player.steam_id in untracked_sids,
+                        self.players()
+                    )
+                ))
+                if len(untracked_players):
+                    channel.reply("^1WARNING^7: Untracked players detected: {}. ^7Setting rating {}...".format(", ".join(untracked_players), UNTRACKED_RATING))
             callback(players, channel, *args)
 
     def add_request(self, players, callback, channel, *args):
@@ -209,7 +219,7 @@ class balance(minqlx.Plugin):
             self.fetch_ratings(players, req)
         else:
             # All players were cached, so we tell it to go ahead and call the callbacks.
-            self.handle_ratings_fetched(req, requests.codes.ok)
+            self.handle_ratings_fetched(req, requests.codes.ok, [])
 
     def remove_cached(self, players):
         with self.ratings_lock:
