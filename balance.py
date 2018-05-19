@@ -29,6 +29,7 @@ RATING_KEY = "minqlx:players:{0}:ratings:{1}" # 0 == steam_id, 1 == short gamety
 MAX_ATTEMPTS = 3
 CACHE_EXPIRE = 60*10 # 10 minutes TTL.
 DEFAULT_RATING = 1500
+UNTRACKED_RATING = 9999
 SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm")
 # Externally supported game types. Used by !getrating for game types the API works with.
 EXT_SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm", "duel", "ffa")
@@ -167,6 +168,15 @@ class balance(minqlx.Plugin):
                     if sid not in self.ratings:
                         self.ratings[sid] = {}
                     self.ratings[sid][players[sid]] = {"games": -1, "elo": DEFAULT_RATING, "local": False, "time": time.time()}
+
+            # Setting ratings for untracked players.
+            for gt in SUPPORTED_GAMETYPES:
+                for sid in js["untracked"]:
+                  sid = int(sid)
+                  with self.ratings_lock:
+                      if sid not in self.ratings:
+                          self.ratings[sid] = {}
+                      self.ratings[sid][gt] = {"games": -1, "elo": UNTRACKED_RATING, "local": False, "time": time.time()}
 
             break
 
