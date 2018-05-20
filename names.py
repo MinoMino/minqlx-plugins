@@ -93,6 +93,7 @@ class names(minqlx.Plugin):
             return minqlx.RET_STOP_ALL
 
         self.name_set = True
+        name = "^7" + name
         player.name = name
         self.db[name_key] = name
         player.tell("The name has been registered. To make me forget about it, a simple ^6{}name^7 will do it."
