@@ -201,7 +201,7 @@ class balance(minqlx.Plugin):
                 pass
 
     @minqlx.next_frame
-    def handle_ratings_fetched(self, request_id, status_code, untracked_sids):
+    def handle_ratings_fetched(self, request_id, status_code, untracked_sids = []):
         players, callback, channel, args = self.requests[request_id]
         del self.requests[request_id]
         if status_code != requests.codes.ok:
@@ -240,7 +240,7 @@ class balance(minqlx.Plugin):
             self.fetch_ratings(players, req)
         else:
             # All players were cached, so we tell it to go ahead and call the callbacks.
-            self.handle_ratings_fetched(req, requests.codes.ok, [])
+            self.handle_ratings_fetched(req, requests.codes.ok)
 
     def remove_cached(self, players):
         with self.ratings_lock:
