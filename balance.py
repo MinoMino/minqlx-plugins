@@ -208,27 +208,33 @@ class balance(minqlx.Plugin):
             # TODO: Put a couple of known errors here for more detailed feedback.
             channel.reply("ERROR {}: Failed to fetch ratings.".format(status_code))
         else:
-            if len(untracked_sids):
-                untracked_players = list(filter(
-                    lambda player: player.steam_id in untracked_sids,
+            def sids_to_players(sids):
+                return list(filter(
+                    lambda player: player.steam_id in sids,
                     self.players()
                 ))
-                untracked_players_names = list( map(
+
+            def players_to_names(players):
+                return list( map(
                     lambda player: "^6" + player.name,
-                    untracked_players
+                    players
                 ))
-                if len(untracked_players):
-                    if self.get_cvar("qlx_balanceKickUntracked", bool):
-                        future_action = "Kicking them..."
 
-                        @minqlx.delay(2)
-                        def f():
-                            self.kick_massive(untracked_sids, "Untracked players not allowed")
-                        f()
+            untracked_players = sids_to_players(untracked_sids)
+            untracked_players_names = players_to_names(untracked_players)
+            if len(untracked_players):
+                if self.get_cvar("qlx_balanceKickUntracked", bool):
+                    future_action = "Kicking them..."
 
-                    else:
-                        future_action = "Setting rating {}...".format(UNTRACKED_RATING)
-                    channel.reply("^1WARNING^7: Untracked players detected: {}. ^7{}".format(", ^6".join(untracked_players_names), future_action))
+                    @minqlx.delay(2)
+                    def f():
+                        self.kick_massive(untracked_sids, "Untracked players not allowed")
+                    f()
+
+                else:
+                    future_action = "Setting rating {}...".format(UNTRACKED_RATING)
+                channel.reply("^1WARNING^7: Untracked players detected: {}. ^7{}".format(", ^6".join(untracked_players_names), future_action))
+
             callback(players, channel, *args)
 
     def add_request(self, players, callback, channel, *args):
