@@ -66,6 +66,7 @@ class balance(minqlx.Plugin):
         self.set_cvar_once("qlx_balanceMinimumSuggestionDiff", "25")
         self.set_cvar_once("qlx_balanceApi", "elo")
         self.set_cvar_once("qlx_balanceKickUntracked", "0")
+        self.set_cvar_once("qlx_balanceKickNonPublic", "0")
 
         self.use_local = self.get_cvar("qlx_balanceUseLocal", bool)
         self.api_url = "http://{}/{}/".format(self.get_cvar("qlx_balanceUrl"), self.get_cvar("qlx_balanceApi"))
@@ -125,6 +126,7 @@ class balance(minqlx.Plugin):
         attempts = 0
         last_status = 0
         untracked_sids = []
+        nonpublic_sids = []
 
         while attempts < MAX_ATTEMPTS:
             attempts += 1
@@ -176,6 +178,11 @@ class balance(minqlx.Plugin):
             if "untracked" in js:
                 untracked_sids = list(map( lambda sid: int(sid), js["untracked"]))
 
+            # Setting ratings for nonpublic players.
+            if "playerinfo" in js:
+                nonpublic_sids = [int(player) for player in js["playerinfo"]
+                                    if js["playerinfo"][player]["privacy"] in ["anonymous", "private"]]
+
             for gt in SUPPORTED_GAMETYPES:
                 for sid in untracked_sids:
                   with self.ratings_lock:
@@ -186,10 +193,10 @@ class balance(minqlx.Plugin):
             break
 
         if attempts == MAX_ATTEMPTS:
-            self.handle_ratings_fetched(request_id, last_status, untracked_sids)
+            self.handle_ratings_fetched(request_id, last_status, untracked_sids, nonpublic_sids)
             return
 
-        self.handle_ratings_fetched(request_id, requests.codes.ok, untracked_sids)
+        self.handle_ratings_fetched(request_id, requests.codes.ok, untracked_sids, nonpublic_sids)
 
     def kick_massive(self, player_sids_to_kick, reason):
         for sid in player_sids_to_kick:
@@ -201,7 +208,7 @@ class balance(minqlx.Plugin):
                 pass
 
     @minqlx.next_frame
-    def handle_ratings_fetched(self, request_id, status_code, untracked_sids = []):
+    def handle_ratings_fetched(self, request_id, status_code, untracked_sids = [], nonpublic_sids = []):
         players, callback, channel, args = self.requests[request_id]
         del self.requests[request_id]
         if status_code != requests.codes.ok:
@@ -235,6 +242,17 @@ class balance(minqlx.Plugin):
                 else:
                     future_action = "Setting rating {}...".format(UNTRACKED_RATING)
                 channel.reply("^1WARNING^7: Untracked players detected: {}. ^7{}".format(", ^6".join(untracked_players_names), future_action))
+
+            nonpublic_players = sids_to_players(nonpublic_sids)
+            if len(nonpublic_players) and self.get_cvar("qlx_balanceKickNonPublic", bool):
+                nonpublic_players_names = players_to_names(nonpublic_players)
+
+                @minqlx.delay(2)
+                def g():
+                    self.kick_massive(nonpublic_sids, "You need to set your qlstats.net privacy to: PUBLIC")
+                g()
+
+                channel.reply("^1WARNING^7: Nonpublic players detected: {}. ^7Kicking them...".format(", ^6".join(nonpublic_players_names)))
 
             callback(players, channel, *args)
 
