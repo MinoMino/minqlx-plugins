@@ -221,8 +221,9 @@ class balance(minqlx.Plugin):
                 ))
 
             untracked_players = sids_to_players(untracked_sids)
-            untracked_players_names = players_to_names(untracked_players)
             if len(untracked_players):
+                untracked_players_names = players_to_names(untracked_players)
+
                 if self.get_cvar("qlx_balanceKickUntracked", bool):
                     future_action = "Kicking them..."
 
