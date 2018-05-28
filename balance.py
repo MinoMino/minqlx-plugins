@@ -191,6 +191,15 @@ class balance(minqlx.Plugin):
 
         self.handle_ratings_fetched(request_id, requests.codes.ok, untracked_sids)
 
+    def kick_massive(self, player_sids_to_kick, reason):
+        for sid in player_sids_to_kick:
+            try:
+                if sid in self.ratings:
+                    del self.ratings[sid]
+                self.kick(sid, reason)
+            except:
+                pass
+
     @minqlx.next_frame
     def handle_ratings_fetched(self, request_id, status_code, untracked_sids):
         players, callback, channel, args = self.requests[request_id]
@@ -214,13 +223,7 @@ class balance(minqlx.Plugin):
 
                         @minqlx.delay(2)
                         def f():
-                            for sid in untracked_sids:
-                                try:
-                                    if sid in self.ratings:
-                                        del self.ratings[sid]
-                                    self.kick(sid, "Untracked players not allowed")
-                                except:
-                                    pass
+                            self.kick_massive(untracked_sids, "Untracked players not allowed")
                         f()
 
                     else:
