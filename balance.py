@@ -104,11 +104,21 @@ class balance(minqlx.Plugin):
             f()
 
     def handle_player_disconnect(self, player, reason):
+        self.clean_player_data(player)
+
+    @minqlx.thread
+    def clean_player_data(self, player):
+        for p in self.players().copy():
+            if p.steam_id == player.steam_id and p.id != player.id:
+                # there is a second client with same steam id
+                return
+
         if player.steam_id in self.player_info:
             del self.player_info[player.steam_id]
 
-        if player.steam_id in self.ratings:
-            del self.ratings[player.steam_id]
+        with self.ratings_lock:
+            if player.steam_id in self.ratings:
+                del self.ratings[player.steam_id]
 
     @minqlx.thread
     def fetch_ratings(self, players, request_id):
