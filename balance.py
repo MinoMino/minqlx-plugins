@@ -67,7 +67,6 @@ class balance(minqlx.Plugin):
         self.set_cvar_once("qlx_balanceAuto", "1")
         self.set_cvar_once("qlx_balanceMinimumSuggestionDiff", "25")
         self.set_cvar_once("qlx_balanceApi", "elo")
-        self.set_cvar_once("qlx_balanceKickUntracked", "0")
 
         self.use_local = self.get_cvar("qlx_balanceUseLocal", bool)
         self.api_url = "http://{}/{}/".format(self.get_cvar("qlx_balanceUrl"), self.get_cvar("qlx_balanceApi"))
@@ -197,56 +196,19 @@ class balance(minqlx.Plugin):
             break
 
         if attempts == MAX_ATTEMPTS:
-            self.handle_ratings_fetched(request_id, last_status, untracked_sids)
+            self.handle_ratings_fetched(request_id, last_status)
             return
 
-        self.handle_ratings_fetched(request_id, requests.codes.ok, untracked_sids)
-
-    def kick_massive(self, player_sids_to_kick, reason):
-        for sid in player_sids_to_kick:
-            try:
-                if sid in self.ratings:
-                    del self.ratings[sid]
-                self.kick(sid, reason)
-            except:
-                pass
+        self.handle_ratings_fetched(request_id, requests.codes.ok)
 
     @minqlx.next_frame
-    def handle_ratings_fetched(self, request_id, status_code, untracked_sids = []):
+    def handle_ratings_fetched(self, request_id, status_code):
         players, callback, channel, args = self.requests[request_id]
         del self.requests[request_id]
         if status_code != requests.codes.ok:
             # TODO: Put a couple of known errors here for more detailed feedback.
             channel.reply("ERROR {}: Failed to fetch ratings.".format(status_code))
         else:
-            def sids_to_players(sids):
-                return list(filter(
-                    lambda player: player.steam_id in sids,
-                    self.players()
-                ))
-
-            def players_to_names(players):
-                return list( map(
-                    lambda player: "^6" + player.name,
-                    players
-                ))
-
-            untracked_players = sids_to_players(untracked_sids)
-            if len(untracked_players):
-                untracked_players_names = players_to_names(untracked_players)
-
-                if self.get_cvar("qlx_balanceKickUntracked", bool):
-                    future_action = "Kicking them..."
-
-                    @minqlx.delay(2)
-                    def f():
-                        self.kick_massive(untracked_sids, "Untracked players not allowed")
-                    f()
-
-                else:
-                    future_action = "Setting rating {}...".format(UNTRACKED_RATING)
-                channel.reply("^1WARNING^7: Untracked players detected: {}. ^7{}".format(", ^6".join(untracked_players_names), future_action))
-
             callback(players, channel, *args)
 
     def add_request(self, players, callback, channel, *args):
