@@ -53,6 +53,8 @@ class balance(minqlx.Plugin):
         self.ratings_lock = threading.RLock()
         # Keys: steam_id - Items: {"ffa": {"elo": 123, "games": 321, "local": False}, ...}
         self.ratings = {}
+        # Keys: steam_id - Items: {"deactivated": true/false, "ratings": {...}, "allowRating": true/false, "privacy": "public/private/anonymous/untracked"}
+        self.player_info = {}
         # Keys: request_id - Items: (players, callback, channel)
         self.requests = {}
         self.request_counter = itertools.count()
@@ -182,6 +184,15 @@ class balance(minqlx.Plugin):
                       if sid not in self.ratings:
                           self.ratings[sid] = {}
                       self.ratings[sid][gt] = {"games": -1, "elo": UNTRACKED_RATING, "local": False, "time": time.time()}
+
+            # Saving player info
+            try:
+                for player, data in js["playerinfo"].items():
+                    sid = int(player)
+                    self.player_info[sid] = js["playerinfo"][player]
+                    self.player_info[sid]["time"] = time.time()
+            except KeyError:
+                pass
 
             break
 
