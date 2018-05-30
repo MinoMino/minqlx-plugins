@@ -41,6 +41,7 @@ class balance(minqlx.Plugin):
         self.add_hook("round_countdown", self.handle_round_countdown)
         self.add_hook("round_start", self.handle_round_start)
         self.add_hook("vote_ended", self.handle_vote_ended)
+        self.add_hook("player_disconnect", self.handle_player_disconnect)
         self.add_command(("setrating", "setelo"), self.cmd_setrating, 3, usage="<id> <rating>")
         self.add_command(("getrating", "getelo", "elo"), self.cmd_getrating, usage="<id> [gametype]")
         self.add_command(("remrating", "remelo"), self.cmd_remrating, 3, usage="<id>")
@@ -101,6 +102,13 @@ class balance(minqlx.Plugin):
                 players = dict([(p.steam_id, gt) for p in players["red"] + players["blue"]])
                 self.add_request(players, self.callback_balance, minqlx.CHAT_CHANNEL)
             f()
+
+    def handle_player_disconnect(self, player, reason):
+        if player.steam_id in self.player_info:
+            del self.player_info[player.steam_id]
+
+        if player.steam_id in self.ratings:
+            del self.ratings[player.steam_id]
 
     @minqlx.thread
     def fetch_ratings(self, players, request_id):
