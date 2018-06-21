@@ -28,6 +28,7 @@ _re_haha_yeah_haha = re.compile(r"^haha(?:ha)?,? yeah?,? haha\W?$", flags=re.IGN
 _re_yeah_hahaha = re.compile(r"^yeah?,? haha(?:ha)\W?$", flags=re.IGNORECASE)
 _re_duahahaha = re.compile(r"^duahaha(?:ha)?\W?$", flags=re.IGNORECASE)
 _re_hahaha = re.compile(r"hahaha", flags=re.IGNORECASE)
+_re_haahaahaa = re.compile(r"haahaahaa", flags=re.IGNORECASE)
 _re_glhf = re.compile(r"^(?:gl ?hf\W?)|(?:hf\W?)|(?:gl hf\W?)", flags=re.IGNORECASE)
 _re_f3 = re.compile(r"^(?:(?:press )?f3)|ready(?: up)?\W?", flags=re.IGNORECASE)
 _re_welcome = re.compile(r"^welcome to (?:ql|quake live)\W?$", flags=re.IGNORECASE)
@@ -88,6 +89,8 @@ class fun(minqlx.Plugin):
             self.play_sound("sound/player/keel/taunt.wav")
         elif _re_hahaha.search(msg):
             self.play_sound("sound/player/santa/taunt.wav")
+        elif _re_haahaahaa.search(msg):
+            self.play_sound("sound/player/visor/taunt.wav")
         elif _re_glhf.match(msg):
             self.play_sound("sound/vo/crash_new/39_01.wav")
         elif _re_f3.match(msg):

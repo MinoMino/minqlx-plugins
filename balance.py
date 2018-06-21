@@ -27,11 +27,12 @@ from minqlx.database import Redis
 
 RATING_KEY = "minqlx:players:{0}:ratings:{1}" # 0 == steam_id, 1 == short gametype.
 MAX_ATTEMPTS = 3
-CACHE_EXPIRE = 60*30 # 30 minutes TTL.
+CACHE_EXPIRE = 60*10 # 10 minutes TTL.
 DEFAULT_RATING = 1500
-SUPPORTED_GAMETYPES = ("ca", "ctf", "dom", "ft", "tdm")
+UNTRACKED_RATING = 9999
+SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm")
 # Externally supported game types. Used by !getrating for game types the API works with.
-EXT_SUPPORTED_GAMETYPES = ("ca", "ctf", "dom", "ft", "tdm", "duel", "ffa")
+EXT_SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm", "duel", "ffa")
 
 class balance(minqlx.Plugin):
     database = Redis
@@ -40,6 +41,7 @@ class balance(minqlx.Plugin):
         self.add_hook("round_countdown", self.handle_round_countdown)
         self.add_hook("round_start", self.handle_round_start)
         self.add_hook("vote_ended", self.handle_vote_ended)
+        self.add_hook("player_disconnect", self.handle_player_disconnect)
         self.add_command(("setrating", "setelo"), self.cmd_setrating, 3, usage="<id> <rating>")
         self.add_command(("getrating", "getelo", "elo"), self.cmd_getrating, usage="<id> [gametype]")
         self.add_command(("remrating", "remelo"), self.cmd_remrating, 3, usage="<id>")
@@ -52,6 +54,8 @@ class balance(minqlx.Plugin):
         self.ratings_lock = threading.RLock()
         # Keys: steam_id - Items: {"ffa": {"elo": 123, "games": 321, "local": False}, ...}
         self.ratings = {}
+        # Keys: steam_id - Items: {"deactivated": true/false, "ratings": {...}, "allowRating": true/false, "privacy": "public/private/anonymous/untracked"}
+        self.player_info = {}
         # Keys: request_id - Items: (players, callback, channel)
         self.requests = {}
         self.request_counter = itertools.count()
@@ -99,6 +103,23 @@ class balance(minqlx.Plugin):
                 self.add_request(players, self.callback_balance, minqlx.CHAT_CHANNEL)
             f()
 
+    def handle_player_disconnect(self, player, reason):
+        self.clean_player_data(player)
+
+    @minqlx.thread
+    def clean_player_data(self, player):
+        for p in self.players().copy():
+            if p.steam_id == player.steam_id and p.id != player.id:
+                # there is a second client with same steam id
+                return
+
+        if player.steam_id in self.player_info:
+            del self.player_info[player.steam_id]
+
+        with self.ratings_lock:
+            if player.steam_id in self.ratings:
+                del self.ratings[player.steam_id]
+
     @minqlx.thread
     def fetch_ratings(self, players, request_id):
         if not players:
@@ -122,6 +143,8 @@ class balance(minqlx.Plugin):
 
         attempts = 0
         last_status = 0
+        untracked_sids = []
+
         while attempts < MAX_ATTEMPTS:
             attempts += 1
             url = self.api_url + "+".join([str(sid) for sid in players])
@@ -167,6 +190,26 @@ class balance(minqlx.Plugin):
                     if sid not in self.ratings:
                         self.ratings[sid] = {}
                     self.ratings[sid][players[sid]] = {"games": -1, "elo": DEFAULT_RATING, "local": False, "time": time.time()}
+
+            # Setting ratings for untracked players.
+            if "untracked" in js:
+                untracked_sids = list(map( lambda sid: int(sid), js["untracked"]))
+
+            for gt in SUPPORTED_GAMETYPES:
+                for sid in untracked_sids:
+                  with self.ratings_lock:
+                      if sid not in self.ratings:
+                          self.ratings[sid] = {}
+                      self.ratings[sid][gt] = {"games": -1, "elo": UNTRACKED_RATING, "local": False, "time": time.time()}
+
+            # Saving player info
+            try:
+                for player, data in js["playerinfo"].items():
+                    sid = int(player)
+                    self.player_info[sid] = js["playerinfo"][player]
+                    self.player_info[sid]["time"] = time.time()
+            except KeyError:
+                pass
 
             break
 
