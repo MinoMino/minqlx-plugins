@@ -6,7 +6,7 @@ The Python dependencies are included in requirements.txt. Make sure you do a
 The extras directory contains plugins I would not advice you use unless you further improve them or
 just use them for the purpose of learning.
 
-This repository only contains plugins maintained by me and @em92. Take a look [here](https://github.com/MinoMino/minqlx/wiki/Useful-Plugins) some of the plugins by other users that could be useful to you.
+This repository only contains plugins maintained by me and [@em92](https://github.com/em92). Take a look [here](https://github.com/MinoMino/minqlx/wiki/Useful-Plugins) some of the plugins by other users that could be useful to you.
 
 If you have any questions, the IRC channel for the old bot,
 [#minqlbot on Quakenet](http://webchat.quakenet.org/?channels=minqlbot),
