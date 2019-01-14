@@ -31,7 +31,7 @@ class permission(minqlx.Plugin):
         self.add_command("getperm", self.cmd_getperm, 5, usage="<id>")
         # myperm can only be used in-game.
         self.add_command("myperm", self.cmd_myperm,
-            channels=("chat", "red", "blue", "spectator", "free", "client_command"))
+            channels=("chat", "red_team_chat", "blue_team_chat", "spectator_chat", "free_chat", "client_command"))
 
     def cmd_setperm(self, player, msg, channel):
         if len(msg) < 3:
