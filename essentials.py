@@ -867,7 +867,7 @@ class essentials(minqlx.Plugin):
 
     def tell_mappool(self, player, indent=0):
         out = ""
-        for m in self.mappool:
-            out += ("{0}Map: {1:25} Factories: {2}\n"
-                .format(" " * indent, m, ", ".join(val for val in self.mappool[m])))
+        for m in sorted(self.mappool.items(), key=lambda x: x[0]):
+            out += ("{0}{1:25} Factories: {2}\n"
+                .format(" " * indent, m[0], ", ".join(val for val in m[1])))
         player.tell(out.rstrip("\n"))
