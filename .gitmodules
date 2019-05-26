@@ -1,0 +1,3 @@
+[submodule "tests/minqlx-plugin-tests"]
+	path = tests/minqlx-plugin-tests
+	url = https://github.com/mgaertne/minqlx-plugin-tests.git

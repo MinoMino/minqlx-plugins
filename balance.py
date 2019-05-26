@@ -474,7 +474,7 @@ class balance(minqlx.Plugin):
             channel.reply("^1{} ^7vs ^4{}^7 - Holy shit!"
                 .format(round(avg_red), round(avg_blue)))
 
-        minimum_suggestion_diff = self.get_cvar("qlx_balanceMinimumSuggestionDiff", int)
+        minimum_suggestion_diff = self.get_cvar("qlx_balanceMinimumSuggestionDiff", float)
         if switch and switch[1] >= minimum_suggestion_diff:
             channel.reply("SUGGESTION: switch ^6{}^7 with ^6{}^7. Mentioned players can type !a to agree."
                 .format(switch[0][0].clean_name, switch[0][1].clean_name))
