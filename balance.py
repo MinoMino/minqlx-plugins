@@ -23,8 +23,6 @@ import threading
 import random
 import time
 
-from minqlx.database import Redis
-
 RATING_KEY = "minqlx:players:{0}:ratings:{1}" # 0 == steam_id, 1 == short gametype.
 MAX_ATTEMPTS = 3
 CACHE_EXPIRE = 60*10 # 10 minutes TTL.
@@ -36,8 +34,6 @@ EXT_SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm", "duel", "ffa")
 
 
 class balance(minqlx.Plugin):
-    database = Redis
-    
     def __init__(self):
         self.add_hook("round_countdown", self.handle_round_countdown)
         self.add_hook("round_start", self.handle_round_start)
