@@ -1,4 +1,4 @@
-from minqlx_plugin_test import setup_plugin, setup_cvar, setup_cvars, setup_game_in_progress, connected_players, fake_player, unstub
+from minqlx_plugin_test import setup_plugin, setup_cvar, setup_cvars, setup_game_in_progress, connected_players, fake_player, unstub, setup_game_in_warmup
 
 import unittest
 
@@ -69,3 +69,22 @@ class TestBalance(unittest.TestCase):
             exception_raised = e
 
         self.assertIsNone(exception_raised, "Unexpected exception")
+
+    def test_cache_reset(self):
+        setup_game_in_warmup()
+
+        player1 = fake_player(1, "Evmoncer", "red")
+        player2 = fake_player(2, "FalseMan", "blue")
+
+        self.setup_balance_ratings([
+            (player1, 1443),
+            (player2, 1394),
+        ])
+
+        self.assertIn(1, self.plugin.ratings)
+        self.assertIn(2, self.plugin.ratings)
+
+        setup_game_in_warmup()
+        self.plugin.handle_new_game()
+
+        self.assertFalse(self.plugin.ratings)

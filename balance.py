@@ -34,6 +34,7 @@ SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm")
 # Externally supported game types. Used by !getrating for game types the API works with.
 EXT_SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm", "duel", "ffa")
 
+
 class balance(minqlx.Plugin):
     database = Redis
     
@@ -42,6 +43,7 @@ class balance(minqlx.Plugin):
         self.add_hook("round_start", self.handle_round_start)
         self.add_hook("vote_ended", self.handle_vote_ended)
         self.add_hook("player_disconnect", self.handle_player_disconnect)
+        self.add_hook("new_game", self.handle_new_game)
         self.add_command(("setrating", "setelo"), self.cmd_setrating, 3, usage="<id> <rating>")
         self.add_command(("getrating", "getelo", "elo"), self.cmd_getrating, usage="<id> [gametype]")
         self.add_command(("remrating", "remelo"), self.cmd_remrating, 3, usage="<id>")
@@ -105,6 +107,12 @@ class balance(minqlx.Plugin):
 
     def handle_player_disconnect(self, player, reason):
         self.clean_player_data(player)
+
+    def handle_new_game(self):
+        # reset ratings cache on start
+        if self.game.state == "warmup":
+            with self.ratings_lock:
+                self.ratings = {}
 
     @minqlx.thread
     def clean_player_data(self, player):
