@@ -152,7 +152,7 @@ class balance(minqlx.Plugin):
         while attempts < MAX_ATTEMPTS:
             attempts += 1
             url = self.api_url + "+".join([str(sid) for sid in players])
-            res = requests.get(url)
+            res = requests.get(url, headers={"X-QuakeLive-Map": self.game.map})
             last_status = res.status_code
             if res.status_code != requests.codes.ok:
                 continue
