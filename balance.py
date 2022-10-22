@@ -67,6 +67,10 @@ class balance(minqlx.Plugin):
         self.set_cvar_once("qlx_balanceMinimumSuggestionDiff", "25")
         self.set_cvar_once("qlx_balanceApi", "elo")
 
+        self.cache_cvars()
+
+    def cache_cvars(self):
+        # Store some cvar values that are used in non-game threads
         self.use_local = self.get_cvar("qlx_balanceUseLocal", bool)
         self.api_url = "http://{}/{}/".format(self.get_cvar("qlx_balanceUrl"), self.get_cvar("qlx_balanceApi"))
 
@@ -105,6 +109,8 @@ class balance(minqlx.Plugin):
         self.clean_player_data(player)
 
     def handle_new_game(self):
+        self.cache_cvars()
+
         # reset ratings cache on start
         if self.game.state == "warmup":
             with self.ratings_lock:
