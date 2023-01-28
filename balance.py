@@ -151,6 +151,10 @@ class balance(minqlx.Plugin):
                             self.ratings[steam_id] = {gt: {"games": -1, "elo": int(self.db[key]), "local": True, "time": -1}}
                     del players[steam_id]
 
+            if not players:
+                self.handle_ratings_fetched(request_id, requests.codes.ok)
+                return
+
         attempts = 0
         last_status = 0
         untracked_sids = []
