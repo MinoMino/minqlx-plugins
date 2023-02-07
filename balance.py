@@ -46,7 +46,9 @@ class balance(minqlx.Plugin):
         self.add_command("balance", self.cmd_balance, 1)
         self.add_command(("teams", "teens"), self.cmd_teams)
         self.add_command("do", self.cmd_do, 1)
+        self.add_command("dont", self.cmd_dont, 1)
         self.add_command(("agree", "a"), self.cmd_agree, client_cmd_perm=0)
+        self.add_command(("veto", "v"), self.cmd_veto, client_cmd_perm=0)
         self.add_command(("ratings", "elos", "selo"), self.cmd_ratings)
 
         self.ratings_lock = threading.RLock()
@@ -66,6 +68,8 @@ class balance(minqlx.Plugin):
         self.set_cvar_once("qlx_balanceAuto", "1")
         self.set_cvar_once("qlx_balanceMinimumSuggestionDiff", "25")
         self.set_cvar_once("qlx_balanceApi", "elo")
+        # indicates whether switch suggestions need to be opted-in (!a) or vetoed (!v) by the suggested players
+        self.set_cvar_once("qlx_balanceSwitchOptIn", "1")
 
         self.cache_cvars()
 
@@ -73,9 +77,12 @@ class balance(minqlx.Plugin):
         # Store some cvar values that are used in non-game threads
         self.use_local = self.get_cvar("qlx_balanceUseLocal", bool)
         self.api_url = "http://{}/{}/".format(self.get_cvar("qlx_balanceUrl"), self.get_cvar("qlx_balanceApi"))
+        self.switch_opt_in = self.get_cvar("qlx_balanceSwitchOptIn", bool)
 
     def handle_round_countdown(self, *args, **kwargs):
-        if all(self.suggested_agree):
+        if (self.switch_opt_in and all(self.suggested_agree)) or \
+                (not self.switch_opt_in and self.suggested_pair is not None and
+                 not all(self.suggested_agree)):
             # If we don't delay the switch a bit, the round countdown sound and
             # text disappears for some weird reason.
             @minqlx.next_frame
@@ -490,8 +497,14 @@ class balance(minqlx.Plugin):
 
         minimum_suggestion_diff = self.get_cvar("qlx_balanceMinimumSuggestionDiff", float)
         if switch and switch[1] >= minimum_suggestion_diff:
-            channel.reply("SUGGESTION: switch ^6{}^7 with ^6{}^7. Mentioned players can type !a to agree."
-                .format(switch[0][0].clean_name, switch[0][1].clean_name))
+            if self.switch_opt_in:
+                return "SUGGESTION: switch ^6{}^7 with ^6{}^7. Mentioned players can type !a to agree."\
+                    .format(switch[0][0].clean_name, switch[0][1].clean_name)
+
+            return "NOTICE: Server will switch ^6{}^7 with ^6{}^7 at start of next round. "\
+                "Both mentioned players need to type !v to veto the switch."\
+                .format(switch[0][0].clean_name, switch[0][1].clean_name)
+
             if not self.suggested_pair or self.suggested_pair[0] != switch[0][0] or self.suggested_pair[1] != switch[0][1]:
                 self.suggested_pair = (switch[0][0], switch[0][1])
                 self.suggested_agree = [False, False]
@@ -507,27 +520,67 @@ class balance(minqlx.Plugin):
 
     def cmd_do(self, player, msg, channel):
         """Forces a suggested switch to be done."""
-        if self.suggested_pair:
-            self.execute_suggestion()
+        if not self.suggested_pair:
+            return
+        
+        if not self.switch_opt_in:
+            return
+
+        self.execute_suggestion()
+
+    def cmd_dont(self, player, msg, channel):
+        """Vetoes a suggested switch to be done."""
+        if not self.suggested_pair:
+            return
+
+        if self.switch_opt_in:
+            return
+
+        self.msg("An admin prevented the switch! The switch will be terminated.")
+        self.suggested_pair = None
+        self.suggested_agree = [False, False]
 
     def cmd_agree(self, player, msg, channel):
         """After the bot suggests a switch, players in question can use this to agree to the switch."""
-        if self.suggested_pair and not all(self.suggested_agree):
-            p1, p2 = self.suggested_pair
+        if not self.suggested_pair or not self.switch_opt_in or all(self.suggested_agree):
+            return
+
+        p1, p2 = self.suggested_pair
             
-            if p1 == player:
-                self.suggested_agree[0] = True
-            elif p2 == player:
-                self.suggested_agree[1] = True
+        if p1 == player:
+            self.suggested_agree[0] = True
+        elif p2 == player:
+            self.suggested_agree[1] = True
 
-            if all(self.suggested_agree):
-                # If the game's in progress and we're not in the round countdown, wait for next round.
-                if self.game.state == "in_progress" and not self.in_countdown:
-                    self.msg("The switch will be executed at the start of next round.")
-                    return
+        if not all(self.suggested_agree):
+            return
 
-                # Otherwise, switch right away.
-                self.execute_suggestion()
+        # If the game's in progress and we're not in the round countdown, wait for next round.
+        if self.game.state == "in_progress" and not self.in_countdown:
+            self.msg("The switch will be executed at the start of next round.")
+            return
+
+        # Otherwise, switch right away.
+        self.execute_suggestion()
+
+    def cmd_veto(self, player, msg, channel):
+        """After the bot suggests a switch, players in question can use this to veto to the switch."""
+        if not self.suggested_pair or self.switch_opt_in:
+            return
+
+        p1, p2 = self.suggested_pair
+            
+        if p1 == player:
+            self.suggested_agree[0] = True
+        elif p2 == player:
+            self.suggested_agree[1] = True
+
+        if not all(self.suggested_agree):
+            return
+
+        self.msg("Both players vetoed! The switch will be terminated.")
+        self.suggested_pair = None
+        self.suggested_agree = [False, False]
 
     def cmd_ratings(self, player, msg, channel):
         gt = self.game.type_short
