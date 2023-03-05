@@ -25,7 +25,7 @@ LOCKED = False
 ROUND_COUNT = 0
 SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm")
 
-class round_control(minqlx.Plugin):
+class roundcontrol(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("round_start", self.handle_round_start)
