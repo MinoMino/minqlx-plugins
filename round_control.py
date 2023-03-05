@@ -50,9 +50,8 @@ class round_control(minqlx.Plugin):
                     self.msg("Teams were ^6UNLOCKED^7. Spectators are allowed to join.")
                     return
                 
-                players = dict([(p.steam_id, gt) for p in players["red"] + players["blue"]])
-                self.add_request(players, self.callback_balance, minqlx.CHAT_CHANNEL)
             f()
 
     def cmd_unlock(self, player, msg, channel):
+        
         return
