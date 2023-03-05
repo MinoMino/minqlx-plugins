@@ -33,7 +33,8 @@ class round_control(minqlx.Plugin):
         self.add_hook("new_game", self.handle_new_game)
         self.add_hook("vote_ended", self.handle_vote_ended)
 
-        self.add_command(("unlock"), self.cmd_unlock)
+        self.add_command(("unlock"), self.cmd_unlockteams, 5)
+        self.add_command(("lock"), self.cmd_lockteams, 5)
         
         self.set_cvar_once("qlx_minRoundsToLock", "5") # minimum rounds to block new players to join
 
@@ -52,6 +53,9 @@ class round_control(minqlx.Plugin):
                 
             f()
 
-    def cmd_unlock(self, player, msg, channel):
+    def cmd_lockteams(self, player, msg, channel):
+
+        return
+    def cmd_unlockteams(self, player, msg, channel):
         
         return
