@@ -123,4 +123,3 @@ class roundcontrol(minqlx.Plugin):
         else:
             self.msg("Team locking is disabled. Check server configuration.")
             return
-    
