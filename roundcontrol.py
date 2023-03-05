@@ -19,7 +19,6 @@
 import minqlx
 import itertools
 
-ROUND_COUNT = 0
 SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm")
 
 class roundcontrol(minqlx.Plugin):
