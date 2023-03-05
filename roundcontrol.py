@@ -42,7 +42,7 @@ class roundcontrol(minqlx.Plugin):
         ROUND_COUNT = ROUND_COUNT + 1
 
         if ROUND_COUNT >= 5:
-            self.msg("Game reach round count of " + self.get_cvar("qlx_minRoundsToLock") + ". ^6Locking teams.")
+            self.msg("Game reach round count of {}. ^6Locking teams.".format(self.get_cvar("qlx_minRoundsToLock")))
             return
     
     def handle_vote_called(self, caller, vote, args):
@@ -61,7 +61,7 @@ class roundcontrol(minqlx.Plugin):
                 if LOCKED == True:
                     LOCKED = False
                     self.unlock()
-                    self.msg("Teams were ^6UNLOCKED^7. Spectators are allowed to join.")
+                    self.msg("Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
                     return
             f()
 
@@ -69,10 +69,11 @@ class roundcontrol(minqlx.Plugin):
         teams = self.teams()
         players = teams["red"] + teams["blue"]
         if players % 2 != 0:
-            self.msg("Teams were ^6NOT^7 balanced. Not possible to lock teams.")
+            self.msg("Teams were ^3NOT^7 balanced. Not possible to lock teams.")
             return
         
-        self.game.teamsize = teams["red"]
+        n = int(teams["red"])
+        self.game.teamsize = n
         self.lock()
         LOCKED = True
         self.msg("Teams has been ^6LOCKED^7.")
@@ -83,11 +84,11 @@ class roundcontrol(minqlx.Plugin):
         self.game.teamsize = teams["red"] + 1
         self.unlock()
         LOCKED = False
-        self.msg("Teams were ^6UNLOCKED^7. Spectators are allowed to join.")
+        self.msg("Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
 
     def cmd_lockstatus(self, player, msg, channel):
         if LOCKED:
-            player.tell("Teams are ^6LOCKED^7.")
+            player.tell("Teams are ^1LOCKED^7.")
         else:
-            player.tell("Teams are ^6UNLOCKED^7.")
+            player.tell("Teams are ^3UNLOCKED^7.")
     
