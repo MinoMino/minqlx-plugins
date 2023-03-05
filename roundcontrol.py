@@ -69,7 +69,7 @@ class roundcontrol(minqlx.Plugin):
                     return
             f()
 
-    def cmd_lockteams(self, player):
+    def cmd_lockteams(self, player, msg, channel):
         player.tell("Trying to ^1lock teams.")
         teams = self.teams()
         players = teams["red"] + teams["blue"]
@@ -83,7 +83,7 @@ class roundcontrol(minqlx.Plugin):
         LOCKED = True
         self.msg("Teams has been ^6LOCKED^7.")
     
-    def cmd_unlockteams(self, player):
+    def cmd_unlockteams(self, player, msg, channel):
         player.tell("Trying to ^3unlock teams.")
         teams = self.teams()
         players = teams["red"]
@@ -92,7 +92,7 @@ class roundcontrol(minqlx.Plugin):
         LOCKED = False
         self.msg("Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
 
-    def cmd_lockstatus(self, player):
+    def cmd_lockstatus(self, player, msg, channel):
         if LOCKED:
             player.tell("Teams are ^1LOCKED^7.")
         else:
