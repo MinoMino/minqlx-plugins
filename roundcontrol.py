@@ -41,24 +41,24 @@ class roundcontrol(minqlx.Plugin):
 
         self.set_cvar_once("qlx_minRoundsToLock", "5") # minimum rounds to block new players to join
 
-    def handle_round_start(self, caller):
+    def handle_round_start(self):
         self.msg("Round count {}".format(ROUND_COUNT))
         ROUND_COUNT = ROUND_COUNT + 1
 
         if ROUND_COUNT >= 5:
-            caller.msg("Game reach round count of {}. ^6Locking teams.".format(self.get_cvar("qlx_minRoundsToLock")))
-            return minqlx.RET_NONE
+            self.msg("Game reach round count of {}. ^6Locking teams.".format(self.get_cvar("qlx_minRoundsToLock")))
+            return
     
-    def handle_vote_called(self, caller, vote):
+    def handle_vote_called(self, caller, vote, args):
         if vote.lower() == "unlockteams" and LOCKED == False:
             caller.tell("Teams are alread unlocked.")
-            return  minqlx.RET_NONE
+            return
     
-    def handle_vote_ended(self, vote, passed):   
+    def handle_vote_ended(self, votes, vote, args, passed):   
         if passed == True and vote.lower() == "unlockteams":
             gt = self.game.type_short
             if gt not in SUPPORTED_GAMETYPES:
-                return minqlx.RET_NONE
+                return
             
             @minqlx.delay(3.5)
             def f():
@@ -66,7 +66,7 @@ class roundcontrol(minqlx.Plugin):
                     LOCKED = False
                     self.unlock()
                     self.msg("Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
-                    return minqlx.RET_NONE
+                    return
             f()
 
     def cmd_lockteams(self, player):
@@ -75,13 +75,13 @@ class roundcontrol(minqlx.Plugin):
         players = teams["red"] + teams["blue"]
         if players % 2 != 0:
             self.msg("Teams were ^3NOT^7 balanced. Not possible to lock teams.")
-            return minqlx.RET_NONE
+            return
         
         n = int(teams["red"])
         self.game.teamsize = n
         self.lock()
         LOCKED = True
-        Plugin.msg("Teams has been ^6LOCKED^7.")
+        self.msg("Teams has been ^6LOCKED^7.")
     
     def cmd_unlockteams(self, player):
         player.tell("Trying to ^3unlock teams.")
