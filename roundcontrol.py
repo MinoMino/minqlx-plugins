@@ -19,7 +19,6 @@
 import minqlx
 import itertools
 
-LOCKED = False
 ROUND_COUNT = 0
 SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm")
 
@@ -31,6 +30,7 @@ class roundcontrol(minqlx.Plugin):
 
     def __init__(self):
         super().__init__()
+        #self.add_hook("round_countdown", self.handle_round_countdown)
         self.add_hook("round_start", self.handle_round_start)
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("vote_ended", self.handle_vote_ended)
@@ -39,18 +39,34 @@ class roundcontrol(minqlx.Plugin):
         self.add_command(("lockteams"), self.cmd_lockteams, 5)
         self.add_command(("lockstatus"), self.cmd_lockstatus, 1)
 
-        self.set_cvar_once("qlx_minRoundsToLock", "5") # minimum rounds to block new players to join
+        self.set_cvar_once("qlx_minRoundsToLock", "5")      # minimum rounds to block new players from joinning
+        self.set_cvar_once("qlx_roundsLockEnable", "0")     # Enable / disable round control
+        self.set_cvar_once("qlx_teamslocked", "0")
 
-    def handle_round_start(self):
-        self.msg("Round count {}".format(ROUND_COUNT))
-        ROUND_COUNT = ROUND_COUNT + 1
+    def handle_round_start(self, *args, **kwargs):
+        roundcontrolenabled = (int)(self.get_cvar("qlx_roundsLockEnable"))
+        if (roundcontrolenabled == 1):
+            total_rounds = (int)(self.game.red_score + self.game.blue_score)
+            self.msg("Round count {}".format(total_rounds))
+            minrounds = (int)(self.get_cvar("qlx_minRoundsToLock"))
 
-        if ROUND_COUNT >= 5:
-            self.msg("Game reach round count of {}. ^6Locking teams.".format(self.get_cvar("qlx_minRoundsToLock")))
+            if total_rounds >= minrounds and self.get_cvar("qlx_teamslocked", bool) is False:
+                self.msg("Game reach round count of {}. ^6Locking teams.".format(self.get_cvar("qlx_minRoundsToLock")))
+                teams = self.teams()
+                if len(teams["red"] + teams["blue"]) % 2 != 0:
+                    self.msg("Teams were ^3NOT^7 balanced. Not possible to lock teams.")
+                    return
+                
+                self.game.teamsize = len(teams["red"])
+                self.lock()
+                self.set_cvar_once("qlx_teamslocked", "1")
+                self.msg("Teams has been ^6LOCKED^7.")
+
+                return
             return
     
     def handle_vote_called(self, caller, vote, args):
-        if vote.lower() == "unlockteams" and LOCKED == False:
+        if vote.lower() == "unlockteams" and self.get_cvar("qlx_teamslocked", bool):
             caller.tell("Teams are alread unlocked.")
             return
     
@@ -62,37 +78,49 @@ class roundcontrol(minqlx.Plugin):
             
             @minqlx.delay(3.5)
             def f():
-                if LOCKED == True:
-                    LOCKED = False
+                if self.get_cvar("qlx_teamslocked", bool):
+                    self.set_cvar_once("qlx_teamslocked", "0")
                     self.unlock()
                     self.msg("Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
                     return
             f()
 
     def cmd_lockteams(self, player, msg, channel):
-        player.tell("Trying to ^1lock teams.")
-        teams = self.teams()
-        if len(teams["red"] + teams["blue"]) % 2 != 0:
-            self.msg("Teams were ^3NOT^7 balanced. Not possible to lock teams.")
-            return
-        
-        n = len(teams["red"])
-        self.game.teamsize = n
-        self.lock()
-        LOCKED = True
-        self.msg("Teams has been ^6LOCKED^7.")
+        if self.get_cvar("qlx_roundsLockEnable", bool):
+            player.tell("Trying to ^1lock teams.")
+            teams = self.teams()
+            if len(teams["red"] + teams["blue"]) % 2 != 0:
+                self.msg("Teams were ^3NOT^7 balanced. Not possible to lock teams.")
+                return
+            
+            n = len(teams["red"])
+            self.game.teamsize = n
+            self.lock()
+            self.set_cvar_once("qlx_teamslocked", "1")
+            self.msg("Teams has been ^6LOCKED^7.")
+        else:
+            self.msg("Team locking is disabled. Check server configuration.")
+        return
     
     def cmd_unlockteams(self, player, msg, channel):
-        player.tell("Trying to ^3unlock teams.")
-        teams = self.teams()
-        self.game.teamsize = len(teams["red"]) + 1
-        self.unlock()
-        LOCKED = False
-        self.msg("Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
+        if self.get_cvar("qlx_roundsLockEnable", bool):
+            player.tell("Trying to ^3unlock teams.")
+            teams = self.teams()
+            self.game.teamsize = len(teams["red"]) + 1
+            self.unlock()
+            self.set_cvar_once("qlx_teamslocked", "0")
+            self.msg("Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
+        else:
+            self.msg("Team locking is disabled. Check server configuration.")
+            return
 
     def cmd_lockstatus(self, player, msg, channel):
-        if LOCKED:
-            player.tell("Teams are ^1LOCKED^7.")
+        if self.get_cvar("qlx_roundsLockEnable", bool):
+            if self.get_cvar("qlx_teamslocked", bool):
+                player.tell("Teams are ^1LOCKED^7.")
+            else:
+                player.tell("Teams are ^3UNLOCKED^7.")
         else:
-            player.tell("Teams are ^3UNLOCKED^7.")
+            self.msg("Team locking is disabled. Check server configuration.")
+            return
     
