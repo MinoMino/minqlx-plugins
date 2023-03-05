@@ -22,28 +22,40 @@
 import minqlx
 
 LOCKED = False
-ROUND_COUNT = 5
+ROUND_COUNT = 0
 SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm")
 
 class round_control(minqlx.Plugin):
     def __init__(self):
         super().__init__()
-        self.add_hook("player_join", self.handle_player_join)
         self.add_hook("round_start", self.handle_round_start)
-        self.add_hook("new_game", self.handle_new_game)
+        self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("vote_ended", self.handle_vote_ended)
 
         self.add_command(("unlockteams"), self.cmd_unlockteams, 5)
         self.add_command(("lockteams"), self.cmd_lockteams, 5)
+        self.add_command(("lockstatus"), self.cmd_lockstatus, 1)
 
         self.set_cvar_once("qlx_minRoundsToLock", "5") # minimum rounds to block new players to join
 
+    def handle_round_start(self, caller, vote, args):
+        ROUND_COUNT = ROUND_COUNT + 1
+
+        if ROUND_COUNT >= 5:
+            self.msg("Game reach round count of " + self.get_cvar("qlx_minRoundsToLock") + ". ^6Locking teams.")
+            return
+    
+    def handle_vote_called(self, caller, vote, args):
+        if vote.lower() == "unlockteams" and LOCKED == False:
+            caller.tell("Teams are alread unlocked.")
+            return 
+    
     def handle_vote_ended(self, votes, vote, args, passed):   
         if passed == True and vote.lower() == "unlockteams":
             gt = self.game.type_short
             if gt not in SUPPORTED_GAMETYPES:
                 return
-
+            
             @minqlx.delay(3.5)
             def f():
                 if LOCKED == True:
@@ -57,7 +69,7 @@ class round_control(minqlx.Plugin):
         teams = self.teams()
         players = teams["red"] + teams["blue"]
         if players % 2 != 0:
-            self.msg("Teams were ^6NOT^7 balanced due to the total number of players being an odd number.")
+            self.msg("Teams were ^6NOT^7 balanced. Not possible to lock teams.")
             return
         
         self.game.teamsize = teams["red"]
@@ -69,6 +81,13 @@ class round_control(minqlx.Plugin):
         teams = self.teams()
         players = teams["red"]
         self.game.teamsize = teams["red"] + 1
-        LOCKED = False
         self.unlock()
+        LOCKED = False
         self.msg("Teams were ^6UNLOCKED^7. Spectators are allowed to join.")
+
+    def cmd_lockstatus(self, player, msg, channel):
+        if LOCKED:
+            player.tell("Teams are ^6LOCKED^7.")
+        else:
+            player.tell("Teams are ^6UNLOCKED^7.")
+    
