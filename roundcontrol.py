@@ -52,6 +52,7 @@ class roundcontrol(minqlx.Plugin):
 
             if total_rounds >= minrounds and self.get_cvar("qlx_teamslocked", bool) is False:
                 self.msg("Game reach round count of {}. ^6Locking teams.".format(self.get_cvar("qlx_minRoundsToLock")))
+                self.msg("^3You can callvote unlockteams to unlock.")
                 teams = self.teams()
                 if len(teams["red"] + teams["blue"]) % 2 != 0:
                     self.msg("Teams were ^3NOT^7 balanced. Not possible to lock teams.")
