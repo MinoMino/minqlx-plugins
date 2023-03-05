@@ -16,16 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with minqlx. If not, see <http://www.gnu.org/licenses/>.
 
-# Script blocks new players to join the game after ## rounds has been passed.
-# Allow players to callvote unlock to let spectators to join.
-
 import minqlx
+import itertools
 
 LOCKED = False
 ROUND_COUNT = 0
 SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm")
 
 class roundcontrol(minqlx.Plugin):
+    #####
+    # Script blocks new players to join the game after ## rounds has been passed.
+    # Allow players to callvote unlock to let spectators to join.
+    #####
+
     def __init__(self):
         super().__init__()
         self.add_hook("round_start", self.handle_round_start)
@@ -38,23 +41,24 @@ class roundcontrol(minqlx.Plugin):
 
         self.set_cvar_once("qlx_minRoundsToLock", "5") # minimum rounds to block new players to join
 
-    def handle_round_start(self, caller, vote, args):
+    def handle_round_start(self, caller):
+        self.msg("Round count {}".format(ROUND_COUNT))
         ROUND_COUNT = ROUND_COUNT + 1
 
         if ROUND_COUNT >= 5:
-            self.msg("Game reach round count of {}. ^6Locking teams.".format(self.get_cvar("qlx_minRoundsToLock")))
-            return
+            caller.msg("Game reach round count of {}. ^6Locking teams.".format(self.get_cvar("qlx_minRoundsToLock")))
+            return minqlx.RET_NONE
     
-    def handle_vote_called(self, caller, vote, args):
+    def handle_vote_called(self, caller, vote):
         if vote.lower() == "unlockteams" and LOCKED == False:
             caller.tell("Teams are alread unlocked.")
-            return 
+            return  minqlx.RET_NONE
     
-    def handle_vote_ended(self, votes, vote, args, passed):   
+    def handle_vote_ended(self, vote, passed):   
         if passed == True and vote.lower() == "unlockteams":
             gt = self.game.type_short
             if gt not in SUPPORTED_GAMETYPES:
-                return
+                return minqlx.RET_NONE
             
             @minqlx.delay(3.5)
             def f():
@@ -62,23 +66,25 @@ class roundcontrol(minqlx.Plugin):
                     LOCKED = False
                     self.unlock()
                     self.msg("Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
-                    return
+                    return minqlx.RET_NONE
             f()
 
-    def cmd_lockteams(self, player, msg, channel):
+    def cmd_lockteams(self, player):
+        player.tell("Trying to ^1lock teams.")
         teams = self.teams()
         players = teams["red"] + teams["blue"]
         if players % 2 != 0:
             self.msg("Teams were ^3NOT^7 balanced. Not possible to lock teams.")
-            return
+            return minqlx.RET_NONE
         
         n = int(teams["red"])
         self.game.teamsize = n
         self.lock()
         LOCKED = True
-        self.msg("Teams has been ^6LOCKED^7.")
+        Plugin.msg("Teams has been ^6LOCKED^7.")
     
-    def cmd_unlockteams(self, player, msg, channel):
+    def cmd_unlockteams(self, player):
+        player.tell("Trying to ^3unlock teams.")
         teams = self.teams()
         players = teams["red"]
         self.game.teamsize = teams["red"] + 1
@@ -86,7 +92,7 @@ class roundcontrol(minqlx.Plugin):
         LOCKED = False
         self.msg("Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
 
-    def cmd_lockstatus(self, player, msg, channel):
+    def cmd_lockstatus(self, player):
         if LOCKED:
             player.tell("Teams are ^1LOCKED^7.")
         else:
