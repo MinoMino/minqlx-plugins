@@ -45,7 +45,11 @@ class roundcontrol(minqlx.Plugin):
     def handle_round_start(self, *args, **kwargs):
         roundcontrolenabled = (int)(self.get_cvar("qlx_roundsLockEnable"))
         if (roundcontrolenabled == 1):
-            total_rounds = (int)(self.game.red_score + self.game.blue_score)
+            total_rounds = 0
+            #total_rounds = (int)(self.game.red_score + self.game.blue_score)
+            if (int)(self.game.red_score) > (int)(self.game.blue_score): total_rounds = (int)(self.game.red_score); return
+            if (int)(self.game.blue_score) > (int)(self.game.red_score): total_rounds = (int)(self.game.blue_score); return
+
             self.msg("Round count {}".format(total_rounds))
             minrounds = (int)(self.get_cvar("qlx_minRoundsToLock"))
 
