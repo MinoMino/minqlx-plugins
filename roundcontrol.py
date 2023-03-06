@@ -78,6 +78,7 @@ class roundcontrol(minqlx.Plugin):
             self.unlock()
             self.teamslocked = False
             self.msg("Round Control: Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
+            self.msg("Round Control: Teamsize set to ^3{}.".format(len(teams["red"]) + 1))
         else:
             self.msg("Round Control: Team locking is disabled. Check server configuration.")
             return
