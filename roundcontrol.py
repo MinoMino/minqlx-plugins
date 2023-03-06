@@ -35,7 +35,6 @@ class roundcontrol(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("round_countdown", self.handle_round_countdown)
-        self.add_hook("round_start", self.handle_round_start)
         self.add_hook("vote_called", self.handle_vote_called)
         self.add_hook("vote_ended", self.handle_vote_ended)
         self.add_hook("new_game", self.handle_new_game)
@@ -66,12 +65,8 @@ class roundcontrol(minqlx.Plugin):
                 self.lock()
                 self.set_cvar_once("qlx_teamslocked", "1")
                 self.msg("Teams has been ^6LOCKED^7.")
-                self.in_countdown = True
                 return
             return
-        
-    def handle_round_start(self, *args, **kwargs):
-        self.in_countdown = False
 
     def handle_vote_called(self, caller, vote, args):
         if vote.lower() == "unlockteams" and self.get_cvar("qlx_teamslocked", bool):
@@ -97,7 +92,6 @@ class roundcontrol(minqlx.Plugin):
     
     def cmd_unlockteams(self, player, msg, channel):
         if self.get_cvar("qlx_roundsLockEnable", bool):
-            #player.tell("Trying to ^3unlock teams.")
             teams = self.teams()
             self.game.teamsize = len(teams["red"]) + 1
             self.unlock()
