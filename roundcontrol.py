@@ -47,10 +47,9 @@ class roundcontrol(minqlx.Plugin):
         self.set_cvar_once("qlx_teamslocked", "0")
 
     def handle_round_countdown(self, *args, **kwargs):
-        roundcontrolenabled = (int)(self.get_cvar("qlx_roundsLockEnable"))
-        if (roundcontrolenabled == 1):
+       if self.get_cvar("qlx_roundsLockEnable", bool):
             total_rounds = max((int)(self.game.red_score), (int)(self.game.blue_score))
-
+            
             self.msg("Round Control: round count ^3{}".format(total_rounds))
 
             if total_rounds >= (int)(self.get_cvar("qlx_minRoundsToLock")) and self.get_cvar("qlx_teamslocked", bool) is False:
