@@ -1298,7 +1298,7 @@ class myFun(minqlx.Plugin):
     ''' Here in case the essentials plugin is not loaded '''
     def cmd_enable_sounds(self, player, msg, channel):
         if "essentials" not in self._loaded_plugins:
-            flag = self.db.get_flag(player, "essentials:sounds_enabled", default=True)
+            flag = self.db.get_flag(player, "   :sounds_enabled", default=True)
             self.db.set_flag(player, "essentials:sounds_enabled", not flag)
 
             if flag:
