@@ -46,7 +46,7 @@ class playerfart(minqlx.Plugin):
             "7": "{} libertou o Mandela.",
             "8": "{} so faz merda.",
             "9": "{} rompeu o esfincter.",
-            "10": "{} tirou o charufo do beiço.",
+            "10": "{} cortou o rabo do macaco.",
         }
         
         # keep looking for AFK players

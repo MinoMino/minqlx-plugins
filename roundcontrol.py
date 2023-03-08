@@ -65,9 +65,7 @@ class roundcontrol(minqlx.Plugin):
     def handle_player_disconnect(self, player, reason):
         teams = self.teams()
         if len(teams["red"] + teams["blue"]) % 2 != 0:
-            return minqlx.RET_STOP_ALL
-        else:
-            self.def_unlock((int)(self.game.teamsize))
+            self.def_unlock(0)
     
     def handle_game_end(self, data):
         if self.get_cvar("qlx_roundControlEnable", bool):
@@ -101,19 +99,19 @@ class roundcontrol(minqlx.Plugin):
         teams = self.teams()
         self.unlock()
         self.teamslocked = False
-        self.msg("Round Control: Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
         if size > 0:
             self.game.teamsize = size
             self.msg("Round Control: Teamsize set to ^3{}.".format(size))
+        self.msg("Round Control: Teams were ^3UNLOCKED^7. Spectators are allowed to join.")
     
     @minqlx.thread
     def def_lock(self):
         teams = self.teams()
         self.lock()
         self.teamslocked = True
-        self.msg("Round Control: Teams were ^1LOCKED^7.")
         self.game.teamsize = len(teams["red"]) # teams are equal anyways ;)
         self.msg("Round Control: Teamsize set to ^3{}.".format(len(teams["red"])))
+        self.msg("Round Control: Teams were ^1LOCKED^7.")
     
     def cmd_lockstatus(self, player, msg, channel):
         if self.get_cvar("qlx_roundControlEnable", bool):
