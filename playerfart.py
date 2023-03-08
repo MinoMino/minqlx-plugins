@@ -1,7 +1,9 @@
 #####
 # The last player on the team farts randomly
 # Fun with friends
-# Requires: MyFun plugin (https://github.com/BarelyMiSSeD/minqlx-plugins/tree/master/myFun)
+# Requires: 
+#   Essentials plugin
+#   MyFun plugin (https://github.com/BarelyMiSSeD/minqlx-plugins/tree/master/myFun)
 #####
 
 import minqlx
@@ -21,6 +23,7 @@ class playerfart(minqlx.Plugin):
         self.add_hook("round_end", self.handle_round_end)
 
         self.add_command("fart", self.cmd_fart, 3, usage="[<id>|<name>]")
+        self.add_command("farts", self.cmd_enable_farts)
 
         self.farts = {
             "fart": "sound/warp/fart.ogg",
@@ -59,7 +62,6 @@ class playerfart(minqlx.Plugin):
         
     def handle_round_end(self, round_number):
         self.running = False
-        return
 
     @minqlx.thread
     def help_create_thread(self):
@@ -79,14 +81,17 @@ class playerfart(minqlx.Plugin):
                 self.def_fart(lastplayer)
 
     def cmd_fart(self, player, msg, channel):
-        self.def_fart(player)
-        return
+        if len(msg) < 2:
+            self.def_fart(player)
+            return minqlx.RET_USAGE
+        else:
+            self.def_fart(msg[1])
     
     @minqlx.next_frame
     def def_fart(self, player):
         for p in self.players():
             # Play sound for all players but only for those who has !sounds enables
-            if self.db.get_flag(p, "essentials:sounds_enabled", default=True):
+            if self.db.get_flag(p, "essentials:farts_enabled", default=True):
                 Plugin.play_sound(self.get_random_fart_sound(), p)
         self.msg(self.get_random_message().format(player))
 
@@ -101,3 +106,17 @@ class playerfart(minqlx.Plugin):
     def get_random_team(self):
         team = random.choice(["red", "blue"]) 
         return team
+    
+    def cmd_enable_farts(self, player, msg, channel):
+        if "essentials" not in self._loaded_plugins:
+            flag = self.db.get_flag(player, "essentials:farts_enabled", default=True)
+            self.db.set_flag(player, "essentials:farts_enabled", not flag)
+
+            if flag:
+                player.tell("Random farts have been disabled. Use ^6{}farts^7 to enable them again."
+                            .format(self._command_prefix))
+            else:
+                player.tell("Random farts have been enabled. Use ^6{}farts^7 to disable them again."
+                            .format(self._command_prefix))
+
+            return minqlx.RET_STOP_ALL
