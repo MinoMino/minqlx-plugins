@@ -49,11 +49,11 @@ class playerfart(minqlx.Plugin):
             "10": "{} cortou o rabo do macaco.",
         }
         
-        # keep looking for AFK players
+        # Thread control
         self.running = False
 
         # Interval for the thread to call player fart.
-        self.interval = 10
+        self.interval = [10, 12, 15]
 
     def handle_round_start(self, round_number):
         # start checking thread
@@ -66,7 +66,7 @@ class playerfart(minqlx.Plugin):
     @minqlx.thread
     def help_create_thread(self):
         while self.running and self.game and self.game.state == 'in_progress':
-            time.sleep((int)(random.choice([10, 12, 15])))
+            time.sleep((int)(random.choice(self.interval)))
             
             teams = self.teams()
             team = self.get_random_team()
@@ -81,19 +81,22 @@ class playerfart(minqlx.Plugin):
                 self.def_fart(lastplayer)
 
     def cmd_fart(self, player, msg, channel):
-        if len(msg) < 2:
-            self.def_fart(player)
-            return minqlx.RET_USAGE
+        if self.db.get_flag(player, "essentials:farts_enabled", default=True):
+            if len(msg) < 2:
+                return minqlx.RET_USAGE
+            else:
+                self.def_fart(msg[1])
         else:
-            self.def_fart(msg[1])
+            player.tell("You must enable ^6!farts^7 before use this command.")
     
     @minqlx.next_frame
     def def_fart(self, player):
         for p in self.players():
-            # Play sound for all players but only for those who has !sounds enables
             if self.db.get_flag(p, "essentials:farts_enabled", default=True):
+                # Play sound for all players but only for those who has !farts enabled
                 Plugin.play_sound(self.get_random_fart_sound(), p)
-        self.msg(self.get_random_message().format(player))
+                # Offensive text for all players but only for those who has !farts enabled
+                p.tell(self.get_random_message().format(player))
 
     def get_random_fart_sound(self):
         key, sound = random.choice(list(self.farts.items()))
@@ -108,15 +111,13 @@ class playerfart(minqlx.Plugin):
         return team
     
     def cmd_enable_farts(self, player, msg, channel):
-        if "essentials" not in self._loaded_plugins:
+        if "essentials" in self._loaded_plugins:
             flag = self.db.get_flag(player, "essentials:farts_enabled", default=True)
             self.db.set_flag(player, "essentials:farts_enabled", not flag)
 
             if flag:
-                player.tell("Random farts have been disabled. Use ^6{}farts^7 to enable them again."
-                            .format(self._command_prefix))
+                player.tell("Random farts have been disabled. Use ^6!farts^7 to enable them again.")
             else:
-                player.tell("Random farts have been enabled. Use ^6{}farts^7 to disable them again."
-                            .format(self._command_prefix))
+                player.tell("Random farts have been enabled. Use ^6!farts^7 to disable them again.")
 
             return minqlx.RET_STOP_ALL
