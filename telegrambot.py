@@ -33,7 +33,6 @@ class telegrambot(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.add_hook("chat", self.handle_chat)
-        self.add_hook("new_game", self.handle_new_game)
         self.add_hook("game_end", self.handle_game_end)
         self.add_hook("player_connect", self.handle_player_connect, priority=minqlx.PRI_LOWEST)
         self.add_hook("player_disconnect", self.handle_player_disconnect)
@@ -105,9 +104,6 @@ class telegrambot(minqlx.Plugin):
         player.tell("Telegram Bot: CHAT ID: {}".format(self.db.get(TELEBOT_DB_KEY.format("chatid"))))
 
     ################### HANDLES ####################
-    def handle_new_game(self)
-         return
-    
     def handle_vote_called(self, caller, vote, args):
         self.scan_vote_called(caller, vote, args)
     
