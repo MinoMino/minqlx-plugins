@@ -3,16 +3,25 @@
 # Relay ingame chat to the chatbot in Telegram
 # Requires: 
 #   pyTelegramBOTAPI (https://pypi.org/project/pyTelegramBotAPI/)
-#   Create a .env file to store your API_KEY
-#   Make sure this is installed on your server.
 #   Add the module into the minqlx.zip file on the server on the
 #   path ~/steamapps/common/qlds
 #   
 #   Create a new bot using the Bot Father.
-#   CHAT_ID is the chat id used in Telegram app.
+#   Define API_KEY using command !telebotapikey <KEY>
+#   Use Telegram app to call command /chatid. Bot will reply with the ID.
+#   Define CHAT_ID using command !telebotchatid <ID>
+#
 #   API_KEY is the key token for your bot.
+#   CHAT_ID is the chat id used in Telegram app.
+#
 #####
-
+#   CVARS
+#   qlx_chatrelayenabled <1|0> Enable/Disable chat relay to telegram
+#   qlx_cmdrelayenabled <1|0> Enable/Disable commands relay to telegram
+#   qlx_plrelayenabled <1|0> Enable/Disable players connect/disconnect relay to telegram
+#   qlx_voterelayenabled <1|0> Enable/Disable votes relay to telegram
+#   
+#####
 import minqlx
 import os
 import telebot
@@ -20,11 +29,11 @@ import time
 
 VERSION = "v0.1"
 TELEBOT_DB_KEY = "minqlx:telegrambot:{}"
-
+bot = telebot.TeleBot("")
 
 class telegrambot(minqlx.Plugin):
 
-    bot = telebot.TeleBot("") 
+    game_bot = telebot.TeleBot("")
 
     def __init__(self):
         super().__init__()
@@ -37,7 +46,7 @@ class telegrambot(minqlx.Plugin):
         self.add_hook("unload", self.handle_unload)
 
         self.set_cvar_once("qlx_chatrelayenabled", "1")
-        self.set_cvar_once("qlx_cmdrelayenabled", "0")
+        self.set_cvar_once("qlx_cmdrelayenabled", "1")
         self.set_cvar_once("qlx_plrelayenabled", "1")
         self.set_cvar_once("qlx_voterelayenabled", "1")
 
@@ -46,16 +55,12 @@ class telegrambot(minqlx.Plugin):
         self.add_command("telebotapikey", self.apikey, 2, usage="<API_KEY>")
         self.add_command("showtelebotkeys", self.telebotkey, 2)
 
-        self.running = False
         self.apikeyk = ""
         self.chatidk = ""
-
         minqlx.console_print("Loading Telegram Bot keys from DB...")
         self.loadkeys()
-        #self.running = True
-        #self.msg("Telegram bot: Polling chat...")
-        #self.bot_poll()
-
+        # Start Bot Polling
+        self.bot_polling()
 
     ###################### DB ######################
     @minqlx.thread
@@ -70,6 +75,7 @@ class telegrambot(minqlx.Plugin):
             minqlx.console_print("Telegram Bot: API KEY found: {}".format(apikey))
             self.apikeyk = apikey
             self.bot = telebot.TeleBot(apikey)
+            bot = telebot.TeleBot(apikey)
 
         # Get CHAT ID in DB
         chatidkey = self.db.get(TELEBOT_DB_KEY.format("chatid"))
@@ -144,8 +150,11 @@ class telegrambot(minqlx.Plugin):
 
     @minqlx.thread
     def scan_client_command(self, player, cmd):
+        if cmd == "score" or \
+            cmd == "say" or \
+            cmd == "say_team": return
         p = self.clean_text((str)(player))
-        self.bot.send_message(self.chatidk, "{} used command ".format(p, len(cmd)))
+        self.bot.send_message(self.chatidk, "{} used command {}.".format(p, cmd))
     
     def handle_game_end(self, data):
         self.scan_game_end()
@@ -174,8 +183,8 @@ class telegrambot(minqlx.Plugin):
 
     def handle_unload(self, plugin):
         if plugin == self.__class__.__name__:
-            self.msg("Polling chat disabled.")
-            self.running = False
+            self.msg("Telegram bot: Polling chat disabled.")
+            self.bot.stop_polling()
 
     @minqlx.thread
     def testpl(self, player, msg, channel):
@@ -203,14 +212,15 @@ class telegrambot(minqlx.Plugin):
     ##################### BOT ######################
     #Thread to listen for commands from Telegram chat
     @minqlx.thread
-    def bot_poll(self):
-        while self.running == True and len(self.players()) > 1:
-            self.bot.polling()
+    def bot_polling(self):
+        time.sleep(5)
+        self.msg("Telegram bot: Polling chat enabled.")
+        self.bot.polling()
 
-    @bot.message_handler(commands=["chatid"])
-    def sendchatid(self, message):
-        self.bot.send_message(message.chat.id, message.chat.id)
-        
-    @bot.message_handler(commands=["start"])
-    def sendmsg(self, message):
-        self.bot.send_message(message.chat.id, "/chatid")
+@bot.message_handler(commands=["chatid"])
+def sendchatid(message):
+    bot.send_message(message.chat.id, message.chat.id)
+    
+@bot.message_handler(commands=["start"])
+def sendmsg(message):
+    bot.send_message(message.chat.id, "/chatid")
