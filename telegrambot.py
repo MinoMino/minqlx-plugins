@@ -19,8 +19,6 @@ import telebot
 import time
 
 VERSION = "v0.1"
-#API_KEY = "6074681084:AAGSjqYnAzXEGBgaYWH11b5S2Zp-_l9-3sc"
-#CHAT_ID = "-962006238"
 TELEBOT_DB_KEY = "minqlx:telegrambot:{}"
 TELEBOT_API_KEY = "minqlx:telegrambot:apikey"
 TELEBOT_CHATID_KEY = "minqlx:telegrambot:chatid"
