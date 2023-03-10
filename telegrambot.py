@@ -20,8 +20,6 @@ import time
 
 VERSION = "v0.1"
 TELEBOT_DB_KEY = "minqlx:telegrambot:{}"
-TELEBOT_API_KEY = "minqlx:telegrambot:apikey"
-TELEBOT_CHATID_KEY = "minqlx:telegrambot:chatid"
 
 
 class telegrambot(minqlx.Plugin):
