@@ -261,7 +261,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             player.tell("Invalid ID.")
             return minqlx.RET_STOP_ALL
 
@@ -287,7 +287,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             player.tell("Invalid ID.")
             return minqlx.RET_STOP_ALL
 
@@ -383,7 +383,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
         
@@ -402,7 +402,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -450,7 +450,7 @@ class essentials(minqlx.Plugin):
             player1 = self.player(i1)
             if not (0 <= i1 < 64) or not player1:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("The first ID is invalid.")
             return
 
@@ -459,7 +459,7 @@ class essentials(minqlx.Plugin):
             player2 = self.player(i2)
             if not (0 <= i2 < 64) or not player2:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("The second ID is invalid.")
             return
 
@@ -475,7 +475,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -491,7 +491,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -508,7 +508,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -524,7 +524,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -540,7 +540,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -556,7 +556,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -572,7 +572,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -588,7 +588,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -607,7 +607,7 @@ class essentials(minqlx.Plugin):
             target_player = self.player(i)
             if not (0 <= i < 64) or not target_player:
                 raise ValueError
-        except ValueError:
+        except (ValueError, NonexistentPlayerError):
             channel.reply("Invalid ID.")
             return
 
@@ -755,7 +755,7 @@ class essentials(minqlx.Plugin):
                 .format(now.strftime(TIME_FORMAT)))
 
     def cmd_teamsize(self, player, msg, channel):
-        """Calls a teamsize vote and passes it immediately."""
+        """Sets the teamsize cvar directly via a helper property."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
         
