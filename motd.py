@@ -26,7 +26,7 @@ class motd(minqlx.Plugin):
 
     def __init__(self):
         super().__init__()
-        self.add_hook("player_loaded", self.handle_player_loaded, priority=minqlx.PRI_LOWEST)
+        self.add_hook("player_connect", self.handle_player_connect)
         self.add_command(("setmotd", "newmotd"), self.cmd_setmotd, 4, usage="<motd>")
         self.add_command(("setmotdall", "newmotdall"), self.cmd_setmotdall, 4, usage="<motd>")
         self.add_command(("getmotd", "motd"), self.cmd_getmotd)
@@ -46,22 +46,17 @@ class motd(minqlx.Plugin):
         self.set_cvar_once("qlx_motdSound", "sound/vo/crash_new/37b_07_alt.wav")
         self.set_cvar_once("qlx_motdHeader", "^6======= ^7Message of the Day ^6=======^7")
 
-    @minqlx.delay(2)
-    def handle_player_loaded(self, player):
-        """Send the message of the day to the player in a tell.
-
-        This should be set to lowest priority so that we don't execute anything if "ban" or
-        a similar plugin determines the player should be kicked.
-        """
+    @minqlx.delay(10)
+    def handle_player_connect(self, player):
         try:
             motd = self.db[self.motd_key]
         except KeyError:
             return
-        
+
         welcome_sound = self.get_cvar("qlx_motdSound")
         if welcome_sound == "0":
             welcome_sound = ""
-        
+
         if welcome_sound and self.db.get_flag(player, "essentials:sounds_enabled", default=True):
             self.play_sound(welcome_sound, player)
         self.send_motd(player, motd)
