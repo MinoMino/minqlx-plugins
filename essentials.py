@@ -99,7 +99,7 @@ class essentials(minqlx.Plugin):
         self.recent_cmds = deque(maxlen=11)
         # A short history of recently disconnected players.
         self.recent_dcs = deque(maxlen=10)
-        
+
         # Map voting stuff. fs_homepath takes precedence.
         self.mappool = None
         mphome = os.path.join(self.get_cvar("fs_homepath", str),
@@ -126,14 +126,14 @@ class essentials(minqlx.Plugin):
                 args = int(args)
             except ValueError:
                 return
-            
+
             if args > self.get_cvar("qlx_teamsizeMaximum", int):
                 caller.tell("The team size is larger than what the server allows.")
                 return minqlx.RET_STOP_ALL
             elif args < self.get_cvar("qlx_teamsizeMinimum", int):
                 caller.tell("The team size is smaller than what the server allows.")
                 return minqlx.RET_STOP_ALL
-        
+
         # Enforce map pool.
         if vote.lower() == "map" and self.mappool and self.get_cvar("qlx_enforceMappool", bool):
             split_args = args.split()
@@ -141,7 +141,7 @@ class essentials(minqlx.Plugin):
                 caller.tell("Available maps and factories:")
                 self.tell_mappool(caller, indent=2)
                 return minqlx.RET_STOP_ALL
-            
+
             map_name = split_args[0].lower()
             factory = split_args[1] if len(split_args) > 1 else self.game.factory
             if map_name in self.mappool:
@@ -153,7 +153,7 @@ class essentials(minqlx.Plugin):
                 caller.tell("This map is not allowed. Use {}mappool to see available options."
                     .format(self.get_cvar("qlx_commandPrefix")))
                 return minqlx.RET_STOP_ALL
-        
+
         # Automatic vote passing.
         if self.get_cvar("qlx_votepass", bool):
             self.last_vote = next(self.vote_count)
@@ -182,7 +182,7 @@ class essentials(minqlx.Plugin):
                 out += " " * indent
                 out += "{}^6:^7 {}\n".format(p.id, p.name)
             player.tell(out[:-1])
-        
+
         player_list = self.players()
         if not player_list:
             player.tell("There are no players connected at the moment.")
@@ -210,7 +210,7 @@ class essentials(minqlx.Plugin):
         if not len(players):
             player.tell("There are no players connected at the moment.")
             return minqlx.RET_STOP_ALL
-        
+
         res = "{:^} | {:^17} | {:^15} | {:^}\n".format("ID", "SteamID64", "IP Address", "Name")
         for p in players:
             res += "{:2} | {:17} | {:15} | {}\n".format(p.id, p.steam_id, p.ip, p)
@@ -273,7 +273,7 @@ class essentials(minqlx.Plugin):
                 return minqlx.RET_STOP_ALL
         else:
             dmg = 0
-        
+
         self.slap(target_player, dmg)
         return minqlx.RET_STOP_ALL
 
@@ -297,7 +297,7 @@ class essentials(minqlx.Plugin):
     def cmd_enable_sounds(self, player, msg, channel):
         flag = self.db.get_flag(player, "essentials:sounds_enabled", default=True)
         self.db.set_flag(player, "essentials:sounds_enabled", not flag)
-        
+
         if flag:
             player.tell("Sounds have been disabled. Use ^6{}sounds^7 to enable them again."
                 .format(self.get_cvar("qlx_commandPrefix")))
@@ -386,7 +386,7 @@ class essentials(minqlx.Plugin):
         except ValueError:
             channel.reply("Invalid ID.")
             return
-        
+
         if len(msg) > 2:
             target_player.kick(" ".join(msg[2:]))
         else:
@@ -426,20 +426,20 @@ class essentials(minqlx.Plugin):
         """Presents a random number in chat."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
-        
+
         try:
             n = randint(1,int(msg[1]))
         except ValueError:
             player.tell("Invalid upper limit. Use a positive integer.")
             return minqlx.RET_STOP_ALL
-        
+
         channel.reply("^3Random number is: ^5{}".format(n))
-        
+
     def cmd_cointoss(self, player, msg, channel):
         """Tosses a coin, and returns HEADS or TAILS in chat."""
         n = randint(0,1)
         channel.reply("^3The coin is: ^5{}".format("HEADS" if n else "TAILS"))
-        
+
     def cmd_switch(self, player, msg, channel):
         """Switches the teams of the two players."""
         if len(msg) < 3:
@@ -464,7 +464,7 @@ class essentials(minqlx.Plugin):
             return
 
         self.switch(player1, player2)
-            
+
     def cmd_red(self, player, msg, channel):
         """Moves a player to the red team."""
         if len(msg) < 2:
@@ -642,40 +642,40 @@ class essentials(minqlx.Plugin):
                 return minqlx.RET_STOP_ALL
         else:
             self.unlock()
-    
+
     def cmd_allready(self, player, msg, channel):
         """Forces all players to ready up."""
         if self.game.state == "warmup":
             self.allready()
         else:
             channel.reply("But the game's already in progress, you silly goose!")
-        
+
     def cmd_abort(self, player, msg, channel):
         """Forces a game in progress to go back to warmup."""
         if self.game.state != "warmup":
             self.abort()
         else:
             channel.reply("But the game isn't even on, you doofus!")
-    
+
     def cmd_map(self, player, msg, channel):
         """Changes the map."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
-        
+
         # TODO: Give feedback on !map.
         self.change_map(msg[1], msg[2] if len(msg) > 2 else None)
-        
+
     def cmd_help(self, player, msg, channel):
         # TODO: Perhaps print some essential commands in !help
         player.tell("minqlx: ^6{}^7 - Plugins: ^6{}".format(minqlx.__version__, minqlx.__plugins_version__))
         player.tell("See ^6github.com/MinoMino/minqlx^7 for more info about the mod and its commands.")
         return minqlx.RET_STOP_ALL
-    
+
     def cmd_db(self, player, msg, channel):
         """Prints the value of a key in the database."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
-        
+
         try:
             if msg[1] not in self.db:
                 channel.reply("The key is not present in the database.")
@@ -691,7 +691,7 @@ class essentials(minqlx.Plugin):
                     out = str(self.db.zrange(msg[1], 0, -1, withscores=True))
                 else:
                     out = str(self.db.hgetall(msg[1]))
-                
+
                 channel.reply(out)
         except Exception as e:
             channel.reply("^1{}^7: {}".format(e.__class__.__name__, e))
@@ -711,12 +711,12 @@ class essentials(minqlx.Plugin):
         except ValueError:
             channel.reply("Unintelligible SteamID64.")
             return
-        
+
         p = self.player(steam_id)
         if p:
             channel.reply("That would be {}^7, who is currently on this very server!".format(p))
             return
-        
+
         key = "minqlx:players:{}:last_seen".format(steam_id)
         name = "that player" if steam_id != minqlx.owner() else "my ^6master^7"
         if key in self.db:
@@ -758,13 +758,13 @@ class essentials(minqlx.Plugin):
         """Calls a teamsize vote and passes it immediately."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
-        
+
         try:
             n = int(msg[1])
         except ValueError:
             channel.reply("^7Unintelligible size.")
             return
-        
+
         self.game.teamsize = n
         self.msg("The teamsize has been set to ^6{}^7 by {}.".format(n, player))
         return minqlx.RET_STOP_ALL
@@ -773,7 +773,7 @@ class essentials(minqlx.Plugin):
         """Sends an rcon command to the server."""
         if len(msg) < 2:
             return minqlx.RET_USAGE
-        
+
         with minqlx.redirect_print(channel):
             minqlx.console_command(" ".join(msg[1:]))
 
@@ -797,13 +797,13 @@ class essentials(minqlx.Plugin):
         """
         base_key = "minqlx:players:" + str(player.steam_id)
         db = self.db.pipeline()
-        
+
         # Add to IP set and make IP entry.
         if player.ip:
             db.sadd("minqlx:ips", player.ip)
             db.sadd("minqlx:ips:" + player.ip, player.steam_id)
             db.sadd(base_key + ":ips", player.ip)
-        
+
         # Make or update player entry.
         if base_key not in self.db:
             db.lpush(base_key, player.name)
@@ -813,13 +813,13 @@ class essentials(minqlx.Plugin):
             if player.clean_name not in names:
                 db.lpush(base_key, player.name)
                 db.ltrim(base_key, 0, 19)
-        
+
         db.execute()
 
     def update_seen_player(self, player):
         key = "minqlx:players:" + str(player.steam_id) + ":last_seen"
         self.db[key] = datetime.datetime.now().strftime(DATETIME_FORMAT)
-        
+
     @minqlx.delay(29)
     def force(self, require, vote_id):
         if self.last_vote != vote_id:
@@ -834,13 +834,13 @@ class essentials(minqlx.Plugin):
                 if sum(votes)/len(players) < require:
                     return
             minqlx.force_vote(True)
-    
+
     def parse_mappool(self, path):
         """Read and parse the map pool file into a dictionary.
-    
+
         Structure as follows:
         {'campgrounds': ['ca', 'ffa'], 'overkill': ['ca']}
-        
+
         """
         mappool = {}
         try:
@@ -849,7 +849,7 @@ class essentials(minqlx.Plugin):
         except:
             minqlx.log_exception()
             return None
-        
+
         for line in lines:
             li = line.lstrip()
             # Ignore commented lines.
@@ -862,7 +862,7 @@ class essentials(minqlx.Plugin):
                     mappool[key].append(value.strip())
                 else:
                     mappool[key] = [value.strip()]
-        
+
         return mappool
 
     def tell_mappool(self, player, indent=0):

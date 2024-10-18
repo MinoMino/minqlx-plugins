@@ -26,7 +26,7 @@ class plugin_manager(minqlx.Plugin):
         self.add_command("loadall", self.cmd_loadall, 5)
         self.add_command("unloadall", self.cmd_unloadall, 5)
         self.add_command("reloadall", self.cmd_reloadall, 5)
-    
+
     def cmd_load(self, player, msg, channel):
         if len(msg) < 2:
             return minqlx.RET_USAGE
@@ -39,7 +39,7 @@ class plugin_manager(minqlx.Plugin):
                 channel.reply("Plugin ^6{} ^7has failed to load: {} - {}"
                     .format(msg[1], e.__class__.__name__, e))
                 minqlx.log_exception(self)
-    
+
     def cmd_unload(self, player, msg, channel):
         if len(msg) < 2:
             return minqlx.RET_USAGE
@@ -52,7 +52,7 @@ class plugin_manager(minqlx.Plugin):
                 channel.reply("Plugin ^6{} ^7has failed to unload: {} - {}"
                     .format(msg[1], e.__class__.__name__, e))
                 minqlx.log_exception(self)
-    
+
     def cmd_reload(self, player, msg, channel):
         if len(msg) < 2:
             return minqlx.RET_USAGE

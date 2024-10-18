@@ -36,7 +36,7 @@ class permission(minqlx.Plugin):
     def cmd_setperm(self, player, msg, channel):
         if len(msg) < 3:
             return minqlx.RET_USAGE
-        
+
         try:
             ident = int(msg[1])
             target_player = None
@@ -49,7 +49,7 @@ class permission(minqlx.Plugin):
         except minqlx.NonexistentPlayerError:
             channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
             return
-        
+
         try:
             level = int(msg[2])
             if level < 0 or level > 5:
@@ -57,7 +57,7 @@ class permission(minqlx.Plugin):
         except ValueError:
             channel.reply("Invalid permission level. Use a level between 0 and 5.")
             return
-        
+
         self.db.set_permission(ident, level)
         name = target_player.name if target_player else str(ident)
 
@@ -80,7 +80,7 @@ class permission(minqlx.Plugin):
         except ValueError:
             channel.reply("Invalid ID. Use either a client ID or a SteamID64.".format(msg[1]))
             return
-        
+
         perm = self.db.get_permission(ident)
         if perm is None:
             channel.reply("I do not know ^6{}^7.".format(msg[1]))
@@ -92,7 +92,7 @@ class permission(minqlx.Plugin):
         if player.steam_id == minqlx.owner():
             channel.reply("You can do anything to me, master.")
             return
-        
+
         perm = self.db.get_permission(player)
         if perm is None:
             channel.reply("I do not know you.")

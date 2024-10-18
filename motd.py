@@ -57,11 +57,11 @@ class motd(minqlx.Plugin):
             motd = self.db[self.motd_key]
         except KeyError:
             return
-        
+
         welcome_sound = self.get_cvar("qlx_motdSound")
         if welcome_sound == "0":
             welcome_sound = ""
-        
+
         if welcome_sound and self.db.get_flag(player, "essentials:sounds_enabled", default=True):
             self.play_sound(welcome_sound, player)
         self.send_motd(player, motd)
@@ -69,7 +69,7 @@ class motd(minqlx.Plugin):
     def cmd_setmotd(self, player, msg, channel):
         if len(msg) < 2:
             return minqlx.RET_USAGE
-        
+
         self.db.sadd(MOTD_SET_KEY, self.home)
         self.db[self.motd_key] = " ".join(msg[1:])
         player.tell("The MOTD has been set.")
@@ -84,7 +84,7 @@ class motd(minqlx.Plugin):
         db.execute()
         player.tell("All MOTDs have been set.")
         return minqlx.RET_STOP_EVENT
-    
+
     def cmd_getmotd(self, player, msg, channel):
         if self.motd_key in self.db:
             self.send_motd(player, self.db[self.motd_key])
@@ -133,4 +133,3 @@ class motd(minqlx.Plugin):
             player.tell(line)
         for line in motd.split("\\n"):
             player.tell(line)
-

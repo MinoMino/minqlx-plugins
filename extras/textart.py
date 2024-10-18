@@ -54,7 +54,7 @@ class textart(minqlx.Plugin):
                     yield line
                 else:
                     continue
-        
+
         gen = text_gen()
 
         @minqlx.next_frame
@@ -64,10 +64,10 @@ class textart(minqlx.Plugin):
                 go()
             except StopIteration:
                 return
-        
+
         go()
 
-             
+
     def generate_shading_levels(self, code_points):
         if not os.path.exists(FONT):
             raise RuntimeError("Couldn't find the font '{}'!".format(FONT))
@@ -79,12 +79,12 @@ class textart(minqlx.Plugin):
             for x in range(bitmap.size[0]):
                 for y in range(bitmap.size[1]):
                     pixels.append(bitmap.getpixel((x, y)))
-            
+
             if pixels:
                 key = round(mean(pixels)) + 25
             else:
                 key = 0
-            
+
             if key not in out:
                 out[key] = [i]
             else:
@@ -136,4 +136,3 @@ class textart(minqlx.Plugin):
 
         for i in range(len(cp)):
             yield cp[i]
-

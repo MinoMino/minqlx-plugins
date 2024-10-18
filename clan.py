@@ -47,7 +47,7 @@ class clan(minqlx.Plugin):
     def cmd_clan(self, player, msg, channel):
         index = 529 + player.id
         tag_key = _tag_key.format(player.steam_id)
-        
+
         if len(msg) < 2:
             if tag_key in self.db:
                 del self.db[tag_key]
@@ -64,7 +64,7 @@ class clan(minqlx.Plugin):
         if len(self.clean_text(msg[1])) > 5:
             player.tell("The clan tag can only be at most 5 characters long, excluding colors.")
             return minqlx.RET_STOP_EVENT
-        
+
         # If the player already has a clan, we need to edit the current
         # configstring. We can't just append cn and xcn.
         tag = self.clean_tag(msg[1])
@@ -83,4 +83,3 @@ class clan(minqlx.Plugin):
             return match.group(1)
 
         return _re_remove_excessive_colors.sub(sub_func, tag)
-

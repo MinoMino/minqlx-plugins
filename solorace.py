@@ -34,7 +34,7 @@ class solorace(minqlx.Plugin):
         if (minqlx.GAMETYPES_SHORT[self.get_cvar("g_gametype", int)] == "race" and old_team == "free" and
             self.game.state == "in_progress" and not self.teams()["free"]):
             minqlx.console_command("map_restart")
-    
+
     def handle_player_disconnect(self, player, reason):
         if len(self.teams()["free"]) == 1 and player.team == "free":
             minqlx.console_command("map_restart")

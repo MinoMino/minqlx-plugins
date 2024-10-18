@@ -37,7 +37,7 @@ class names(minqlx.Plugin):
 
     def handle_player_connect(self, player):
         self.steam_names[player.steam_id] = player.clean_name
-    
+
     def handle_player_loaded(self, player):
         name_key = _name_key.format(player.steam_id)
         if name_key in self.db:
@@ -69,7 +69,7 @@ class names(minqlx.Plugin):
 
     def cmd_name(self, player, msg, channel):
         name_key = _name_key.format(player.steam_id)
-        
+
         if len(msg) < 2:
             if name_key not in self.db:
                 return minqlx.RET_USAGE
@@ -77,7 +77,7 @@ class names(minqlx.Plugin):
                 del self.db[name_key]
                 player.tell("Your registered name has been removed.")
                 return minqlx.RET_STOP_ALL
-        
+
         name = self.clean_excessive_colors(" ".join(msg[1:]))
         if len(name.encode()) > 36:
             player.tell("The name is too long. Consider using fewer colors or a shorter name.")
@@ -106,4 +106,3 @@ class names(minqlx.Plugin):
             return match.group(1)
 
         return _re_remove_excessive_colors.sub(sub_func, name)
-
