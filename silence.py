@@ -37,7 +37,7 @@ class silence(minqlx.Plugin):
         self.add_command("checksilence", self.cmd_checksilence, usage="<id>")
 
         self.silenced = {}
-    
+
     def handle_player_loaded(self, player):
         silenced = self.is_silenced(player.steam_id)
         if not silenced:
@@ -58,7 +58,7 @@ class silence(minqlx.Plugin):
     def handle_client_command(self, player, cmd):
         if player.steam_id not in self.silenced:
             return
-        
+
         if (cmd.lower().startswith("say ") or cmd.lower().startswith("say_team ")):
             expires, score, reason = self.silenced[player.steam_id]
             if time.time() < score:
@@ -69,7 +69,7 @@ class silence(minqlx.Plugin):
             else:
                 del self.silenced[player.steam_id]
                 player.unmute()
-                
+
                 @minqlx.next_frame
                 def repeat_command():
                     minqlx.client_command(player.id, cmd)
@@ -106,7 +106,7 @@ class silence(minqlx.Plugin):
         except minqlx.NonexistentPlayerError:
             channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
             return
-        
+
         if target_player:
             name = target_player.name
         else:
@@ -120,14 +120,14 @@ class silence(minqlx.Plugin):
             reason = " ".join(msg[4:])
         else:
             reason = ""
-        
+
         r = LENGTH_REGEX.match(" ".join(msg[2:4]).lower())
         if r:
             number = float(r.group("number"))
             if number <= 0: return
             scale = r.group("scale").rstrip("s")
             td = None
-            
+
             if scale == "second":
                 td = datetime.timedelta(seconds=number)
             elif scale == "minute":
@@ -142,7 +142,7 @@ class silence(minqlx.Plugin):
                 td = datetime.timedelta(days=number * 30)
             elif scale == "year":
                 td = datetime.timedelta(weeks=number * 52)
-            
+
             now = datetime.datetime.now().strftime(TIME_FORMAT)
             expires = (datetime.datetime.now() + td).strftime(TIME_FORMAT)
             base_key = PLAYER_KEY.format(ident) + ":silences"
@@ -181,7 +181,7 @@ class silence(minqlx.Plugin):
         except minqlx.NonexistentPlayerError:
             channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
             return
-        
+
         if target_player:
             name = target_player.name
         else:
@@ -219,7 +219,7 @@ class silence(minqlx.Plugin):
         except minqlx.NonexistentPlayerError:
             channel.reply("Invalid client ID. Use either a client ID or a SteamID64.")
             return
-        
+
         if target_player:
             name = target_player.name
         else:
@@ -234,7 +234,7 @@ class silence(minqlx.Plugin):
             else:
                 channel.reply("^6{}^7 is silenced until ^6{}^7.".format(name, expires))
             return
-        
+
         channel.reply("^6{} ^7is not silenced.".format(name))
 
     # ====================================================================
@@ -252,5 +252,5 @@ class silence(minqlx.Plugin):
         expires = datetime.datetime.strptime(longest_silence["expires"], TIME_FORMAT)
         if (expires - datetime.datetime.now()).total_seconds() > 0:
             return expires, score, longest_silence["reason"]
-        
+
         return None
