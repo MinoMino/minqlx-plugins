@@ -86,7 +86,7 @@ class irc(minqlx.Plugin):
     def handle_player_disconnect(self, player, reason):
         if reason and reason[-1] not in ("?", "!", "."):
             reason = reason + "."
-        
+
         if self.irc and self.relay:
             self.irc.msg(self.relay, self.translate_colors("{} {}".format(player.name, reason)))
 
@@ -109,7 +109,7 @@ class irc(minqlx.Plugin):
     def handle_msg(self, irc, user, channel, msg):
         if not msg:
             return
-        
+
         cmd = msg[0].lower()
         if channel.lower() == self.relay.lower():
             if cmd in (".players", ".status", ".info", ".map", ".server"):
@@ -194,7 +194,7 @@ class irc(minqlx.Plugin):
                 plist.append("\x0302Blue\x03: " + ", ".join([p.clean_name for p in teams["blue"]]))
             elif t == "spectator":
                 plist.append("\x02Spec\x02: " + ", ".join([p.clean_name for p in teams["spectator"]]))
-                
+
 
         # Info about the game state.
         if game.state == "in_progress":
@@ -233,7 +233,7 @@ class IrcDummyPlayer(minqlx.AbstractDummyPlayer):
         self.irc = irc
         self.user = user
         super().__init__(name="IRC-{}".format(irc.nickname))
-    
+
     @property
     def steam_id(self):
         return minqlx.owner()
@@ -280,7 +280,7 @@ class SimpleAsyncIrc(threading.Thread):
                 loop.run_until_complete(self.connect())
             except Exception:
                 minqlx.log_exception()
-            
+
             # Disconnected. Try reconnecting in 30 seconds.
             logger.info("Disconnected from IRC. Reconnecting in 30 seconds...")
             time.sleep(30)
@@ -298,7 +298,7 @@ class SimpleAsyncIrc(threading.Thread):
     def connect(self):
         self.reader, self.writer = yield from asyncio.open_connection(self.host, self.port)
         self.write("NICK {0}\r\nUSER {0} 0 * :{0}\r\n".format(self.nickname))
-        
+
         while not self.stop_event.is_set():
             line = yield from self.reader.readline()
             if not line:

@@ -55,14 +55,14 @@ class log(minqlx.Plugin):
     def handle_player_disconnect(self, player, reason):
         if reason and reason[-1] not in ("?", "!", "."):
             reason = reason + "."
-        
+
         self.chatlog.info(self.clean_text("{}:{} {}".format(player, player.steam_id, reason)))
 
     def handle_chat(self, player, msg, channel):
         channel_name = ""
         if channel != "chat":
             channel_name = "[{}] ".format(str(channel).upper())
-        
+
         self.chatlog.info(self.clean_text("{}<{}:{}> {}"
             .format(channel_name, player, player.steam_id, msg)))
 
