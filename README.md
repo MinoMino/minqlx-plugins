@@ -115,4 +115,4 @@ python3 -m unittest tests
 ```
 
 ## Contribute
-If you create pull requests, please try to not deviate from the coding style of the plugins (e.g. don't use camelCase variable names and stuff like that), and please create the PR against the develop branch of the repository.
+If you create pull requests, please try to not deviate from the coding style of the plugins (e.g. don't use camelCase variable names and stuff like that), and please create the PR against the master branch of the repository.
