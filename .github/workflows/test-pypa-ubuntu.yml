@@ -12,25 +12,60 @@ jobs:
   test:
     strategy:
       matrix:
-        python-version: ["3.12", "3.11", "3.10", "3.9", "3.8", "3.7"]
-        os: ["ubuntu-22.04"]
         include:
+          - python-version: "3.12"
+            os: "ubuntu-22.04"
+          - python-version: "3.11"
+            os: "ubuntu-22.04"
+          - python-version: "3.10"
+            os: "ubuntu-22.04"
+          - python-version: "3.9"
+            os: "ubuntu-22.04"
+          - python-version: "3.8"
+            os: "ubuntu-22.04"
+          - python-version: "3.7"
+            os: "ubuntu-22.04"
           - python-version: "3.6"
             os: "ubuntu-20.04"
           - python-version: "3.5"
             os: "ubuntu-20.04"
 
     runs-on: ${{ matrix.os }}
+    env:
+      GET_PIP_PATH_PREFIX: ${{ contains(fromJSON('["3.7", "3.6", "3.5"]'), matrix.python-version) && format('pip/{0}/', matrix.python-version) || '' }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
       - name: Include ppa repository
         run: sudo add-apt-repository ppa:deadsnakes/ppa
+
       - name: Set up Python ${{ matrix.python-version }}
         run: |
           sudo apt-get install python${{ matrix.python-version }}-dev
           sudo update-alternatives --install /usr/bin/python3 python3 `which python${{ matrix.python-version }}` 1
           sudo update-alternatives --install /usr/bin/python3-config python3-config `which python${{ matrix.python-version }}-config` 1
+
+      - name: Install disutils package
+        if: contains(fromJSON('["3.5"]'), matrix.python-version) == false
+        run: sudo apt-get install python${{ matrix.python-version }}-distutils
+
+      - name: Download get-pip.py
+        run: curl https://bootstrap.pypa.io/${{ env.GET_PIP_PATH_PREFIX }}get-pip.py -o get-pip.py
+
+      - name: Install pip
+        run: python3 get-pip.py
+
+      # TODO: try to remove this after unpining redis
+      - name: Install setuptools
+        if: contains(fromJSON('["3.12"]'), matrix.python-version)
+        run: python3 get-pip.py "setuptools"
+
+      - name: Install requirements
+        run: python3 -m pip install -r requirements.txt
+
       - name: Install requirements for testing
-        run: sudo python3 -m pip install mockito
+        run: python3 -m pip install mockito
+
       - name: Run tests
         run: python3 -m unittest tests
