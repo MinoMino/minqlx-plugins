@@ -1,0 +1,33 @@
+name: Tests (Ubuntu packages)
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: ["ubuntu-24.04", "ubuntu-22.04", "ubuntu-20.04"]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+      - name: Set up Python
+        run: sudo apt-get install python3
+      - name: Install requirements
+        run: sudo apt-get install python3-redis python3-hiredis python3-requests python3-zmq
+      - name: Install requirements for testing (from PyPA)
+        if: matrix.os == 'ubuntu-20.04'
+        run: python3 -m pip install mockito
+      - name: Install requirements for testing (from Ubuntu packages)
+        if: matrix.os != 'ubuntu-20.04'
+        run: sudo apt-get install python3-mockito
+      - name: Run tests
+        run: python3 -m unittest tests
