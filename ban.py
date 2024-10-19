@@ -20,6 +20,7 @@ import minqlx
 import datetime
 import time
 import re
+import redis
 
 LENGTH_REGEX = re.compile(r"(?P<number>[0-9]+) (?P<scale>seconds?|minutes?|hours?|days?|weeks?|months?|years?)")
 TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -239,7 +240,10 @@ class ban(minqlx.Plugin):
         else:
             db = self.db.pipeline()
             for ban_id, score in bans:
-                db.zincrby(base_key, ban_id, -score)
+                if redis.VERSION < (3,):
+                    db.zincrby(base_key, ban_id, -score)
+                else:
+                    db.zincrby(base_key, -score, ban_id)
             db.execute()
             channel.reply("^6{}^7 has been unbanned.".format(name))
 

@@ -20,6 +20,7 @@ import minqlx
 import datetime
 import time
 import re
+import redis
 
 LENGTH_REGEX = re.compile(r"(?P<number>[0-9]+) (?P<scale>seconds?|minutes?|hours?|days?|weeks?|months?|years?)")
 TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -194,7 +195,10 @@ class silence(minqlx.Plugin):
         else:
             db = self.db.pipeline()
             for silence_id, score in silences:
-                db.zincrby(base_key, silence_id, -score)
+                if redis.VERSION < (3,):
+                    db.zincrby(base_key, silence_id, -score)
+                else:
+                    db.zincrby(base_key, -score, silence_id)
             db.execute()
             if ident in self.silenced:
                 del self.silenced[ident]

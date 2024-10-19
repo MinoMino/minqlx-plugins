@@ -1,4 +1,4 @@
-redis>=2.10, <3.0
+redis
 hiredis
 requests
 pyzmq<18; python_version < '3.9'
