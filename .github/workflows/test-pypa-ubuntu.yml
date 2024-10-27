@@ -56,11 +56,6 @@ jobs:
       - name: Install pip
         run: python3 get-pip.py
 
-      # TODO: try to remove this after unpining redis
-      - name: Install setuptools
-        if: contains(fromJSON('["3.12"]'), matrix.python-version)
-        run: python3 get-pip.py "setuptools"
-
       - name: Install requirements
         run: python3 -m pip install -r requirements.txt
 

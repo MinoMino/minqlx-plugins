@@ -8,10 +8,12 @@ sys.path.append(PATH + "/minqlx-plugin-tests/src/main/python")
 sys.path.append(PATH + "/minqlx-plugin-tests/src/unittest/python")
 
 from .test_balance import TestBalance
+from .test_ban import TestBan
 
 def suite():
     r = unittest.TestSuite()
     r.addTest(TestBalance())
+    r.addTest(TestBan())
     return r
 
 
