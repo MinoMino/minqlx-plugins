@@ -20,6 +20,7 @@ import minqlx
 import datetime
 import time
 import re
+import redis
 
 LENGTH_REGEX = re.compile(r"(?P<number>[0-9]+) (?P<scale>seconds?|minutes?|hours?|days?|weeks?|months?|years?)")
 TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -149,7 +150,10 @@ class silence(minqlx.Plugin):
             silence_id = self.db.zcard(base_key)
             score = time.time() + td.total_seconds()
             db = self.db.pipeline()
-            db.zadd(base_key, score, silence_id)
+            if redis.VERSION < (3,):
+                db.zadd(base_key, score, silence_id)
+            else:
+                db.zadd(base_key, {silence_id: score})
             silence = {"expires": expires, "reason": reason, "issued": now, "issued_by": player.steam_id}
             db.hmset(base_key + ":{}".format(silence_id), silence)
             db.execute()
@@ -194,7 +198,10 @@ class silence(minqlx.Plugin):
         else:
             db = self.db.pipeline()
             for silence_id, score in silences:
-                db.zincrby(base_key, silence_id, -score)
+                if redis.VERSION < (3,):
+                    db.zincrby(base_key, silence_id, -score)
+                else:
+                    db.zincrby(base_key, -score, silence_id)
             db.execute()
             if ident in self.silenced:
                 del self.silenced[ident]
