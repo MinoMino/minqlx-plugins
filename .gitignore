@@ -1,2 +1,5 @@
 *.pyc
 test.py
+_minqlx.py
+minqlx_plugin_test
+minqlx

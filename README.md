@@ -105,6 +105,9 @@ To install requirements for unit testing:
 ```
 git submodule init
 git submodule update --recursive
+ln -s tests/_minqlx.py
+ln -s tests/minqlx_plugin_test
+ln -s tests/minqlx-repo/python/minqlx
 python3 -m pip install mockito
 ```
 

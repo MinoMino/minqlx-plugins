@@ -29,5 +29,10 @@ jobs:
       - name: Install requirements for testing (from Ubuntu packages)
         if: matrix.os != 'ubuntu-20.04'
         run: sudo apt-get install python3-mockito
+      - name: Create symlinks for testing
+        run: |
+          ln -s tests/_minqlx.py
+          ln -s tests/minqlx_plugin_test
+          ln -s tests/minqlx-repo/python/minqlx
       - name: Run tests
         run: python3 -m unittest tests

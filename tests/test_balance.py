@@ -1,10 +1,18 @@
-from minqlx_plugin_test import setup_plugin, setup_cvar, setup_cvars, setup_game_in_progress, connected_players, fake_player, unstub, setup_game_in_warmup
-
 import unittest
+from time import time
+
+from mockito import unstub
 
 from balance import balance
-
-from time import time
+from minqlx_plugin_test import (
+    connected_players,
+    fake_player,
+    setup_cvar,
+    setup_cvars,
+    setup_game_in_progress,
+    setup_game_in_warmup,
+    setup_plugin,
+)
 
 
 def noop(*args, **kwargs):
