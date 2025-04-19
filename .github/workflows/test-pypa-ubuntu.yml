@@ -70,6 +70,10 @@ jobs:
           ln -s tests/minqlx_plugin_test
           ln -s tests/minqlx-repo/python/minqlx
 
+      - name: Patch minqlx_plugin_test module for Python 3.5
+        if: matrix.python-version == "3.5"
+        run: patch -p1 < tests/minqlx_plugin_test/python35.patch
+
       - name: Install requirements for testing
         run: python3 -m pip install mockito
 

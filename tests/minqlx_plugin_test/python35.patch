@@ -1,0 +1,213 @@
+diff --git a/tests/minqlx_plugin_test/game.py b/tests/minqlx_plugin_test/game.py
+index f95a937..7546384 100644
+--- a/tests/minqlx_plugin_test/game.py
++++ b/tests/minqlx_plugin_test/game.py
+@@ -26,8 +26,8 @@ def setup_game_in_warmup(
+     mapname: str = "campgrounds",
+     map_title: Optional[str] = None,
+     roundlimit: int = 8,
+-    maxclients: int = 16,
+-) -> None:
++    maxclients: int = 16
++):
+     """Set up the server with a game currently in warmup mode.
+ 
+     **Make sure to use :func:`mockito.unstub()` after calling this assertion to avoid side effects spilling into the
+@@ -58,8 +58,8 @@ def setup_game_in_progress(
+     roundlimit: int = 8,
+     red_score: int = 0,
+     blue_score: int = 0,
+-    maxclients: int = 16,
+-) -> None:
++    maxclients: int = 16
++):
+     """Set up the server with a game currently in progress. You may specify the game_type, roundlimit, and score for
+     the red and blue teams with the optional parameters.
+ 
+@@ -87,7 +87,7 @@ def setup_game_in_progress(
+     mock_game.assert_addteamscore = assert_game_addteamscore
+ 
+ 
+-def assert_game_addteamscore(*, team: str, score: int, _times: int = 1) -> None:
++def assert_game_addteamscore(*, team: str, score: int, _times: int = 1):
+     """Verify that the score of the team was manipulated by the given amount.
+ 
+     **The test needs to be set up via :func:`.setUp_game_in_warmup()` or :func:`.setup_game_in_progress()`
+diff --git a/tests/minqlx_plugin_test/player.py b/tests/minqlx_plugin_test/player.py
+index 08cc41a..cdc6ae0 100644
+--- a/tests/minqlx_plugin_test/player.py
++++ b/tests/minqlx_plugin_test/player.py
+@@ -11,7 +11,7 @@ from minqlx import Player, Plugin
+ 
+ # Functions for setting up players in the game and verifying interactions with them.
+ 
+-any_team: Matcher = any_(str)
++any_team = None  # : Matcher = any_(str)
+ 
+ 
+ def fake_player(
+@@ -21,7 +21,7 @@ def fake_player(
+     _id: int = 0,
+     score: int = 0,
+     ping: int = 0,
+-) -> Player:
++):
+     """A builder for mocked players that assertion can be used to check for certain interactions.
+ 
+     **Make sure to use :func:`mockito.unstub()` after calling this function to avoid side effects spilling into the
+@@ -52,7 +52,7 @@ def fake_player(
+     return player
+ 
+ 
+-def connected_players(*players: Player) -> None:
++def connected_players(*players: Player):
+     """Sets up a plugin with the provided players being connected to the server.
+ 
+     **Make sure to use :func:`mockito.unstub()` after calling this function to avoid side effects spilling into the
+@@ -70,7 +70,7 @@ def connected_players(*players: Player) -> None:
+ 
+ def assert_player_was_put_on(
+     player: Player, matcher: Union[str, Matcher], *, times: int = 1
+-) -> None:
++):
+     """Assert that the given player was put on the matching team given.
+ 
+     **The player needs to be set up via :func:`.fake_player(steam_id, name, team, ping)` before using this assertion.**
+@@ -89,7 +89,7 @@ def assert_player_was_put_on(
+ 
+ def assert_player_was_told(
+     player: Player, matcher: Union[str, Matcher, Any], *, times: int = 1
+-) -> None:
++):
+     """Verify that a certain text was sent to the console by the player.
+ 
+     **The player needs to be set up via :func:`.fake_player(steam_id, name, team, ping)` before using this assertion.**
+@@ -109,7 +109,7 @@ def assert_player_was_told(
+ 
+ def assert_player_received_center_print(
+     player: Player, matcher: Union[str, Matcher, Any], *, times: int = 1
+-) -> None:
++):
+     """Verify that a certain text was center printed for the player.
+ 
+     **The player needs to be set up via :func:`.fake_player(steam_id, name, team, ping)` before using this assertion.**
+@@ -133,19 +133,19 @@ class PlayerMatcher(Matcher):
+     """
+ 
+     def __init__(self, wanted_player: Player):
+-        self.wanted_player: Player = wanted_player
++        self.wanted_player = wanted_player
+ 
+-    def matches(self, arg: Player) -> bool:
++    def matches(self, arg: Player):
+         return (
+             self.wanted_player.steam_id == arg.steam_id
+             and self.wanted_player.name == arg.name
+         )
+ 
+     def __repr__(self) -> str:
+-        return f"<Player: id={self.wanted_player.steam_id}, name={self.wanted_player.name}>"
++        return "<Player: id=" + str(self.wanted_player.steam_id) + ", name=" + str(self.wanted_player.name) + ">"
+ 
+ 
+-def player_that_matches(player: Player) -> Matcher:
++def player_that_matches(player: Player):
+     """
+     Matches against a given player by their name and steam_id.
+     """
+diff --git a/tests/minqlx_plugin_test/plugin.py b/tests/minqlx_plugin_test/plugin.py
+index 7c2ccc2..b95304a 100644
+--- a/tests/minqlx_plugin_test/plugin.py
++++ b/tests/minqlx_plugin_test/plugin.py
+@@ -13,7 +13,7 @@ from minqlx import Plugin, Player
+ # provided by minqlx.
+ 
+ 
+-def setup_plugin() -> None:
++def setup_plugin():
+     """Set up a minqlx.Plugin for unit testing.
+ 
+     This function will enable spying on certain functions like messages sent to the console through msg,
+@@ -42,7 +42,7 @@ def setup_plugin() -> None:
+     when2(minqlx.get_cvar, "zmq_stats_enable").thenReturn("1")
+ 
+ 
+-def setup_cvar(cvar_name: str, cvar_value: str) -> None:
++def setup_cvar(cvar_name: str, cvar_value: str):
+     """Set up a minqlx.Plugin with the provided cvar and value.
+ 
+     **Make sure to use :func:`mockito.unstub()` after calling this function to avoid side effects spilling into the
+@@ -54,7 +54,7 @@ def setup_cvar(cvar_name: str, cvar_value: str) -> None:
+     when2(minqlx.get_cvar, cvar_name).thenReturn(cvar_value)
+ 
+ 
+-def setup_cvars(cvars: Dict[str, str]) -> None:
++def setup_cvars(cvars: Dict[str, str]):
+     """Set up a minqlx.Plugin with the provided cvars and values.
+ 
+     **Make sure to use :func:`mockito.unstub()` after calling this function to avoid side effects spilling into the
+@@ -68,7 +68,7 @@ def setup_cvars(cvars: Dict[str, str]) -> None:
+ 
+ def assert_plugin_sent_to_console(
+     matcher: Union[str, Matcher, Any], *, times: int = 1, atleast: Optional[int] = None
+-) -> None:
++):
+     """Verify that a certain text was sent to the console.
+ 
+     **The test needs to be set up via :func:`.setUp_plugin()` before using this assertion.**
+@@ -86,7 +86,7 @@ def assert_plugin_sent_to_console(
+ 
+ def assert_plugin_center_printed(
+     matcher: Union[str, Matcher], *, times: int = 1
+-) -> None:
++):
+     """Verify that a certain text was printed for each player to see.
+ 
+     **The test needs to be set up via :func:`.setUp_plugin()` before using this assertion.**
+@@ -104,7 +104,7 @@ def assert_plugin_center_printed(
+ 
+ def assert_plugin_played_sound(
+     matcher: Union[str, Matcher, Any], *, times: int = 1
+-) -> None:
++):
+     """Verify that a certain sound was played for all players.
+ 
+     **The test needs to be set up via :func:`.setUp_plugin()` before using this assertion.**
+@@ -122,7 +122,7 @@ def assert_plugin_played_sound(
+ 
+ def assert_players_switched(
+     player1: Union[Player, Matcher], player2: Union[Player, Matcher], *, times: int = 1
+-) -> None:
++):
+     """Verify that two players were switched with each other.
+ 
+     This function differs from :func:`.assert_player_was_put_on` in that the two players were switched with each other
+@@ -141,7 +141,7 @@ def assert_players_switched(
+     verify(Plugin, times=times).switch(player1, player2)
+ 
+ 
+-def assert_cvar_was_set_to(cvar_name: str, cvar_value: str, *, times: int = 1) -> None:
++def assert_cvar_was_set_to(cvar_name: str, cvar_value: str, *, times: int = 1):
+     """Verify that the plugin set a cvar to certain value
+ 
+     **The test needs to be set up via :func:`.setUp_plugin()` before using this assertion.**
+@@ -156,7 +156,7 @@ def assert_cvar_was_set_to(cvar_name: str, cvar_value: str, *, times: int = 1) -
+     verify(Plugin, times=times).set_cvar(cvar_name, cvar_value)
+ 
+ 
+-def mocked_channel() -> minqlx.AbstractChannel:
++def mocked_channel():
+     """Set up a mocked channel where minqlx communication runs through.
+ 
+     **Make sure to use :func:`mockito.unstub()` after calling this assertion to avoid side effects spilling into the
+@@ -172,8 +172,8 @@ def assert_channel_was_replied(
+     channel: minqlx.AbstractChannel,
+     matcher: Union[str, Matcher, Any],
+     *,
+-    times: int = 1,
+-) -> None:
++    times: int = 1
++):
+     """Verify that a mocked channel was replied to with the given matcher.
+ 
+     **Make sure to use :func:`mockito.unstub()` after calling this assertion to avoid side effects spilling into the

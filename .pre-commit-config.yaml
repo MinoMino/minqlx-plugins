@@ -5,3 +5,4 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+        exclude: tests/minqlx_plugin_test
