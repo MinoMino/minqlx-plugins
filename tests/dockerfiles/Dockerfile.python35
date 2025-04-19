@@ -1,0 +1,16 @@
+FROM python:3.5-buster
+
+RUN rm -f /etc/apt/sources.list && \
+    rm -f /etc/apt/sources.list.d/backports.list && \
+    echo "deb http://archive.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list && \
+    echo "deb http://archive.debian.org/debian buster main" >> /etc/apt/sources.list
+
+RUN apt-get update && apt-get install -y redis
+RUN python3 -m pip install mockito
+
+COPY . /opt/minqlx-plugins
+WORKDIR /opt/minqlx-plugins
+
+RUN python3 -m pip install -r requirements.txt
+RUN patch -p1 < ./tests/minqlx_plugin_test/python35.patch
+CMD ["./tests/dockerfiles/entrypoint.sh"]

@@ -1,0 +1,36 @@
+name: Tests (using Docker)
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        dockerfile-suffix: [
+        "python35", "python36",
+        ]
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./tests/dockerfiles/Dockerfile.${{ matrix.dockerfile-suffix }}
+          push: false
+          load: true
+          tags: test:latest
+      - name: Test
+        run: docker run --rm test:latest
