@@ -1,12 +1,6 @@
 name: Tests (PyPA packages)
 
-on:
-  push:
-    branches:
-      - "master"
-  pull_request:
-    branches:
-      - "master"
+on: [workflow_call]
 
 jobs:
   test:
@@ -67,7 +61,16 @@ jobs:
           ln -s tests/minqlx-repo/python/minqlx
 
       - name: Install requirements for testing
-        run: python3 -m pip install mockito
+        run: python3 -m pip install mockito coverage
 
       - name: Run tests
-        run: python3 -m unittest tests
+        run: coverage run -m unittest tests
+
+      - name: Make coverage report
+        run: coverage xml
+
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage - pypa - ubuntu - ${{ matrix.python-version }}.xml
+          path: coverage.xml

@@ -1,12 +1,6 @@
 name: Tests (using Docker)
 
-on:
-  push:
-    branches:
-      - "master"
-  pull_request:
-    branches:
-      - "master"
+on: [workflow_call]
 
 jobs:
   test:
@@ -32,5 +26,14 @@ jobs:
           push: false
           load: true
           tags: test:latest
+
       - name: Test
-        run: docker run --rm test:latest
+        run: |
+          mkdir output
+          docker run --rm --mount type=bind,src=./output,dst=/output test:latest
+
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage - docker - ${{ matrix.dockerfile-suffix }}.xml
+          path: ./output/coverage.xml

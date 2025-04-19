@@ -1,12 +1,6 @@
 name: Tests (Ubuntu packages)
 
-on:
-  push:
-    branches:
-      - "master"
-  pull_request:
-    branches:
-      - "master"
+on: [workflow_call]
 
 jobs:
   test:
@@ -24,11 +18,20 @@ jobs:
       - name: Install requirements
         run: sudo apt-get install python3-redis python3-hiredis python3-requests python3-zmq
       - name: Install requirements for testing
-        run: sudo apt-get install python3-mockito
+        run: sudo apt-get install python3-mockito python3-coverage
       - name: Create symlinks for testing
         run: |
           ln -s tests/_minqlx.py
           ln -s tests/minqlx_plugin_test
           ln -s tests/minqlx-repo/python/minqlx
       - name: Run tests
-        run: python3 -m unittest tests
+        run: python3-coverage run -m unittest tests
+
+      - name: Make coverage report
+        run: python3-coverage xml
+
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage - apt - ubuntu - ${{ matrix.os }}.xml
+          path: coverage.xml

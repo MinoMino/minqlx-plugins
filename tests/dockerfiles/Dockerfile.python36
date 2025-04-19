@@ -1,7 +1,7 @@
 FROM python:3.6-bullseye
 
 RUN apt-get update && apt-get install -y redis
-RUN python3 -m pip install mockito
+RUN python3 -m pip install mockito coverage
 
 COPY . /opt/minqlx-plugins
 WORKDIR /opt/minqlx-plugins

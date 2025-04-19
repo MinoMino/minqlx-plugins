@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  ubuntu:
+    uses: ./.github/workflows/test-ubuntu.yml
+  pypa_ubuntu:
+    uses: ./.github/workflows/test-pypa-ubuntu.yml
+  with_docker:
+    uses: ./.github/workflows/test-with-docker.yml
+  upload-to-codecov:
+    needs: [pypa_ubuntu, with_docker, ubuntu]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
