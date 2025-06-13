@@ -28,7 +28,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     env:
-      GET_PIP_PATH_PREFIX: ${{ contains(fromJSON('["3.7"]'), matrix.python-version) && format('pip/{0}/', matrix.python-version) || '' }}
+      GET_PIP_PATH_PREFIX: ${{ contains(fromJSON('["3.7", "3.8"]'), matrix.python-version) && format('pip/{0}/', matrix.python-version) || '' }}
     steps:
       - uses: actions/checkout@v3
         with:
