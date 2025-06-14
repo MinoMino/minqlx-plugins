@@ -70,13 +70,8 @@ class TestBalance(unittest.TestCase):
 
         setup_cvar("qlx_balanceMinimumSuggestionDiff", "1.2")
 
-        exception_raised = None
-        try:
-            self.plugin.callback_teams(list(range(1, 9)), channel)
-        except ValueError as e:
-            exception_raised = e
-
-        self.assertIsNone(exception_raised, "Unexpected exception")
+        # should not raise ValueError
+        self.plugin.callback_teams(list(range(1, 9)), channel)
 
     def test_cache_reset(self):
         setup_game_in_warmup()
