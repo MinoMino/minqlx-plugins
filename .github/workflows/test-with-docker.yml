@@ -39,5 +39,5 @@ jobs:
       - name: Upload coverage report as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: coverage - docker - ${{ matrix.dockerfile-suffix }}.xml
+          name: coverage - docker - ${{ matrix.dockerfile-suffix }} - ${{ matrix.force-redis-package-version }}.xml
           path: ./output/coverage.xml
