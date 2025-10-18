@@ -11,6 +11,9 @@ RUN python3 -m pip install mockito coverage
 COPY . /opt/minqlx-plugins
 WORKDIR /opt/minqlx-plugins
 
+ARG FORCE_REDIS_PACKAGE_VERSION
+RUN if [[ "$FORCE_REDIS_PACKAGE_VERSION" ]] ; then python3 -m pip install redis"$FORCE_REDIS_PACKAGE_VERSION" ; fi
+
 RUN python3 -m pip install -r requirements.txt
 RUN patch -p1 < ./tests/minqlx_plugin_test/python35.patch
 CMD ["./tests/dockerfiles/entrypoint.sh"]

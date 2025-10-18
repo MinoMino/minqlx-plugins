@@ -9,6 +9,9 @@ jobs:
         dockerfile-suffix: [
         "python35", "python36",
         ]
+        force-redis-package-version: [
+        "", "==2.10",
+        ]
 
     runs-on: ubuntu-latest
     steps:
@@ -26,6 +29,7 @@ jobs:
           push: false
           load: true
           tags: test:latest
+          build-args: FORCE_REDIS_PACKAGE_VERSION=${{ matrix.force-redis-package-version }}
 
       - name: Test
         run: |
