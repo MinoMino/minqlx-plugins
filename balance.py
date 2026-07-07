@@ -132,11 +132,18 @@ class balance(minqlx.Plugin):
         # reset based on the current built-in factory. Custom factories are
         # left untouched -- their .factories file sets qlx_balanceApi
         # explicitly and cache_cvars() reads it as normal.
+        #
+        # Guarded on qlx_balanceUrl matching the default qlstats endpoint,
+        # because "elo" and "elo_b" are qlstats-specific path segments. Admins
+        # running an alternative rating backend will have changed the URL,
+        # so we leave their setup entirely alone.
+        #
         # Must run BEFORE cache_cvars() so api_url reflects the corrected value.
-        if self.game.factory in DEFAULT_ELO_FACTORIES:
-            self.set_cvar("qlx_balanceApi", "elo")
-        elif self.game.factory in DEFAULT_ELO_B_FACTORIES:
-            self.set_cvar("qlx_balanceApi", "elo_b")
+        if self.get_cvar("qlx_balanceUrl") == "qlstats.net":
+            if self.game.factory in DEFAULT_ELO_FACTORIES:
+                self.set_cvar("qlx_balanceApi", "elo")
+            elif self.game.factory in DEFAULT_ELO_B_FACTORIES:
+                self.set_cvar("qlx_balanceApi", "elo_b")
 
         self.cache_cvars()
 
