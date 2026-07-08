@@ -45,7 +45,7 @@ DEFAULT_ELO_FACTORIES = frozenset((
     "ad", "ffa", "ca", "ft", "tdm", "duel", "ctf",
 ))
 DEFAULT_ELO_B_FACTORIES = frozenset((
-    "ictf", "ift",
+    "ictf", "ift", "iffa",
 ))
 
 
