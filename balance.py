@@ -31,6 +31,22 @@ UNTRACKED_RATING = 9999
 SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm")
 # Externally supported game types. Used by !getrating for game types the API works with.
 EXT_SUPPORTED_GAMETYPES = ("ad", "ca", "ctf", "dom", "ft", "tdm", "duel", "ffa")
+# Gametypes with a natural "next round" boundary that a swap can be deferred to.
+# Continuous gametypes (ctf, dom, tdm) have no mid-game round boundary --
+# deferring a swap there means waiting until the entire game ends.
+ROUND_BASED_GAMETYPES = ("ad", "ca", "ft")
+# Built-in QL factories cannot be edited and never set qlx_balanceApi themselves.
+# handle_new_game force-resets qlx_balanceApi based on the current built-in
+# factory so a previous custom factory's setting (e.g. "elo_b" from an ictf
+# variant) does not leak across factory switches. Custom factories are left
+# untouched -- their own .factories file sets qlx_balanceApi explicitly and
+# cache_cvars() reads it as usual.
+DEFAULT_ELO_FACTORIES = frozenset((
+    "ad", "ffa", "ca", "ft", "tdm", "duel", "ctf",
+))
+DEFAULT_ELO_B_FACTORIES = frozenset((
+    "ictf", "ift", "iffa",
+))
 
 
 class balance(minqlx.Plugin):
@@ -109,6 +125,26 @@ class balance(minqlx.Plugin):
         self.clean_player_data(player)
 
     def handle_new_game(self):
+        # Built-in QL factories can't be edited and never set qlx_balanceApi.
+        # If a previous custom factory set it (e.g. to "elo_b" from an ictf
+        # variant) and the engine then switches to a built-in factory, the
+        # cvar leaks and ratings would be fetched from the wrong API. Force-
+        # reset based on the current built-in factory. Custom factories are
+        # left untouched -- their .factories file sets qlx_balanceApi
+        # explicitly and cache_cvars() reads it as normal.
+        #
+        # Guarded on qlx_balanceUrl matching the default qlstats endpoint,
+        # because "elo" and "elo_b" are qlstats-specific path segments. Admins
+        # running an alternative rating backend will have changed the URL,
+        # so we leave their setup entirely alone.
+        #
+        # Must run BEFORE cache_cvars() so api_url reflects the corrected value.
+        if self.get_cvar("qlx_balanceUrl") == "qlstats.net":
+            if self.game.factory in DEFAULT_ELO_FACTORIES:
+                self.set_cvar("qlx_balanceApi", "elo")
+            elif self.game.factory in DEFAULT_ELO_B_FACTORIES:
+                self.set_cvar("qlx_balanceApi", "elo_b")
+
         self.cache_cvars()
 
         # reset ratings cache on start
@@ -521,8 +557,15 @@ class balance(minqlx.Plugin):
                 self.suggested_agree[1] = True
 
             if all(self.suggested_agree):
-                # If the game's in progress and we're not in the round countdown, wait for next round.
-                if self.game.state == "in_progress" and not self.in_countdown:
+                # On round-based gametypes (AD, CA, FT), defer to the next
+                # round if the game is in progress -- the swap will happen
+                # between rounds. On continuous gametypes (TDM, CTF, DOM),
+                # there is no mid-game "next round" boundary; deferring would
+                # queue the swap until the entire game ends. Execute
+                # immediately in that case.
+                gt = self.game.type_short
+                if self.game.state == "in_progress" and not self.in_countdown \
+                        and gt in ROUND_BASED_GAMETYPES:
                     self.msg("The switch will be executed at the start of next round.")
                     return
 
